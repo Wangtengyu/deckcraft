@@ -1,0 +1,10 @@
+{
+  "sponsors": [
+    { "name": "匿名用户", "amount": 5, "date": "2026-04-12", "message": "" },
+    { "name": "张三", "amount": 10, "date": "2026-04-12", "message": "很好用！" },
+    { "name": "李四", "amount": 20, "date": "2026-04-13", "message": "支持开发者" },
+    { "name": "王五", "amount": 50, "date": "2026-04-13", "message": "感谢这个工具" }
+  ],
+  "total": 85,
+  "count": 4
+}
