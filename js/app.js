@@ -851,8 +851,36 @@ async function showPptxDownload() {
 async function confirmAddToGallery(title, style, platform) {
   const thumbnailUrl = state.generatedImages?.[0]?.url || '';
   
-  if (confirm(`确认将「${title}」加入案例库？\n\n加入后，其他用户可以参考您生成的PPT效果。`)) {
-    showToast('已加入案例库，感谢您的贡献！', 'success');
+  if (!confirm(`确认将「${title}」加入案例库？\n\n加入后，其他用户可以参考您生成的PPT效果。`)) {
+    return;
+  }
+  
+  try {
+    showToast('正在提交案例...', 'info');
+    
+    const response = await fetch('https://ig8u65l6vm.sealosbja.site/add-case', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        title: title,
+        style: style,
+        platform: platform,
+        thumbnailUrl: thumbnailUrl
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.ok) {
+      showToast('✅ 已加入案例库，感谢您的贡献！审核通过后将在首页展示。', 'success');
+    } else {
+      showToast('❌ 加入失败：' + result.error, 'error');
+    }
+  } catch (error) {
+    console.error('加入案例库失败:', error);
+    showToast('❌ 加入失败，请稍后重试', 'error');
   }
 }
 
