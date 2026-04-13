@@ -393,13 +393,13 @@
             </div>
 
             <!-- 场景选择 -->
-            <div class="mb-10">
+            <div class="mb-6">
                 <label class="block text-sm font-medium mb-3">
                     使用场景
                     <span class="text-gray-500 text-xs ml-2">决定内容结构</span>
                 </label>
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    <button onclick="selectScene('report')" class="option-card selected rounded-xl p-4 text-center cursor-pointer" data-scene="report">
+                    <button onclick="selectScene('report')" class="option-card rounded-xl p-4 text-center cursor-pointer" data-scene="report">
                         <i class="fas fa-chart-line text-lg mb-1 text-cyan-400"></i>
                         <div class="font-medium text-sm">工作汇报</div>
                         <div class="text-xs text-gray-500 mt-1">背景→成果→问题→计划</div>
@@ -429,6 +429,70 @@
                         <div class="font-medium text-sm">其他场景</div>
                         <div class="text-xs text-gray-500 mt-1">自定义结构</div>
                     </button>
+                </div>
+            </div>
+
+            <!-- 内容模式选择 -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-3">
+                    内容模式
+                    <span class="text-gray-500 text-xs ml-2">选择内容生成方式</span>
+                </label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <button onclick="selectContentMode('custom')" class="option-card selected rounded-xl p-4 cursor-pointer" data-content-mode="custom">
+                        <div class="flex items-center">
+                            <i class="fas fa-pen text-xl text-accent mr-3"></i>
+                            <div class="text-left">
+                                <div class="font-medium text-sm">自定义内容</div>
+                                <div class="text-xs text-gray-500 mt-1">自己编写PPT内容</div>
+                            </div>
+                        </div>
+                    </button>
+                    <button onclick="selectContentMode('ai')" class="option-card rounded-xl p-4 cursor-pointer" data-content-mode="ai">
+                        <div class="flex items-center">
+                            <i class="fas fa-robot text-xl text-purple-400 mr-3"></i>
+                            <div class="text-left">
+                                <div class="font-medium text-sm">AI自由发挥</div>
+                                <div class="text-xs text-gray-500 mt-1">AI智能生成专业大纲</div>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- AI大纲预览区域 -->
+            <div id="outlinePreview" class="hidden mb-6">
+                <div class="bg-gradient-to-r from-purple-500/10 to-accent/10 rounded-xl border border-purple-500/20 p-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-magic text-purple-400 mr-2"></i>
+                            <span class="font-medium">AI生成的大纲</span>
+                        </div>
+                        <button onclick="generateOutline()" class="text-sm text-accent hover:text-accent/80 flex items-center">
+                            <i class="fas fa-sync-alt mr-1"></i>重新生成
+                        </button>
+                    </div>
+                    
+                    <div id="outlineList" class="mb-4 max-h-80 overflow-y-auto">
+                        <div class="text-center py-8 text-gray-400">
+                            <i class="fas fa-lightbulb text-2xl mb-2 text-yellow-400/50"></i>
+                            <p class="text-sm">点击下方按钮，AI将根据您的主题和场景生成专业大纲</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button onclick="generateOutline()" class="flex-1 btn-primary text-white py-2.5 rounded-lg text-sm font-medium">
+                            <i class="fas fa-wand-magic-sparkles mr-2"></i>生成大纲
+                        </button>
+                        <button onclick="confirmOutline()" class="flex-1 btn-secondary py-2.5 rounded-lg text-sm font-medium">
+                            <i class="fas fa-check mr-2"></i>确认并继续
+                        </button>
+                    </div>
+                    
+                    <p class="text-xs text-gray-500 mt-3 text-center">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        生成后可点击编辑图标修改每个页面内容
+                    </p>
                 </div>
             </div>
 

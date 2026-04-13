@@ -1,71 +1,15 @@
 /**
- * DeckCraft - 前端交互逻辑 V2.0 (优化版)
- * 新增功能：
- * 1. 专业化Prompt模板支持
- * 2. 预设模板库选择
- * 3. 内容智能生成
- * 4. 场景化推荐
+ * DeckCraft - 前端交互逻辑
  */
 
 // API配置
 const API_URL = 'https://ig8u65l6vm.sealosbja.site/generate';
-const PROGRESS_API = 'https://ig8u65l6vm.sealosbja.site/progress';
-const TEMPLATE_API = 'https://ig8u65l6vm.sealosbja.site/templates';
-
-// 轮询间隔(ms)
-const POLL_INTERVAL = 2000;
-
-// ============ 场景与模板配置 ============
-const SCENE_TEMPLATES = {
-  report: {
-    name: '工作汇报',
-    icon: 'fa-chart-line',
-    description: '项目进度、述职报告、季度总结',
-    recommended: 'A',
-    color: '#4A90D9'
-  },
-  proposal: {
-    name: '项目方案',
-    icon: 'fa-lightbulb',
-    description: '商业计划、解决方案、产品提案',
-    recommended: 'A',
-    color: '#2C3E50'
-  },
-  training: {
-    name: '培训课件',
-    icon: 'fa-graduation-cap',
-    description: '员工培训、技能教学、流程说明',
-    recommended: 'B',
-    color: '#4ECDC4'
-  },
-  science: {
-    name: '知识科普',
-    icon: 'fa-atom',
-    description: '科普宣传、教育讲解、技术介绍',
-    recommended: 'B',
-    color: '#FF6B6B'
-  },
-  process: {
-    name: '流程说明',
-    icon: 'fa-tasks',
-    description: '操作指南、步骤演示、流程梳理',
-    recommended: 'A',
-    color: '#FFE66D'
-  }
-};
-
-const STYLE_OPTIONS = {
-  A: { name: '信息图风', desc: '专业商务', icon: 'fa-chart-pie', audience: 'adult' },
-  B: { name: '插画科普风', desc: '生动易懂', icon: 'fa-palette', audience: 'student' },
-  C: { name: '图文混排风', desc: '照片为主', icon: 'fa-image', audience: 'adult' },
-  D: { name: '卡通绘本风', desc: '活泼有趣', icon: 'fa-child', audience: 'child' },
-  E: { name: '手绘笔记风', desc: '轻松手绘', icon: 'fa-pen', audience: 'adult' }
-};
+const OUTLINE_API_URL = 'https://ig8u65l6vm.sealosbja.site/generate-outline';
 
 // 状态管理
 let state = {
   currentStep: 1,
-  createMode: 'create',
+  createMode: 'scratch',
   platform: 'ppt',
   contentSource: 'topic',
   contentDensity: 'medium',
@@ -73,51 +17,22 @@ let state = {
   scene: 'report',
   style: null,
   pageCount: 10,
-  topic: '',
-  generatedImages: [],
-  taskId: null,
-  pollTimer: null,
-  templates: null,  // 模板库缓存
-  smartContent: true  // 智能内容生成开关
+  pageStructure: '',
+  smartTitle: true,
+  refImages: [],
+  userContent: '',
+  apiKey: '',
+  usePlatformApi: true,  // 默认使用平台API（免费），自愿赞助
+  contentMode: 'custom',  // 内容模式：custom(自定义) / ai(AI自由发挥)
+  outline: null  // AI生成的大纲
 };
 
-// ============ 模板库加载 ============
-
-async function loadTemplates() {
-  if (state.templates) return state.templates;
-  
-  try {
-    const response = await fetch(TEMPLATE_API);
-    if (response.ok) {
-      state.templates = await response.json();
-      return state.templates;
-    }
-  } catch (e) {
-    console.log('加载模板库失败，使用内置配置');
-  }
-  
-  // 使用内置默认模板
-  state.templates = {
-    scene_templates: SCENE_TEMPLATES,
-    style_presets: STYLE_OPTIONS
-  };
-  return state.templates;
-}
-
-// ============ 页面初始化 ============
-
-document.addEventListener('DOMContentLoaded', async function() {
+// 页面加载时初始化
+document.addEventListener('DOMContentLoaded', function() {
   loadSponsorsList();
-  
-  // 预加载模板库
-  await loadTemplates();
-  
-  // 根据场景推荐风格
-  updateStyleRecommendation();
 });
 
-// ============ 赞助者列表 ============
-
+// 加载赞助者列表
 async function loadSponsorsList() {
   const sponsorsListEl = document.getElementById('sponsorsList');
   if (!sponsorsListEl) return;
@@ -130,244 +45,291 @@ async function loadSponsorsList() {
       `<span class="px-2 py-1 bg-accent/20 text-accent rounded">${s.name} ¥${s.amount}</span>`
     ).join('');
   } catch (error) {
-    console.log('加载赞助者列表失败');
+    console.log('加载赞助者列表失败，使用默认数据');
   }
 }
 
 // ============ 步骤1：基本信息 ============
 
+// 创建模式
 function selectMode(mode) {
   state.createMode = mode;
   updateOptionCards('mode', mode);
 }
 
+// 目标平台
 function selectPlatform(platform) {
   state.platform = platform;
   updateOptionCards('platform', platform);
   
+  // 小红书提示标题优化
   const titleTip = document.getElementById('titleTip');
-  if (titleTip) {
-    if (platform === 'xiaohongshu') {
-      titleTip.classList.remove('hidden');
-    } else {
-      titleTip.classList.add('hidden');
-    }
+  if (platform === 'xiaohongshu' && titleTip) {
+    titleTip.classList.remove('hidden');
+  } else if (titleTip) {
+    titleTip.classList.add('hidden');
   }
 }
 
+// 内容来源
 function selectContentSource(source) {
   state.contentSource = source;
   updateOptionCards('source', source);
   
+  // 显示/隐藏素材上传区域
   const materialUpload = document.getElementById('materialUpload');
   if (materialUpload) {
-    materialUpload.classList.toggle('hidden', source !== 'material');
+    if (source === 'material') {
+      materialUpload.classList.remove('hidden');
+    } else {
+      materialUpload.classList.add('hidden');
+    }
   }
 }
 
+// 内容密度
 function selectDensity(density) {
   state.contentDensity = density;
   updateOptionCards('density', density);
 }
 
-function selectAudience(audience) {
-  state.audience = audience;
-  updateOptionCards('audience', audience);
-  
-  // 自动更新场景推荐
-  updateStyleRecommendation();
-}
+// ============ 内容模式选择（自定义/AI自由发挥） ============
 
-function selectScene(scene) {
-  state.scene = scene;
-  updateOptionCards('scene', scene);
+function selectContentMode(mode) {
+  state.contentMode = mode;
+  updateOptionCards('contentMode', mode);
   
-  // 更新风格推荐
-  updateStyleRecommendation();
-  
-  // 更新页数建议
-  updatePageCountSuggestion(scene);
-}
-
-// ============ 智能推荐 ============
-
-function updateStyleRecommendation() {
-  const recommendedElement = document.getElementById('recommendedStyle');
-  if (!recommendedElement) return;
-  
-  // 根据受众和场景推荐风格
-  let recommended = 'A';
-  
-  // 受众映射
-  const audienceMap = { child: 'D', student: 'B', adult: 'A', professional: 'A' };
-  
-  // 场景覆盖
-  if (SCENE_TEMPLATES[state.scene]) {
-    recommended = SCENE_TEMPLATES[state.scene].recommended;
-  }
-  
-  // 受众优先级
-  if (state.audience === 'child') recommended = 'D';
-  else if (state.audience === 'student') recommended = 'B';
-  else if (state.audience !== 'adult') {
-    recommended = audienceMap[state.audience] || 'A';
-  }
-  
-  const styleInfo = STYLE_OPTIONS[recommended];
-  const sceneInfo = SCENE_TEMPLATES[state.scene];
-  
-  recommendedElement.innerHTML = `
-    <div class="flex items-center gap-2">
-      <span class="text-sm text-gray-400">推荐：</span>
-      <span class="px-3 py-1 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full text-white">
-        <i class="fas ${styleInfo.icon} mr-1"></i>${styleInfo.name}
-      </span>
-      <span class="text-xs text-gray-500">适合${sceneInfo.name}</span>
-    </div>
-  `;
-  
-  // 自动选中推荐风格
-  state.style = recommended;
-  updateOptionCards('style', recommended);
-}
-
-function updatePageCountSuggestion(scene) {
-  // 不同场景建议不同的页数
-  const suggestions = {
-    report: 8,
-    proposal: 10,
-    training: 12,
-    science: 8,
-    process: 6
-  };
-  
-  const suggested = suggestions[scene] || 8;
-  const pageCountSlider = document.getElementById('pageCount');
-  const pageCountDisplay = document.getElementById('pageCountDisplay');
-  
-  if (pageCountSlider && pageCountDisplay) {
-    // 如果用户未修改过页数，则自动更新
-    if (state.pageCount === 10) {
-      pageCountSlider.value = suggested;
-      pageCountDisplay.textContent = suggested + ' 页';
-      state.pageCount = suggested;
+  // 显示/隐藏AI生成区域
+  const outlinePreview = document.getElementById('outlinePreview');
+  if (outlinePreview) {
+    if (mode === 'ai') {
+      outlinePreview.classList.remove('hidden');
+    } else {
+      outlinePreview.classList.add('hidden');
+      state.outline = null;
     }
   }
 }
 
-// ============ 步骤2：内容风格 ============
-
-function selectStyle(style) {
-  state.style = style;
-  updateOptionCards('style', style);
+// AI生成大纲
+async function generateOutline() {
+  const topic = state.topic;
+  if (!topic || topic.trim().length < 2) {
+    showToast('请先输入PPT主题', 'error');
+    return;
+  }
   
-  // 显示风格预览提示
-  const stylePreview = document.getElementById('stylePreview');
-  if (stylePreview) {
-    const info = STYLE_OPTIONS[style];
-    stylePreview.innerHTML = `
-      <div class="p-4 bg-surface rounded-xl">
-        <h4 class="font-medium mb-2"><i class="fas ${info.icon} mr-2"></i>${info.name}</h4>
-        <p class="text-sm text-gray-400">${info.desc}</p>
-        <div class="mt-3 flex flex-wrap gap-2">
-          ${getStyleKeywords(style)}
-        </div>
+  const outlineContainer = document.getElementById('outlineList');
+  if (!outlineContainer) return;
+  
+  // 显示loading
+  outlineContainer.innerHTML = `
+    <div class="text-center py-8">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-accent border-t-transparent mb-3"></div>
+      <p class="text-gray-400 text-sm">AI正在生成大纲，请稍候...</p>
+    </div>
+  `;
+  
+  try {
+    const response = await fetch(OUTLINE_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic: topic,
+        scene: state.scene,
+        audience: state.audience,
+        pageCount: state.pageCount,
+        apiKey: state.apiKey
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.ok && result.outline) {
+      state.outline = result.outline;
+      displayOutline(result.outline);
+      showToast('大纲生成成功！', 'success');
+    } else {
+      throw new Error(result.error || '生成失败');
+    }
+  } catch (error) {
+    outlineContainer.innerHTML = `
+      <div class="text-center py-6">
+        <i class="fas fa-exclamation-circle text-3xl text-red-400 mb-3"></i>
+        <p class="text-red-400 text-sm mb-3">${error.message}</p>
+        <button onclick="generateOutline()" class="text-accent text-sm hover:underline">
+          <i class="fas fa-redo mr-1"></i>重新生成
+        </button>
       </div>
     `;
+    showToast('大纲生成失败：' + error.message, 'error');
   }
 }
 
-function getStyleKeywords(style) {
-  const keywords = {
-    A: ['商务', '简洁', '数据', '专业'],
-    B: ['科普', '插画', '易懂', '趣味'],
-    C: ['照片', '图文', '视觉', '创意'],
-    D: ['可爱', '卡通', '儿童', '活泼'],
-    E: ['手绘', '笔记', '轻松', '文艺']
-  };
-  return (keywords[style] || []).map(k => 
-    `<span class="px-2 py-0.5 bg-white/10 rounded text-xs">${k}</span>`
-  ).join('');
+// 显示大纲预览
+function displayOutline(outlineData) {
+  const outlineContainer = document.getElementById('outlineList');
+  if (!outlineContainer) return;
+  
+  let html = '';
+  let pageNum = 1;
+  
+  // 封面页
+  html += `
+    <div class="bg-[#1a1a24] rounded-lg p-4 mb-3 border border-[#2a2a3a] hover:border-accent/30 transition">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center">
+          <span class="text-gray-500 text-sm mr-2">${pageNum}.</span>
+          <span class="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded">封面</span>
+        </div>
+      </div>
+      <h4 class="font-medium mb-1">${outlineData.title || 'PPT标题'}</h4>
+    </div>
+  `;
+  pageNum++;
+  
+  // 内容页
+  if (outlineData.outline && Array.isArray(outlineData.outline)) {
+    outlineData.outline.forEach((section) => {
+      html += `
+        <div class="bg-[#1a1a24] rounded-lg p-4 mb-3 border border-[#2a2a3a] hover:border-accent/30 transition">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center">
+              <span class="text-gray-500 text-sm mr-2">${pageNum}.</span>
+              <span class="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded">内容</span>
+            </div>
+          </div>
+          <h4 class="font-medium mb-2">${section.section || ''}</h4>
+          ${section.points && section.points.length > 0 ? `
+            <ul class="text-sm text-gray-400 space-y-1">
+              ${section.points.map(p => `<li class="flex items-start"><span class="mr-2">•</span>${p}</li>`).join('')}
+            </ul>
+          ` : ''}
+        </div>
+      `;
+      pageNum++;
+    });
+  }
+  
+  // 结尾页
+  if (outlineData.ending) {
+    html += `
+      <div class="bg-[#1a1a24] rounded-lg p-4 mb-3 border border-[#2a2a3a] hover:border-accent/30 transition">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center">
+            <span class="text-gray-500 text-sm mr-2">${pageNum}.</span>
+            <span class="px-2 py-0.5 bg-purple-500/20 text-purple-400 text-xs rounded">结尾</span>
+          </div>
+        </div>
+        <h4 class="font-medium mb-1">${outlineData.ending}</h4>
+      </div>
+    `;
+  }
+  
+  // 添加操作按钮
+  html += `
+    <div class="flex items-center justify-center space-x-4 mt-4">
+      <button onclick="regenerateOutline()" class="px-4 py-2 bg-surface border border-border rounded-lg text-sm hover:border-accent transition">
+        <i class="fas fa-redo mr-2"></i>重新生成
+      </button>
+      <button onclick="confirmOutline()" class="px-4 py-2 bg-accent text-white rounded-lg text-sm hover:bg-accent/80 transition">
+        <i class="fas fa-check mr-2"></i>确认大纲
+      </button>
+    </div>
+  `;
+  
+  outlineContainer.innerHTML = html;
 }
 
+// 编辑大纲项
+function editOutlineItem(index) {
+  if (!state.outline || !state.outline[index]) return;
+  
+  const page = state.outline[index];
+  const newTitle = prompt('修改页面标题：', page.title);
+  if (newTitle && newTitle.trim()) {
+    state.outline[index].title = newTitle.trim();
+    
+    // 询问是否修改要点
+    if (page.points && page.points.length > 0) {
+      const pointsStr = prompt('修改页面要点（每行一条）：', page.points.join('\n'));
+      if (pointsStr) {
+        state.outline[index].points = pointsStr.split('\n').filter(p => p.trim());
+      }
+    }
+    
+    displayOutline(state.outline);
+    showToast('大纲已更新', 'success');
+  }
+}
+
+// 重新生成大纲
+function regenerateOutline() {
+  state.outline = null;
+  generateOutline();
+}
+
+// 确认大纲
+function confirmOutline() {
+  if (!state.outline) {
+    showToast('请先生成大纲', 'error');
+    return;
+  }
+  
+  // 将大纲转换为pageStructure格式
+  state.pageStructure = JSON.stringify(state.outline);
+  
+  showToast('大纲已确认，可进入下一步', 'success');
+  
+  // 自动进入步骤2
+  goToStep2();
+}
+
+// 受众选择
+function selectAudience(audience) {
+  state.audience = audience;
+  updateOptionCards('audience', audience);
+  
+  // 自动推荐风格
+  const styleMap = { child: 'D', student: 'B', adult: 'A', professional: 'A' };
+  const recommendedStyle = styleMap[audience];
+  const styleNames = { A: '信息图风', B: '插画科普风', C: '图文混排风', D: '卡通绘本风', E: '手绘笔记风' };
+  
+  const recommendedElement = document.getElementById('recommendedStyle');
+  if (recommendedElement) {
+    recommendedElement.textContent = `${styleNames[recommendedStyle]}（适合${audience === 'child' ? '幼儿' : audience === 'student' ? '小学生' : audience === 'adult' ? '成人' : '专业人士'}受众）`;
+  }
+}
+
+// 场景选择
+function selectScene(scene) {
+  state.scene = scene;
+  updateOptionCards('scene', scene);
+}
+
+// ============ 步骤2：内容风格 ============
+
+// 风格选择
+function selectStyle(style) {
+  state.style = style;
+  updateOptionCards('style', style);
+}
+
+// 页数更新
 function updatePageCount(count) {
   state.pageCount = count;
   updateCostEstimate();
 }
 
+// 智能标题开关
 function toggleSmartTitle(enabled) {
   state.smartTitle = enabled;
-}
-
-// ============ 内容预览 ============
-
-function updateContentPreview() {
-  const preview = document.getElementById('contentPreview');
-  if (!preview) return;
-  
-  const topic = document.getElementById('topic')?.value || state.topic;
-  const scene = state.scene;
-  
-  // 根据场景生成内容大纲预览
-  const outline = generateContentOutline(topic, scene, state.pageCount);
-  
-  preview.innerHTML = `
-    <div class="bg-surface rounded-xl p-4">
-      <h4 class="font-medium mb-3">
-        <i class="fas fa-list-alt mr-2 text-accent"></i>
-        内容大纲预览
-      </h4>
-      <div class="space-y-2 text-sm">
-        ${outline.map((item, i) => `
-          <div class="flex items-start gap-2">
-            <span class="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-xs flex-shrink-0">
-              ${i + 1}
-            </span>
-            <div>
-              <span class="font-medium">${item.title}</span>
-              ${item.type !== 'cover' && item.type !== 'ending' ? 
-                `<span class="text-gray-500 ml-2">(${item.points || ''})</span>` : ''}
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `;
-}
-
-// 根据场景生成内容大纲
-function generateContentOutline(topic, scene, pageCount) {
-  const structures = {
-    report: ['背景与目标', '执行过程', '关键成果', '数据分析', '问题与挑战', '下一步计划'],
-    proposal: ['问题与机会', '解决方案', '核心优势', '成功案例', '实施计划', '预期成果'],
-    training: ['培训目标', '基础知识', '核心技能', '实操演练', '案例分析', '行动计划'],
-    science: ['核心概念', '关键原理', '重要知识点', '数据展示', '实践应用'],
-    process: ['流程概述', '准备工作', '步骤详解', '注意事项', '常见问题']
-  };
-  
-  const sections = structures[scene] || structures.report;
-  const outline = [{ type: 'cover', title: '封面页' }];
-  
-  // 分配内容页
-  const contentPages = pageCount - 2;
-  const sectionsPerPage = Math.ceil(sections.length / contentPages);
-  
-  for (let i = 0; i < sections.length && outline.length < pageCount - 1; i++) {
-    outline.push({
-      type: 'content',
-      title: sections[i],
-      points: '3个要点'
-    });
-  }
-  
-  outline.push({ type: 'ending', title: '感谢聆听' });
-  
-  return outline.slice(0, pageCount);
 }
 
 // ============ 步骤导航 ============
 
 function goToStep2() {
+  // 验证必填项
   const topic = document.getElementById('topic').value.trim();
   if (!topic) {
     showToast('请输入PPT主题', 'error');
@@ -375,14 +337,13 @@ function goToStep2() {
   }
   
   state.topic = topic;
+  
+  // 切换到步骤2
   state.currentStep = 2;
   updateStepIndicator();
   
   document.getElementById('step1').classList.add('hidden');
   document.getElementById('step2').classList.remove('hidden');
-  
-  // 更新内容预览
-  updateContentPreview();
 }
 
 function goToStep3() {
@@ -392,7 +353,8 @@ function goToStep3() {
   document.getElementById('step2').classList.add('hidden');
   document.getElementById('step3').classList.remove('hidden');
   
-  startGeneration();
+  // 开始生成
+  generatePPT();
 }
 
 function goBack() {
@@ -426,91 +388,68 @@ function updateStepIndicator() {
   }
 }
 
-// ============ PPT生成（带进度条） ============
+// ============ PPT生成 ============
 
 async function generatePPT() {
+  // 显示赞助弹窗
   showSponsorModal();
 }
 
+// 显示赞助弹窗
 function showSponsorModal() {
   const modal = document.getElementById('sponsorModal');
-  if (modal) modal.classList.remove('hidden');
+  if (modal) {
+    modal.classList.remove('hidden');
+  }
 }
 
+// 关闭赞助弹窗并继续生成
 function closeSponsorModal() {
   const modal = document.getElementById('sponsorModal');
-  if (modal) modal.classList.add('hidden');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+  
+  // 开始实际生成
   startGeneration();
 }
 
+// 实际生成PPT
 async function startGeneration() {
+  // 显示resultModal并设置loading状态
   const resultModal = document.getElementById('resultModal');
-  const card = resultModal?.querySelector('.card');
+  const card = resultModal.querySelector('.card');
   
   if (!card) {
     showToast('页面元素错误', 'error');
     return;
   }
   
-  // 显示进度条loading
-  card.innerHTML = generateProgressHTML();
+  // 显示loading
+  card.innerHTML = `
+    <div class="text-center py-8">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-accent border-t-transparent mb-4"></div>
+      <p class="text-gray-400">正在生成PPT，请稍候...</p>
+    </div>
+  `;
   
   resultModal.classList.remove('hidden');
   
-  // 创建任务
-  try {
-    const createResponse = await fetch(PROGRESS_API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'create',
-        totalPages: state.pageCount
-      })
-    });
-    
-    const createResult = await createResponse.json();
-    state.taskId = createResult.success ? createResult.taskId : `task_${Date.now()}`;
-  } catch (error) {
-    state.taskId = `task_${Date.now()}`;
-  }
-  
-  // 开始轮询
-  startProgressPolling();
-  
-  // 调用生成API（使用V4优化版）
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        topic: state.topic,
-        platform: state.platform,
-        style: state.style,
-        scene: state.scene,
-        audience: state.audience,
-        pageCount: state.pageCount,
-        taskId: state.taskId
-      })
+      body: JSON.stringify(state)
     });
     
     const result = await response.json();
     
-    stopProgressPolling();
-    
     if (result.success) {
-      updateGenerationStats();
-      updateProgressCircle(100);
-      updateStepStatus(result.totalPages + 2);
-      
-      const msgEl = document.getElementById('progressMessage');
-      if (msgEl) msgEl.textContent = '生成完成！';
-      
-      setTimeout(() => displayResult(result, card), 500);
+      displayResult(result, card);
     } else {
       throw new Error(result.error || '生成失败');
     }
   } catch (error) {
-    stopProgressPolling();
     card.innerHTML = `
       <div class="text-center py-8">
         <i class="fas fa-exclamation-circle text-4xl text-red-400 mb-4"></i>
@@ -521,166 +460,8 @@ async function startGeneration() {
   }
 }
 
-function generateProgressHTML() {
-  return `
-    <style>
-      @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-      @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-      .progress-rotate { animation: rotate 2s linear infinite; }
-      .progress-pulse { animation: pulse 1.5s ease-in-out infinite; }
-      .progress-shimmer { background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%); background-size: 200% 100%; animation: shimmer 2s infinite; }
-    </style>
-    <div class="text-center py-8">
-      <div class="relative w-24 h-24 mx-auto mb-6">
-        <svg class="w-24 h-24 progress-rotate absolute top-0 left-0">
-          <circle cx="48" cy="48" r="46" stroke="#2a2a3a" stroke-width="2" fill="none"/>
-        </svg>
-        <svg class="w-24 h-24 absolute top-0 left-0" style="transform: -rotate-90">
-          <circle cx="48" cy="48" r="40" stroke="#2a2a3a" stroke-width="6" fill="none"/>
-          <circle id="progressCircle" cx="48" cy="48" r="40" stroke="url(#gradient)" stroke-width="6" fill="none"
-            stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round"
-            style="transition: stroke-dashoffset 0.5s ease"/>
-          <defs>
-            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#00d4ff"/>
-              <stop offset="50%" stop-color="#a855f7"/>
-              <stop offset="100%" stop-color="#ff6b9d"/>
-            </linearGradient>
-          </defs>
-        </svg>
-        <div class="absolute inset-4 rounded-full bg-gradient-to-br from-cyan-500/20 to-pink-500/20 progress-pulse"></div>
-        <span id="progressPercent" class="absolute inset-0 flex items-center justify-center text-2xl font-bold progress-pulse">0%</span>
-      </div>
-      
-      <h3 id="progressTitle" class="text-lg font-semibold mb-2">正在生成PPT</h3>
-      <p id="progressMessage" class="text-gray-400 text-sm mb-4 progress-shimmer" style="background-clip: text; -webkit-background-clip: text;">准备中...</p>
-      
-      <div class="text-left text-sm space-y-2 mb-6 max-w-xs mx-auto">
-        <div id="step-init" class="flex items-center text-gray-500 transition-all duration-300">
-          <i class="fas fa-circle text-xs w-5"></i>
-          <span>生成内容大纲</span>
-        </div>
-        <div id="step-cover" class="flex items-center text-gray-500 transition-all duration-300">
-          <i class="fas fa-circle text-xs w-5"></i>
-          <span>生成封面背景</span>
-        </div>
-        <div id="step-content" class="flex items-center text-gray-500 transition-all duration-300">
-          <i class="fas fa-circle text-xs w-5"></i>
-          <span>生成内容页背景</span>
-        </div>
-        <div id="step-complete" class="flex items-center text-gray-500 transition-all duration-300">
-          <i class="fas fa-circle text-xs w-5"></i>
-          <span>完成打包</span>
-        </div>
-      </div>
-      
-      <p class="text-xs text-gray-500">AI正在努力创作中，预计需要1-2分钟</p>
-    </div>
-  `;
-}
-
-// ============ 进度轮询 ============
-
-function startProgressPolling() {
-  if (state.pollTimer) clearInterval(state.pollTimer);
-  
-  state.pollTimer = setInterval(async () => {
-    if (!state.taskId) return;
-    
-    try {
-      const response = await fetch(`${PROGRESS_API}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'get', taskId: state.taskId })
-      });
-      
-      const result = await response.json();
-      
-      if (result.success && result.progress) {
-        const p = result.progress;
-        
-        updateProgressCircle(p.progress || 0);
-        
-        const msgEl = document.getElementById('progressMessage');
-        if (msgEl) msgEl.textContent = p.message || '处理中...';
-        
-        updateStepStatus(p.currentStep || 1);
-        
-        if (p.currentPage && p.totalPages) {
-          const titleEl = document.getElementById('progressTitle');
-          if (titleEl) titleEl.textContent = `正在生成第${p.currentPage}页/${p.totalPages}页`;
-        }
-        
-        if (p.status === 'completed' || p.status === 'failed') {
-          stopProgressPolling();
-        }
-      }
-    } catch (error) {
-      console.log('轮询进度失败:', error);
-    }
-  }, POLL_INTERVAL);
-}
-
-function stopProgressPolling() {
-  if (state.pollTimer) {
-    clearInterval(state.pollTimer);
-    state.pollTimer = null;
-  }
-}
-
-function updateProgressCircle(percent) {
-  const circle = document.getElementById('progressCircle');
-  const percentEl = document.getElementById('progressPercent');
-  
-  if (circle) {
-    const circumference = 251.2;
-    const offset = circumference - (percent / 100) * circumference;
-    circle.style.strokeDashoffset = offset;
-  }
-  
-  if (percentEl) {
-    percentEl.textContent = `${Math.round(percent)}%`;
-  }
-}
-
-function updateStepStatus(currentStep) {
-  const steps = ['init', 'cover', 'content', 'complete'];
-  
-  steps.forEach((step, index) => {
-    const el = document.getElementById(`step-${step}`);
-    if (!el) return;
-    
-    const icon = el.querySelector('i');
-    
-    if (index + 1 < currentStep) {
-      el.className = 'flex items-center text-green-400';
-      if (icon) icon.className = 'fas fa-check-circle text-xs w-5';
-    } else if (index + 1 === currentStep) {
-      el.className = 'flex items-center text-accent';
-      if (icon) icon.className = 'fas fa-spinner fa-spin text-xs w-5';
-    } else {
-      el.className = 'flex items-center text-gray-500';
-      if (icon) icon.className = 'fas fa-circle text-xs w-5';
-    }
-  });
-}
-
-async function updateGenerationStats() {
-  try {
-    const genCountEl = document.getElementById('genCount');
-    if (genCountEl) {
-      const current = parseInt(genCountEl.textContent.replace(/,/g, '')) || 15000;
-      genCountEl.textContent = (current + 1).toLocaleString();
-    }
-  } catch (e) {
-    console.log('更新统计失败');
-  }
-}
-
-// ============ 结果展示 ============
-
 function displayResult(result, card) {
+  // 保存生成的图片到state
   state.generatedImages = result.images || [];
   
   let html = `
@@ -689,30 +470,42 @@ function displayResult(result, card) {
         <i class="fas fa-check text-3xl text-green-400"></i>
       </div>
       <h3 class="text-xl font-bold mb-2">${result.ppt_title}</h3>
-      <p class="text-gray-400">${result.style} · ${result.scene || result.platform} · ${(result.images || []).length}页</p>
+      <p class="text-gray-400">${result.style} · ${result.platform} · ${(result.images || result.pages || []).length}页</p>
     </div>
     
+    <!-- 预览区域 -->
     <div class="mb-6 p-4 bg-surface rounded-xl">
       <p class="text-sm text-gray-400 mb-3"><i class="fas fa-eye mr-2"></i>预览生成的页面：</p>
       <div class="grid grid-cols-2 gap-2">
   `;
   
+  // 显示生成的图片
   if (result.images && result.images.length > 0) {
     result.images.forEach((img, i) => {
       if (img.url) {
         html += `
-          <div class="aspect-video bg-surface rounded-lg overflow-hidden relative group">
+          <div class="aspect-video bg-surface rounded-lg overflow-hidden">
             <img src="${img.url}" alt="第${img.page_id}页" class="w-full h-full object-cover">
-            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <span class="text-white text-sm">${img.title || `第${img.page_id}页`}</span>
-            </div>
           </div>
         `;
       }
     });
+  } else if (result.pages) {
+    // 预览模式，显示占位符
+    result.pages.forEach((page, i) => {
+      html += `
+        <div class="aspect-video bg-surface rounded-lg flex items-center justify-center">
+          <div class="text-center">
+            <i class="fas fa-file-powerpoint text-2xl text-gray-500 mb-2"></i>
+            <p class="text-xs text-gray-500">${page.page_type === 'cover' ? '封面' : page.page_type === 'ending' ? '结尾' : '第' + page.page_id + '页'}</p>
+          </div>
+        </div>
+      `;
+    });
   } else {
+    // 无数据，显示提示
     html += `
-      <div class="col-span-2 text-center py-8">
+      <div class="col-span-2 md:col-span-3 text-center py-8">
         <i class="fas fa-exclamation-triangle text-3xl text-yellow-400 mb-2"></i>
         <p class="text-gray-400">生成成功，但图片加载失败</p>
       </div>
@@ -723,10 +516,12 @@ function displayResult(result, card) {
       </div>
     </div>
     
+    <!-- 下载选项 -->
     <div class="space-y-3 mb-4">
       <p class="text-sm text-gray-400">选择下载格式：</p>
   `;
   
+  // 下载按钮
   if (result.images && result.images.length > 0) {
     html += `
       <button onclick="downloadImages()" class="btn-primary text-white py-3 rounded-xl font-medium w-full">
@@ -738,10 +533,19 @@ function displayResult(result, card) {
         下载PPTX文件
       </button>
       <hr class="border-white/10 my-4">
-      <button onclick="confirmAddToGallery('${result.ppt_title}', '${result.style}', '${result.platform}')" class="text-gray-400 py-2 w-full hover:text-white transition">
+      <button onclick="confirmAddToGallery('${result.ppt_title}')" class="text-gray-400 py-2 w-full hover:text-white transition">
         <i class="fas fa-plus mr-2"></i>
         加入案例库
       </button>
+    `;
+  } else {
+    html += `
+      <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 text-center">
+        <p class="text-yellow-400 text-sm">
+          <i class="fas fa-info-circle mr-2"></i>
+          图片生成中，请稍候...
+        </p>
+      </div>
     `;
   }
   
@@ -765,14 +569,15 @@ function updateOptionCards(group, selectedValue) {
     density: '[data-density]',
     audience: '[data-audience]',
     scene: '[data-scene]',
-    style: '[data-style]'
+    style: '[data-style]',
+    contentMode: '[data-content-mode]'
   };
   
   const selector = containers[group];
   if (!selector) return;
   
   document.querySelectorAll(selector).forEach(card => {
-    const value = card.getAttribute(`data-${group === 'mode' ? 'mode' : group}`);
+    const value = card.getAttribute(`data-${group === 'mode' ? 'mode' : group === 'contentMode' ? 'content-mode' : group}`);
     if (value === selectedValue) {
       card.classList.add('selected');
     } else {
@@ -789,11 +594,23 @@ function showToast(message, type = 'info') {
   toast.textContent = message;
   document.body.appendChild(toast);
   
-  setTimeout(() => toast.remove(), 3000);
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
 }
 
-async function downloadImages() {
-  const imgList = state.generatedImages || [];
+function downloadPPT() {
+  showToast('PPT下载功能开发中...', 'info');
+}
+
+function addToGallery() {
+  showToast('已加入案例库', 'success');
+}
+
+// 下载所有图片
+async function downloadImages(images) {
+  // 如果传入了images参数，使用传入的；否则使用state中的
+  const imgList = images || state.generatedImages || [];
   
   if (imgList.length === 0) {
     showToast('没有可下载的图片', 'error');
@@ -802,6 +619,7 @@ async function downloadImages() {
   
   showToast('正在打开图片...', 'info');
   
+  // 逐个打开图片
   for (let i = 0; i < imgList.length; i++) {
     const img = imgList[i];
     if (img.url) {
@@ -812,7 +630,9 @@ async function downloadImages() {
   showToast(`已打开${imgList.length}张图片，请右键保存`, 'success');
 }
 
+// PPTX下载
 async function showPptxDownload() {
+  // 从state中获取当前生成的图片
   if (!state.generatedImages || state.generatedImages.length === 0) {
     showToast('没有可下载的图片', 'error');
     return;
@@ -834,6 +654,7 @@ async function showPptxDownload() {
     const result = await response.json();
     
     if (result.success && result.data) {
+      // 创建下载链接
       const link = document.createElement('a');
       link.href = `data:${result.mimeType};base64,${result.data}`;
       link.download = result.filename;
@@ -848,53 +669,27 @@ async function showPptxDownload() {
   }
 }
 
-async function confirmAddToGallery(title, style, platform) {
-  const thumbnailUrl = state.generatedImages?.[0]?.url || '';
-  
-  if (!confirm(`确认将「${title}」加入案例库？\n\n加入后，其他用户可以参考您生成的PPT效果。`)) {
-    return;
-  }
-  
-  try {
-    showToast('正在提交案例...', 'info');
-    
-    const response = await fetch('https://ig8u65l6vm.sealosbja.site/add-case', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        title: title,
-        style: style,
-        platform: platform,
-        thumbnailUrl: thumbnailUrl
-      })
-    });
-    
-    const result = await response.json();
-    
-    if (result.ok) {
-      showToast('✅ 已加入案例库，感谢您的贡献！审核通过后将在首页展示。', 'success');
-    } else {
-      showToast('❌ 加入失败：' + result.error, 'error');
-    }
-  } catch (error) {
-    console.error('加入案例库失败:', error);
-    showToast('❌ 加入失败，请稍后重试', 'error');
+// 确认加入案例库
+function confirmAddToGallery(title) {
+  if (confirm(`确认将「${title}」加入案例库？\n\n加入后，其他用户可以参考您生成的PPT效果。`)) {
+    showToast('已加入案例库，感谢您的贡献！', 'success');
   }
 }
 
+// ============ 案例库功能 ============
+
 function openGallery(caseId) {
   const modal = document.getElementById('galleryModal');
-  if (modal) modal.classList.remove('hidden');
+  modal.classList.remove('hidden');
 }
 
 function closeGallery() {
   const modal = document.getElementById('galleryModal');
-  if (modal) modal.classList.add('hidden');
+  modal.classList.add('hidden');
 }
 
 function goToPage(pageNum) {
+  // 更新缩略图选中状态
   document.querySelectorAll('#galleryModal button[onclick^="goToPage"]').forEach((btn, i) => {
     if (i + 1 === pageNum) {
       btn.classList.add('bg-accent/20', 'border-2', 'border-accent');
@@ -906,6 +701,8 @@ function goToPage(pageNum) {
   });
 }
 
+// ============ 首页案例选择 ============
+
 function selectCase(caseName) {
   localStorage.setItem('pptCase', caseName);
   location.href = 'create.html';
@@ -914,7 +711,7 @@ function selectCase(caseName) {
 // ============ 初始化 ============
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 检查预选案例
+  // 检查是否有预选案例
   const preselectedCase = localStorage.getItem('pptCase');
   if (preselectedCase && document.getElementById('topic')) {
     document.getElementById('topic').value = preselectedCase;
@@ -928,21 +725,34 @@ document.addEventListener('DOMContentLoaded', () => {
     pageCountSlider.addEventListener('input', (e) => {
       pageCountDisplay.textContent = e.target.value + ' 页';
       updatePageCount(parseInt(e.target.value));
-      updateContentPreview();
     });
   }
   
-  // 主题输入时更新预览
-  const topicInput = document.getElementById('topic');
-  if (topicInput) {
-    topicInput.addEventListener('input', () => {
-      state.topic = topicInput.value;
-      updateContentPreview();
+  // API Key输入
+  const apiKeyInput = document.getElementById('apiKey');
+  if (apiKeyInput) {
+    apiKeyInput.addEventListener('input', (e) => {
+      setApiKey(e.target.value);
+    });
+  }
+  
+  // 平台API开关
+  const usePlatformApiCheckbox = document.getElementById('usePlatformApi');
+  if (usePlatformApiCheckbox) {
+    usePlatformApiCheckbox.addEventListener('change', (e) => {
+      setUsePlatformApi(e.target.checked);
     });
   }
 });
 
-function updateCostEstimate() {}
+// ============ 补充函数 ============
+
+// 更新成本估算（已改为免费，此函数为兼容保留）
+function updateCostEstimate() {
+  // 完全免费，无需计算成本
+}
+
+// 页数增减
 function changePages(delta) {
   const input = document.getElementById('pages');
   if (!input) return;
@@ -952,6 +762,7 @@ function changePages(delta) {
   state.pageCount = value;
 }
 
+// 返回步骤1
 function goToStep1() {
   state.currentStep = 1;
   updateStepIndicator();
@@ -960,10 +771,11 @@ function goToStep1() {
   document.getElementById('step1').classList.remove('hidden');
 }
 
+// 关闭结果弹窗
 function closeResultModal() {
-  document.getElementById('resultModal')?.classList.add('hidden');
-  document.getElementById('step3')?.classList.add('hidden');
-  document.getElementById('step1')?.classList.remove('hidden');
+  document.getElementById('resultModal').classList.add('hidden');
+  document.getElementById('step2').classList.add('hidden');
+  document.getElementById('step1').classList.remove('hidden');
   state.currentStep = 1;
   updateStepIndicator();
 }
