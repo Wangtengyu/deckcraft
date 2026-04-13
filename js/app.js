@@ -205,9 +205,6 @@ async function startGeneration() {
     return;
   }
   
-  // 生成任务ID
-  state.taskId = `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  
   // 显示进度条loading
   card.innerHTML = `
     <div class="text-center py-8">
@@ -255,6 +252,32 @@ async function startGeneration() {
   `;
   
   resultModal.classList.remove('hidden');
+  
+  // 先创建进度任务
+  try {
+    const createResponse = await fetch(PROGRESS_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'create',
+        totalPages: state.pageCount
+      })
+    });
+    
+    const createResult = await createResponse.json();
+    
+    if (!createResult.success) {
+      throw new Error('创建任务失败');
+    }
+    
+    state.taskId = createResult.taskId;
+    console.log('创建任务成功:', state.taskId);
+    
+  } catch (error) {
+    console.error('创建任务失败:', error);
+    // 如果创建失败，使用本地taskId
+    state.taskId = `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
   
   // 开始轮询进度
   startProgressPolling();
