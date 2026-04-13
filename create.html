@@ -917,31 +917,6 @@
             updateCostEstimate();
         }
 
-        function generatePPT() {
-            document.getElementById('step3-dot').classList.remove('inactive');
-            document.getElementById('step3-dot').classList.add('active');
-            document.getElementById('step3-text').classList.remove('text-gray-500');
-            document.getElementById('step3-text').classList.add('text-white');
-            document.getElementById('line2').classList.add('step-line');
-            
-            document.getElementById('progressModal').classList.remove('hidden');
-            
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += Math.random() * 15;
-                if (progress > 100) progress = 100;
-                document.getElementById('progressBar').style.width = `${progress}%`;
-                document.getElementById('progressText').textContent = progress < 100 ? `正在生成第${Math.min(Math.ceil(progress/10), pages)}页...` : '正在生成最终文件...';
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    setTimeout(() => {
-                        document.getElementById('progressModal').classList.add('hidden');
-                        document.getElementById('resultModal').classList.remove('hidden');
-                    }, 500);
-                }
-            }, 300);
-        }
-
         function closeResultModal() {
             document.getElementById('resultModal').classList.add('hidden');
             document.getElementById('step2').classList.add('hidden');
