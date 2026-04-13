@@ -9,13 +9,13 @@ const OUTLINE_API_URL = 'https://ig8u65l6vm.sealosbja.site/generate-outline';
 // 状态管理
 let state = {
   currentStep: 1,
-  createMode: 'scratch',
+  createMode: 'create',  // 修复：与HTML默认选中一致
   platform: 'ppt',
   contentSource: 'topic',
   contentDensity: 'medium',
   audience: 'adult',
   scene: 'report',
-  style: null,
+  style: 'B',  // 修复：与HTML默认选中一致
   pageCount: 10,
   pageStructure: '',
   smartTitle: true,
@@ -562,7 +562,20 @@ function displayResult(result, card) {
 // ============ 工具函数 ============
 
 function updateOptionCards(group, selectedValue) {
-  const containers = {
+  // 属性名映射（data-xxx）
+  const attrMap = {
+    mode: 'mode',
+    platform: 'platform',
+    source: 'source',
+    density: 'density',
+    audience: 'audience',
+    scene: 'scene',
+    style: 'style',
+    contentMode: 'content-mode'
+  };
+  
+  // 选择器映射
+  const selectorMap = {
     mode: '[data-mode]',
     platform: '[data-platform]',
     source: '[data-source]',
@@ -573,13 +586,20 @@ function updateOptionCards(group, selectedValue) {
     contentMode: '[data-content-mode]'
   };
   
-  const selector = containers[group];
-  if (!selector) return;
+  const attrName = attrMap[group];
+  const selector = selectorMap[group];
+  
+  if (!attrName || !selector) {
+    console.error('Unknown group:', group);
+    return;
+  }
   
   document.querySelectorAll(selector).forEach(card => {
-    const value = card.getAttribute(`data-${group === 'mode' ? 'mode' : group === 'contentMode' ? 'content-mode' : group}`);
+    const value = card.getAttribute(`data-${attrName}`);
+    console.log(`Checking ${selector}: data-${attrName}=${value}, expected=${selectedValue}`);
     if (value === selectedValue) {
       card.classList.add('selected');
+      console.log(`Added 'selected' class to:`, card);
     } else {
       card.classList.remove('selected');
     }
