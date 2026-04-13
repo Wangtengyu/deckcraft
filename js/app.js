@@ -263,7 +263,7 @@ function displayResult(result) {
         <i class="fas fa-check text-3xl text-green-400"></i>
       </div>
       <h3 class="text-xl font-bold mb-2">${result.ppt_title}</h3>
-      <p class="text-gray-400">${result.style} · ${result.platform} · ${result.pages.length}页</p>
+      <p class="text-gray-400">${result.style} · ${result.platform} · ${(result.images || result.pages || []).length}页</p>
     </div>
     
     <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
@@ -280,7 +280,7 @@ function displayResult(result) {
         `;
       }
     });
-  } else {
+  } else if (result.pages) {
     // 预览模式，显示占位符
     result.pages.forEach((page, i) => {
       html += `
@@ -292,6 +292,14 @@ function displayResult(result) {
         </div>
       `;
     });
+  } else {
+    // 无数据，显示提示
+    html += `
+      <div class="col-span-2 md:col-span-3 text-center py-8">
+        <i class="fas fa-exclamation-triangle text-3xl text-yellow-400 mb-2"></i>
+        <p class="text-gray-400">生成成功，但图片加载失败</p>
+      </div>
+    `;
   }
   
   html += `
