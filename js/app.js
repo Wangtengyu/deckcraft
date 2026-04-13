@@ -404,7 +404,7 @@ function showToast(message, type = 'info') {
 }
 
 function downloadPPT() {
-  showToast('PPT下载功能开发中...', 'info');
+  showPptxDownload();
 }
 
 function addToGallery() {
