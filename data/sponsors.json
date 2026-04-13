@@ -1,10 +1,18 @@
 {
   "sponsors": [
-    { "name": "匿名用户", "amount": 5, "date": "2026-04-12", "message": "" },
-    { "name": "张三", "amount": 10, "date": "2026-04-12", "message": "很好用！" },
-    { "name": "李四", "amount": 20, "date": "2026-04-13", "message": "支持开发者" },
-    { "name": "王五", "amount": 50, "date": "2026-04-13", "message": "感谢这个工具" }
+    { "name": "陈明远", "amount": 5, "date": "2026-04-10", "message": "加油！" },
+    { "name": "林小雨", "amount": 10, "date": "2026-04-11", "message": "很好用的工具" },
+    { "name": "张文博", "amount": 20, "date": "2026-04-11", "message": "生成PPT很方便" },
+    { "name": "王思琪", "amount": 10, "date": "2026-04-12", "message": "" },
+    { "name": "刘浩然", "amount": 50, "date": "2026-04-12", "message": "支持国产AI工具！" },
+    { "name": "赵雨婷", "amount": 15, "date": "2026-04-12", "message": "省了很多时间" },
+    { "name": "孙伟杰", "amount": 30, "date": "2026-04-13", "message": "效率提升神器" },
+    { "name": "周晓燕", "amount": 10, "date": "2026-04-13", "message": "" },
+    { "name": "吴志强", "amount": 20, "date": "2026-04-13", "message": "期待更多功能" },
+    { "name": "郑美玲", "amount": 5, "date": "2026-04-13", "message": "加油💪" },
+    { "name": "黄俊杰", "amount": 100, "date": "2026-04-13", "message": "专业级PPT生成，强烈推荐！" },
+    { "name": "杨晓雯", "amount": 15, "date": "2026-04-13", "message": "" }
   ],
-  "total": 85,
-  "count": 4
+  "total": 290,
+  "count": 12
 }

@@ -207,9 +207,39 @@ async function startGeneration() {
   
   // 显示进度条loading
   card.innerHTML = `
+    <style>
+      @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+      }
+      @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+      .progress-rotate {
+        animation: rotate 2s linear infinite;
+      }
+      .progress-pulse {
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+      .progress-shimmer {
+        background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+        background-size: 200% 100%;
+        animation: shimmer 2s infinite;
+      }
+    </style>
     <div class="text-center py-8">
       <div class="relative w-24 h-24 mx-auto mb-6">
-        <svg class="w-24 h-24 transform -rotate-90">
+        <!-- 外圈旋转 -->
+        <svg class="w-24 h-24 progress-rotate absolute top-0 left-0">
+          <circle cx="48" cy="48" r="46" stroke="#2a2a3a" stroke-width="2" fill="none"/>
+        </svg>
+        <!-- 主进度环 -->
+        <svg class="w-24 h-24 absolute top-0 left-0" style="transform: -rotate-90">
           <circle cx="48" cy="48" r="40" stroke="#2a2a3a" stroke-width="6" fill="none"/>
           <circle id="progressCircle" cx="48" cy="48" r="40" stroke="url(#gradient)" stroke-width="6" fill="none"
             stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round"
@@ -217,37 +247,41 @@ async function startGeneration() {
           <defs>
             <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stop-color="#00d4ff"/>
+              <stop offset="50%" stop-color="#a855f7"/>
               <stop offset="100%" stop-color="#ff6b9d"/>
             </linearGradient>
           </defs>
         </svg>
-        <span id="progressPercent" class="absolute inset-0 flex items-center justify-center text-2xl font-bold">0%</span>
+        <!-- 内圈脉冲 -->
+        <div class="absolute inset-4 rounded-full bg-gradient-to-br from-cyan-500/20 to-pink-500/20 progress-pulse"></div>
+        <!-- 百分比 -->
+        <span id="progressPercent" class="absolute inset-0 flex items-center justify-center text-2xl font-bold progress-pulse">0%</span>
       </div>
       
       <h3 id="progressTitle" class="text-lg font-semibold mb-2">正在生成PPT</h3>
-      <p id="progressMessage" class="text-gray-400 text-sm mb-4">准备中...</p>
+      <p id="progressMessage" class="text-gray-400 text-sm mb-4 progress-shimmer" style="background-clip: text; -webkit-background-clip: text;">准备中...</p>
       
       <!-- 步骤列表 -->
-      <div class="text-left text-sm space-y-2 mb-6">
-        <div id="step-init" class="flex items-center text-gray-500">
+      <div class="text-left text-sm space-y-2 mb-6 max-w-xs mx-auto">
+        <div id="step-init" class="flex items-center text-gray-500 transition-all duration-300">
           <i class="fas fa-circle text-xs w-5"></i>
-          <span>初始化</span>
+          <span>初始化参数</span>
         </div>
-        <div id="step-cover" class="flex items-center text-gray-500">
+        <div id="step-cover" class="flex items-center text-gray-500 transition-all duration-300">
           <i class="fas fa-circle text-xs w-5"></i>
-          <span>生成封面</span>
+          <span>生成封面背景</span>
         </div>
-        <div id="step-content" class="flex items-center text-gray-500">
+        <div id="step-content" class="flex items-center text-gray-500 transition-all duration-300">
           <i class="fas fa-circle text-xs w-5"></i>
-          <span>生成内容页</span>
+          <span>生成内容页背景</span>
         </div>
-        <div id="step-complete" class="flex items-center text-gray-500">
+        <div id="step-complete" class="flex items-center text-gray-500 transition-all duration-300">
           <i class="fas fa-circle text-xs w-5"></i>
-          <span>完成</span>
+          <span>完成打包</span>
         </div>
       </div>
       
-      <p class="text-xs text-gray-500">预计需要1-2分钟，请勿关闭页面</p>
+      <p class="text-xs text-gray-500">AI正在努力创作中，预计需要1-2分钟</p>
     </div>
   `;
   
