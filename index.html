@@ -907,20 +907,48 @@
         let carouselIndex = 0;
         let cases = [];
         
-        // 加载案例数据
+        // 加载案例数据（从飞书多维表格）
         async function loadCases() {
             try {
-                const response = await fetch('data/cases.json');
-                const data = await response.json();
-                cases = data.cases || [];
+                // 从API获取已发布的案例
+                const response = await fetch('https://ig8u65l6vm.sealosbja.site/deckcraft-stats', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'get_cases', limit: 50 })
+                });
                 
-                // 更新生成次数
-                const genCountEl = document.getElementById('genCount');
-                if (genCountEl && data.total_generations) {
-                    genCountEl.textContent = data.total_generations.toLocaleString();
+                const data = await response.json();
+                
+                if (data.success && data.cases && data.cases.length > 0) {
+                    // 处理飞书返回的数据格式
+                    cases = data.cases.map(c => ({
+                        id: c.id,
+                        title: Array.isArray(c.title) ? c.title[0]?.text : c.title,
+                        style: Array.isArray(c.style) ? c.style[0]?.text : c.style,
+                        platform: Array.isArray(c.platform) ? c.platform[0]?.text : c.platform,
+                        thumbnail: Array.isArray(c.thumbnail) ? c.thumbnail[0]?.text : c.thumbnail,
+                        created_at: new Date().toISOString()
+                    }));
+                    renderCarousel();
+                } else {
+                    // 如果没有案例，使用备用数据
+                    renderFallbackCarousel();
                 }
                 
-                renderCarousel();
+                // 获取统计数据
+                const statsResponse = await fetch('https://ig8u65l6vm.sealosbja.site/deckcraft-stats', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'get_stats' })
+                });
+                
+                const statsData = await statsResponse.json();
+                if (statsData.success && statsData.stats) {
+                    const genCountEl = document.getElementById('genCount');
+                    if (genCountEl) {
+                        genCountEl.textContent = statsData.stats.totalGenerations?.toLocaleString() || '0';
+                    }
+                }
             } catch (error) {
                 console.log('加载案例失败:', error);
                 renderFallbackCarousel();
