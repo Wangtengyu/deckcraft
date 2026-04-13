@@ -221,13 +221,24 @@ function closeSponsorModal() {
 
 // 实际生成PPT
 async function startGeneration() {
-  const resultElement = document.getElementById('generateResult');
-  resultElement.innerHTML = `
+  // 显示resultModal并设置loading状态
+  const resultModal = document.getElementById('resultModal');
+  const card = resultModal.querySelector('.card');
+  
+  if (!card) {
+    showToast('页面元素错误', 'error');
+    return;
+  }
+  
+  // 显示loading
+  card.innerHTML = `
     <div class="text-center py-8">
       <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-accent border-t-transparent mb-4"></div>
       <p class="text-gray-400">正在生成PPT，请稍候...</p>
     </div>
   `;
+  
+  resultModal.classList.remove('hidden');
   
   try {
     const response = await fetch(API_URL, {
@@ -239,24 +250,22 @@ async function startGeneration() {
     const result = await response.json();
     
     if (result.success) {
-      displayResult(result);
+      displayResult(result, card);
     } else {
       throw new Error(result.error || '生成失败');
     }
   } catch (error) {
-    resultElement.innerHTML = `
+    card.innerHTML = `
       <div class="text-center py-8">
         <i class="fas fa-exclamation-circle text-4xl text-red-400 mb-4"></i>
         <p class="text-red-400">${error.message}</p>
-        <button onclick="goBack()" class="mt-4 btn-secondary px-6 py-2 rounded-lg">返回修改</button>
+        <button onclick="closeResultModal()" class="mt-4 btn-secondary px-6 py-2 rounded-lg">关闭</button>
       </div>
     `;
   }
 }
 
-function displayResult(result) {
-  const resultElement = document.getElementById('generateResult');
-  
+function displayResult(result, card) {
   let html = `
     <div class="text-center mb-8">
       <div class="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
@@ -336,7 +345,7 @@ function displayResult(result) {
     </div>
   `;
   
-  resultElement.innerHTML = html;
+  card.innerHTML = html;
 }
 
 // ============ 工具函数 ============
@@ -454,3 +463,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// ============ 补充函数 ============
+
+// 更新成本估算（已改为免费，此函数为兼容保留）
+function updateCostEstimate() {
+  // 完全免费，无需计算成本
+}
+
+// 页数增减
+function changePages(delta) {
+  const input = document.getElementById('pages');
+  if (!input) return;
+  
+  let value = Math.max(5, Math.min(20, parseInt(input.value) + delta));
+  input.value = value;
+  state.pageCount = value;
+}
+
+// 返回步骤1
+function goToStep1() {
+  state.currentStep = 1;
+  updateStepIndicator();
+  
+  document.getElementById('step2').classList.add('hidden');
+  document.getElementById('step1').classList.remove('hidden');
+}
+
+// 关闭结果弹窗
+function closeResultModal() {
+  document.getElementById('resultModal').classList.add('hidden');
+  document.getElementById('step2').classList.add('hidden');
+  document.getElementById('step1').classList.remove('hidden');
+  state.currentStep = 1;
+  updateStepIndicator();
+}
