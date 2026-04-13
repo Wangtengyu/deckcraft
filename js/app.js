@@ -3,7 +3,7 @@
  */
 
 // API配置
-const API_URL = 'https://your-laf-function-url/api/generate-v2';
+const API_URL = 'https://ig8u65l6vm.sealosbja.site/generate';
 
 // 状态管理
 let state = {
