@@ -266,8 +266,11 @@ async function startGeneration() {
 }
 
 function displayResult(result, card) {
+  // 保存生成的图片到state
+  state.generatedImages = result.images || [];
+  
   let html = `
-    <div class="text-center mb-8">
+    <div class="text-center mb-6">
       <div class="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
         <i class="fas fa-check text-3xl text-green-400"></i>
       </div>
@@ -275,7 +278,10 @@ function displayResult(result, card) {
       <p class="text-gray-400">${result.style} · ${result.platform} · ${(result.images || result.pages || []).length}页</p>
     </div>
     
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+    <!-- 预览区域 -->
+    <div class="mb-6 p-4 bg-surface rounded-xl">
+      <p class="text-sm text-gray-400 mb-3"><i class="fas fa-eye mr-2"></i>预览生成的页面：</p>
+      <div class="grid grid-cols-2 gap-2">
   `;
   
   // 显示生成的图片
@@ -312,19 +318,27 @@ function displayResult(result, card) {
   }
   
   html += `
+      </div>
     </div>
     
-    <div class="flex flex-col gap-3">
+    <!-- 下载选项 -->
+    <div class="space-y-3 mb-4">
+      <p class="text-sm text-gray-400">选择下载格式：</p>
   `;
   
-  // 下载/加入案例库按钮
+  // 下载按钮
   if (result.images && result.images.length > 0) {
     html += `
-      <button onclick="downloadPPT()" class="btn-primary text-white py-3 rounded-xl font-medium">
-        <i class="fas fa-download mr-2"></i>
+      <button onclick="downloadImages()" class="btn-primary text-white py-3 rounded-xl font-medium w-full">
+        <i class="fas fa-images mr-2"></i>
+        下载所有图片
+      </button>
+      <button onclick="showPptxDownload()" class="btn-secondary py-3 rounded-xl font-medium w-full">
+        <i class="fas fa-file-powerpoint mr-2"></i>
         下载PPTX文件
       </button>
-      <button onclick="addToGallery()" class="btn-secondary py-3 rounded-xl font-medium">
+      <hr class="border-white/10 my-4">
+      <button onclick="confirmAddToGallery('${result.ppt_title}')" class="text-gray-400 py-2 w-full hover:text-white transition">
         <i class="fas fa-plus mr-2"></i>
         加入案例库
       </button>
@@ -334,14 +348,16 @@ function displayResult(result, card) {
       <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 text-center">
         <p class="text-yellow-400 text-sm">
           <i class="fas fa-info-circle mr-2"></i>
-          预览模式：请提供API Key以生成实际图片
+          图片生成中，请稍候...
         </p>
       </div>
     `;
   }
   
   html += `
-      <button onclick="location.href='create.html'" class="text-gray-400 py-2">创建新PPT</button>
+      <button onclick="closeResultModal()" class="text-gray-400 py-2 w-full hover:text-white transition">
+        创建新PPT
+      </button>
     </div>
   `;
   
@@ -393,6 +409,75 @@ function downloadPPT() {
 
 function addToGallery() {
   showToast('已加入案例库', 'success');
+}
+
+// 下载所有图片
+async function downloadImages(images) {
+  // 如果传入了images参数，使用传入的；否则使用state中的
+  const imgList = images || state.generatedImages || [];
+  
+  if (imgList.length === 0) {
+    showToast('没有可下载的图片', 'error');
+    return;
+  }
+  
+  showToast('正在打开图片...', 'info');
+  
+  // 逐个打开图片
+  for (let i = 0; i < imgList.length; i++) {
+    const img = imgList[i];
+    if (img.url) {
+      window.open(img.url, '_blank');
+    }
+  }
+  
+  showToast(`已打开${imgList.length}张图片，请右键保存`, 'success');
+}
+
+// PPTX下载
+async function showPptxDownload() {
+  // 从state中获取当前生成的图片
+  if (!state.generatedImages || state.generatedImages.length === 0) {
+    showToast('没有可下载的图片', 'error');
+    return;
+  }
+  
+  showToast('正在生成PPTX文件...', 'info');
+  
+  try {
+    const response = await fetch('https://ig8u65l6vm.sealosbja.site/generate-pptx', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        images: state.generatedImages,
+        title: state.topic,
+        style: state.style
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success && result.data) {
+      // 创建下载链接
+      const link = document.createElement('a');
+      link.href = `data:${result.mimeType};base64,${result.data}`;
+      link.download = result.filename;
+      link.click();
+      
+      showToast('PPTX文件已开始下载', 'success');
+    } else {
+      throw new Error(result.error || '生成失败');
+    }
+  } catch (error) {
+    showToast('PPTX生成失败：' + error.message, 'error');
+  }
+}
+
+// 确认加入案例库
+function confirmAddToGallery(title) {
+  if (confirm(`确认将「${title}」加入案例库？\n\n加入后，其他用户可以参考您生成的PPT效果。`)) {
+    showToast('已加入案例库，感谢您的贡献！', 'success');
+  }
 }
 
 // ============ 案例库功能 ============
