@@ -4,7 +4,7 @@
  */
 
 // API配置
-const API_URL = 'https://ig8u65l6vm.sealosbja.site/generate-v3';
+const API_URL = 'https://ig8u65l6vm.sealosbja.site/generate';
 const PROGRESS_API = 'https://ig8u65l6vm.sealosbja.site/progress';
 
 // 轮询间隔(ms)
