@@ -1,0 +1,429 @@
+{
+  "_comment": "DeckCraft PPT模板库 V1.0",
+  "_description": "专业PPT布局模板定义，支持多种页面类型和布局变体",
+  
+  "templates": {
+    "cover": {
+      "name": "封面页模板",
+      "description": "用于PPT开场封面，支持多种标题位置",
+      "variants": {
+        "centered": {
+          "name": "居中标题",
+          "thumbnail": "/imgs/templates/cover-centered.png",
+          "layout": {
+            "title": {
+              "x": 0.5, "y": 2.2, "w": 12.33, "h": 1.5,
+              "align": "center", "valign": "middle",
+              "fontSize": 48, "bold": true, "color": "#1a1a1a"
+            },
+            "subtitle": {
+              "x": 0.5, "y": 3.8, "w": 12.33, "h": 0.8,
+              "align": "center", "valign": "middle",
+              "fontSize": 24, "color": "#666666"
+            },
+            "date": {
+              "x": 0.5, "y": 4.8, "w": 12.33, "h": 0.5,
+              "align": "center", "fontSize": 16, "color": "#999999"
+            }
+          }
+        },
+        "left_aligned": {
+          "name": "左对齐标题",
+          "thumbnail": "/imgs/templates/cover-left.png",
+          "layout": {
+            "title": {
+              "x": 0.8, "y": 2.5, "w": 8, "h": 1.2,
+              "align": "left", "valign": "middle",
+              "fontSize": 44, "bold": true, "color": "#1a1a1a"
+            },
+            "subtitle": {
+              "x": 0.8, "y": 3.8, "w": 8, "h": 0.6,
+              "align": "left", "fontSize": 20, "color": "#666666"
+            },
+            "decor": {
+              "x": 8.5, "y": 1, "w": 3.5, "h": 3,
+              "type": "image", "fit": "contain"
+            }
+          }
+        },
+        "split": {
+          "name": "左右分栏",
+          "thumbnail": "/imgs/templates/cover-split.png",
+          "layout": {
+            "left_panel": {
+              "x": 0, "y": 0, "w": 4, "h": 4.3,
+              "color": "#4A90D9"
+            },
+            "title": {
+              "x": 4.5, "y": 1.5, "w": 8, "h": 1.2,
+              "align": "left", "fontSize": 44, "bold": true
+            },
+            "subtitle": {
+              "x": 4.5, "y": 2.8, "w": 8, "h": 0.6,
+              "align": "left", "fontSize": 20
+            }
+          }
+        }
+      }
+    },
+    
+    "toc": {
+      "name": "目录页模板",
+      "description": "用于章节导航和内容概览",
+      "variants": {
+        "numbered": {
+          "name": "数字编号",
+          "thumbnail": "/imgs/templates/toc-numbered.png",
+          "layout": {
+            "title": {
+              "x": 0.5, "y": 0.3, "w": 12.33, "h": 0.8,
+              "align": "center", "fontSize": 32, "bold": true
+            },
+            "items": {
+              "x": 1.5, "y": 1.5, "w": 9, "h": 3,
+              "fontSize": 20, "lineHeight": 2.2,
+              "numberStyle": "circle",
+              "spacing": 24
+            }
+          }
+        },
+        "icon_list": {
+          "name": "图标列表",
+          "thumbnail": "/imgs/templates/toc-icons.png",
+          "layout": {
+            "title": {
+              "x": 0.5, "y": 0.3, "w": 12.33, "h": 0.8,
+              "align": "center", "fontSize": 32, "bold": true
+            },
+            "items": {
+              "x": 1, "y": 1.5, "w": 10.33, "h": 3,
+              "layout": "grid",
+              "columns": 3,
+              "iconSize": 48,
+              "fontSize": 16
+            }
+          }
+        },
+        "timeline": {
+          "name": "时间轴",
+          "thumbnail": "/imgs/templates/toc-timeline.png",
+          "layout": {
+            "title": {
+              "x": 0.5, "y": 0.3, "w": 12.33, "h": 0.8,
+              "align": "center", "fontSize": 32, "bold": true
+            },
+            "items": {
+              "x": 0.5, "y": 1.8, "w": 12.33, "h": 2,
+              "layout": "horizontal",
+              "lineY": 2.8,
+              "dotSize": 16,
+              "fontSize": 14
+            }
+          }
+        }
+      }
+    },
+    
+    "content": {
+      "name": "内容页模板",
+      "description": "用于正文内容展示",
+      "variants": {
+        "title_top": {
+          "name": "标题顶部",
+          "thumbnail": "/imgs/templates/content-title-top.png",
+          "layout": {
+            "title": {
+              "x": 0.5, "y": 0.3, "w": 12.33, "h": 0.8,
+              "fontSize": 28, "bold": true
+            },
+            "underline": {
+              "x": 0.5, "y": 1.1, "w": 2, "h": 0.05,
+              "color": "#4A90D9"
+            },
+            "content": {
+              "x": 0.5, "y": 1.3, "w": 12.33, "h": 3.2,
+              "fontSize": 16, "lineHeight": 1.8
+            }
+          }
+        },
+        "two_column": {
+          "name": "双栏布局",
+          "thumbnail": "/imgs/templates/content-two-col.png",
+          "layout": {
+            "title": {
+              "x": 0.5, "y": 0.3, "w": 12.33, "h": 0.6,
+              "fontSize": 26, "bold": true
+            },
+            "left": {
+              "x": 0.5, "y": 1.2, "w": 5.5, "h": 2.8,
+              "fontSize": 14, "lineHeight": 1.8
+            },
+            "right": {
+              "x": 6.5, "y": 1.2, "w": 5.5, "h": 2.8,
+              "fontSize": 14, "lineHeight": 1.8
+            },
+            "divider": {
+              "x": 6.25, "y": 1.2, "w": 0.02, "h": 2.8,
+              "color": "#E8EEF4"
+            }
+          }
+        },
+        "bullet_list": {
+          "name": "要点列表",
+          "thumbnail": "/imgs/templates/content-bullets.png",
+          "layout": {
+            "title": {
+              "x": 0.5, "y": 0.3, "w": 12.33, "h": 0.8,
+              "fontSize": 28, "bold": true
+            },
+            "bullets": {
+              "x": 0.8, "y": 1.3, "w": 11, "h": 3,
+              "fontSize": 16, "lineHeight": 2.2,
+              "bulletStyle": "icon",
+              "bulletIcon": "circle"
+            }
+          }
+        },
+        "image_left": {
+          "name": "图文左右",
+          "thumbnail": "/imgs/templates/content-img-left.png",
+          "layout": {
+            "title": {
+              "x": 0.5, "y": 0.3, "w": 12.33, "h": 0.6,
+              "fontSize": 26, "bold": true
+            },
+            "image": {
+              "x": 0.5, "y": 1.1, "w": 5, "h": 2.9,
+              "fit": "cover", "radius": 8
+            },
+            "content": {
+              "x": 6, "y": 1.1, "w": 5.83, "h": 2.9,
+              "fontSize": 14, "lineHeight": 1.8
+            }
+          }
+        },
+        "quote": {
+          "name": "引用强调",
+          "thumbnail": "/imgs/templates/content-quote.png",
+          "layout": {
+            "title": {
+              "x": 0.5, "y": 0.3, "w": 12.33, "h": 0.6,
+              "fontSize": 26, "bold": true
+            },
+            "quote": {
+              "x": 1, "y": 1.2, "w": 11, "h": 1.5,
+              "fontSize": 24, "italic": true,
+              "borderLeft": "4px solid #4A90D9",
+              "paddingLeft": 20
+            },
+            "attribution": {
+              "x": 1, "y": 2.8, "w": 11, "h": 0.5,
+              "fontSize": 14, "color": "#666666"
+            }
+          }
+        }
+      }
+    },
+    
+    "chart": {
+      "name": "图表页模板",
+      "description": "用于数据可视化展示",
+      "variants": {
+        "chart_left": {
+          "name": "图表+说明",
+          "thumbnail": "/imgs/templates/chart-left.png",
+          "layout": {
+            "title": {
+              "x": 0.5, "y": 0.3, "w": 12.33, "h": 0.6,
+              "fontSize": 26, "bold": true
+            },
+            "chart": {
+              "x": 0.5, "y": 1.1, "w": 7, "h": 3,
+              "fit": "contain"
+            },
+            "legend": {
+              "x": 8, "y": 1.1, "w": 4, "h": 3,
+              "fontSize": 14, "lineHeight": 2
+            }
+          }
+        },
+        "full_width": {
+          "name": "全宽图表",
+          "thumbnail": "/imgs/templates/chart-full.png",
+          "layout": {
+            "title": {
+              "x": 0.5, "y": 0.3, "w": 12.33, "h": 0.6,
+              "fontSize": 26, "bold": true
+            },
+            "chart": {
+              "x": 0.5, "y": 1.1, "w": 12.33, "h": 3
+            }
+          }
+        },
+        "multi_chart": {
+          "name": "多图表",
+          "thumbnail": "/imgs/templates/chart-multi.png",
+          "layout": {
+            "title": {
+              "x": 0.5, "y": 0.3, "w": 12.33, "h": 0.5,
+              "fontSize": 24, "bold": true
+            },
+            "chart1": {
+              "x": 0.5, "y": 1, "w": 5.5, "h": 2.5
+            },
+            "chart2": {
+              "x": 6.5, "y": 1, "w": 5.5, "h": 2.5
+            }
+          }
+        }
+      }
+    },
+    
+    "ending": {
+      "name": "结束页模板",
+      "description": "用于PPT收尾",
+      "variants": {
+        "centered": {
+          "name": "居中感谢",
+          "thumbnail": "/imgs/templates/ending-center.png",
+          "layout": {
+            "main": {
+              "x": 0.5, "y": 2, "w": 12.33, "h": 1.2,
+              "align": "center", "valign": "middle",
+              "fontSize": 48, "bold": true
+            },
+            "sub": {
+              "x": 0.5, "y": 3.5, "w": 12.33, "h": 0.6,
+              "align": "center",
+              "fontSize": 20, "color": "#666666"
+            },
+            "contact": {
+              "x": 0.5, "y": 4.3, "w": 12.33, "h": 0.4,
+              "align": "center",
+              "fontSize": 14, "color": "#999999"
+            }
+          }
+        },
+        "with_qr": {
+          "name": "带二维码",
+          "thumbnail": "/imgs/templates/ending-qr.png",
+          "layout": {
+            "main": {
+              "x": 0.5, "y": 1.5, "w": 8, "h": 1,
+              "align": "left", "fontSize": 42, "bold": true
+            },
+            "qr": {
+              "x": 10, "y": 1, "w": 2, "h": 2,
+              "fit": "contain"
+            },
+            "contact": {
+              "x": 0.5, "y": 2.8, "w": 8, "h": 1,
+              "fontSize": 16, "lineHeight": 2
+            }
+          }
+        }
+      }
+    }
+  },
+  
+  "scene_templates": {
+    "report": {
+      "name": "工作汇报",
+      "pages": ["cover:centered", "toc:numbered", "content:title_top", "content:two_column", "content:bullet_list", "chart:chart_left", "content:title_top", "ending:centered"],
+      "default_style": "A"
+    },
+    "proposal": {
+      "name": "项目方案",
+      "pages": ["cover:left_aligned", "toc:icon_list", "content:title_top", "content:image_left", "content:bullet_list", "chart:full_width", "content:quote", "ending:centered"],
+      "default_style": "A"
+    },
+    "training": {
+      "name": "培训课件",
+      "pages": ["cover:centered", "toc:numbered", "content:title_top", "content:bullet_list", "content:two_column", "content:image_left", "content:bullet_list", "ending:centered"],
+      "default_style": "B"
+    },
+    "science": {
+      "name": "知识科普",
+      "pages": ["cover:centered", "toc:timeline", "content:title_top", "content:bullet_list", "chart:multi_chart", "content:image_left", "ending:centered"],
+      "default_style": "B"
+    },
+    "process": {
+      "name": "流程说明",
+      "pages": ["cover:centered", "toc:timeline", "content:title_top", "content:bullet_list", "content:bullet_list", "content:bullet_list", "ending:centered"],
+      "default_style": "A"
+    }
+  },
+  
+  "style_presets": {
+    "A": {
+      "name": "信息图风",
+      "colors": {
+        "primary": "#4A90D9",
+        "secondary": "#F5F7FA",
+        "accent": "#2C3E50",
+        "text": "#1a1a1a",
+        "subtext": "#666666"
+      },
+      "fonts": {
+        "title": "思源黑体 Bold",
+        "body": "思源黑体 Regular"
+      }
+    },
+    "B": {
+      "name": "插画科普风",
+      "colors": {
+        "primary": "#4ECDC4",
+        "secondary": "#FFE66D",
+        "accent": "#FF6B6B",
+        "text": "#333333",
+        "subtext": "#666666"
+      },
+      "fonts": {
+        "title": "思源黑体 Bold",
+        "body": "思源黑体 Regular"
+      }
+    },
+    "C": {
+      "name": "图文混排风",
+      "colors": {
+        "primary": "#FFFFFF",
+        "secondary": "#F0F0F0",
+        "accent": "#333333",
+        "text": "#FFFFFF",
+        "subtext": "#CCCCCC"
+      },
+      "fonts": {
+        "title": "思源黑体 Bold",
+        "body": "思源黑体 Regular"
+      }
+    },
+    "D": {
+      "name": "卡通绘本风",
+      "colors": {
+        "primary": "#FFB6C1",
+        "secondary": "#87CEEB",
+        "accent": "#FFD700",
+        "text": "#333333",
+        "subtext": "#666666"
+      },
+      "fonts": {
+        "title": "圆体 Bold",
+        "body": "圆体 Regular"
+      }
+    },
+    "E": {
+      "name": "手绘笔记风",
+      "colors": {
+        "primary": "#F5E6D3",
+        "secondary": "#8B4513",
+        "accent": "#4169E1",
+        "text": "#333333",
+        "subtext": "#666666"
+      },
+      "fonts": {
+        "title": "手写体",
+        "body": "手写体"
+      }
+    }
+  }
+}

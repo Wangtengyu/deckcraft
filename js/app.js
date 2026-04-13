@@ -1,14 +1,66 @@
 /**
- * DeckCraft - 前端交互逻辑 v2.0
- * 支持: 动态进度条、案例库、访问统计
+ * DeckCraft - 前端交互逻辑 V2.0 (优化版)
+ * 新增功能：
+ * 1. 专业化Prompt模板支持
+ * 2. 预设模板库选择
+ * 3. 内容智能生成
+ * 4. 场景化推荐
  */
 
 // API配置
 const API_URL = 'https://ig8u65l6vm.sealosbja.site/generate';
 const PROGRESS_API = 'https://ig8u65l6vm.sealosbja.site/progress';
+const TEMPLATE_API = 'https://ig8u65l6vm.sealosbja.site/templates';
 
 // 轮询间隔(ms)
 const POLL_INTERVAL = 2000;
+
+// ============ 场景与模板配置 ============
+const SCENE_TEMPLATES = {
+  report: {
+    name: '工作汇报',
+    icon: 'fa-chart-line',
+    description: '项目进度、述职报告、季度总结',
+    recommended: 'A',
+    color: '#4A90D9'
+  },
+  proposal: {
+    name: '项目方案',
+    icon: 'fa-lightbulb',
+    description: '商业计划、解决方案、产品提案',
+    recommended: 'A',
+    color: '#2C3E50'
+  },
+  training: {
+    name: '培训课件',
+    icon: 'fa-graduation-cap',
+    description: '员工培训、技能教学、流程说明',
+    recommended: 'B',
+    color: '#4ECDC4'
+  },
+  science: {
+    name: '知识科普',
+    icon: 'fa-atom',
+    description: '科普宣传、教育讲解、技术介绍',
+    recommended: 'B',
+    color: '#FF6B6B'
+  },
+  process: {
+    name: '流程说明',
+    icon: 'fa-tasks',
+    description: '操作指南、步骤演示、流程梳理',
+    recommended: 'A',
+    color: '#FFE66D'
+  }
+};
+
+const STYLE_OPTIONS = {
+  A: { name: '信息图风', desc: '专业商务', icon: 'fa-chart-pie', audience: 'adult' },
+  B: { name: '插画科普风', desc: '生动易懂', icon: 'fa-palette', audience: 'student' },
+  C: { name: '图文混排风', desc: '照片为主', icon: 'fa-image', audience: 'adult' },
+  D: { name: '卡通绘本风', desc: '活泼有趣', icon: 'fa-child', audience: 'child' },
+  E: { name: '手绘笔记风', desc: '轻松手绘', icon: 'fa-pen', audience: 'adult' }
+};
 
 // 状态管理
 let state = {
@@ -24,12 +76,44 @@ let state = {
   topic: '',
   generatedImages: [],
   taskId: null,
-  pollTimer: null
+  pollTimer: null,
+  templates: null,  // 模板库缓存
+  smartContent: true  // 智能内容生成开关
 };
 
-// 页面加载时初始化
-document.addEventListener('DOMContentLoaded', function() {
+// ============ 模板库加载 ============
+
+async function loadTemplates() {
+  if (state.templates) return state.templates;
+  
+  try {
+    const response = await fetch(TEMPLATE_API);
+    if (response.ok) {
+      state.templates = await response.json();
+      return state.templates;
+    }
+  } catch (e) {
+    console.log('加载模板库失败，使用内置配置');
+  }
+  
+  // 使用内置默认模板
+  state.templates = {
+    scene_templates: SCENE_TEMPLATES,
+    style_presets: STYLE_OPTIONS
+  };
+  return state.templates;
+}
+
+// ============ 页面初始化 ============
+
+document.addEventListener('DOMContentLoaded', async function() {
   loadSponsorsList();
+  
+  // 预加载模板库
+  await loadTemplates();
+  
+  // 根据场景推荐风格
+  updateStyleRecommendation();
 });
 
 // ============ 赞助者列表 ============
@@ -90,19 +174,85 @@ function selectAudience(audience) {
   state.audience = audience;
   updateOptionCards('audience', audience);
   
-  const styleMap = { child: 'D', student: 'B', adult: 'A', professional: 'A' };
-  const styleNames = { A: '信息图风', B: '插画科普风', C: '图文混排风', D: '卡通绘本风', E: '手绘笔记风' };
-  const audienceNames = { child: '幼儿', student: '小学生', adult: '成人', professional: '专业人士' };
-  
-  const recommendedElement = document.getElementById('recommendedStyle');
-  if (recommendedElement) {
-    recommendedElement.textContent = `${styleNames[styleMap[audience]]}（适合${audienceNames[audience]}受众）`;
-  }
+  // 自动更新场景推荐
+  updateStyleRecommendation();
 }
 
 function selectScene(scene) {
   state.scene = scene;
   updateOptionCards('scene', scene);
+  
+  // 更新风格推荐
+  updateStyleRecommendation();
+  
+  // 更新页数建议
+  updatePageCountSuggestion(scene);
+}
+
+// ============ 智能推荐 ============
+
+function updateStyleRecommendation() {
+  const recommendedElement = document.getElementById('recommendedStyle');
+  if (!recommendedElement) return;
+  
+  // 根据受众和场景推荐风格
+  let recommended = 'A';
+  
+  // 受众映射
+  const audienceMap = { child: 'D', student: 'B', adult: 'A', professional: 'A' };
+  
+  // 场景覆盖
+  if (SCENE_TEMPLATES[state.scene]) {
+    recommended = SCENE_TEMPLATES[state.scene].recommended;
+  }
+  
+  // 受众优先级
+  if (state.audience === 'child') recommended = 'D';
+  else if (state.audience === 'student') recommended = 'B';
+  else if (state.audience !== 'adult') {
+    recommended = audienceMap[state.audience] || 'A';
+  }
+  
+  const styleInfo = STYLE_OPTIONS[recommended];
+  const sceneInfo = SCENE_TEMPLATES[state.scene];
+  
+  recommendedElement.innerHTML = `
+    <div class="flex items-center gap-2">
+      <span class="text-sm text-gray-400">推荐：</span>
+      <span class="px-3 py-1 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full text-white">
+        <i class="fas ${styleInfo.icon} mr-1"></i>${styleInfo.name}
+      </span>
+      <span class="text-xs text-gray-500">适合${sceneInfo.name}</span>
+    </div>
+  `;
+  
+  // 自动选中推荐风格
+  state.style = recommended;
+  updateOptionCards('style', recommended);
+}
+
+function updatePageCountSuggestion(scene) {
+  // 不同场景建议不同的页数
+  const suggestions = {
+    report: 8,
+    proposal: 10,
+    training: 12,
+    science: 8,
+    process: 6
+  };
+  
+  const suggested = suggestions[scene] || 8;
+  const pageCountSlider = document.getElementById('pageCount');
+  const pageCountDisplay = document.getElementById('pageCountDisplay');
+  
+  if (pageCountSlider && pageCountDisplay) {
+    // 如果用户未修改过页数，则自动更新
+    if (state.pageCount === 10) {
+      pageCountSlider.value = suggested;
+      pageCountDisplay.textContent = suggested + ' 页';
+      state.pageCount = suggested;
+    }
+  }
 }
 
 // ============ 步骤2：内容风格 ============
@@ -110,6 +260,34 @@ function selectScene(scene) {
 function selectStyle(style) {
   state.style = style;
   updateOptionCards('style', style);
+  
+  // 显示风格预览提示
+  const stylePreview = document.getElementById('stylePreview');
+  if (stylePreview) {
+    const info = STYLE_OPTIONS[style];
+    stylePreview.innerHTML = `
+      <div class="p-4 bg-surface rounded-xl">
+        <h4 class="font-medium mb-2"><i class="fas ${info.icon} mr-2"></i>${info.name}</h4>
+        <p class="text-sm text-gray-400">${info.desc}</p>
+        <div class="mt-3 flex flex-wrap gap-2">
+          ${getStyleKeywords(style)}
+        </div>
+      </div>
+    `;
+  }
+}
+
+function getStyleKeywords(style) {
+  const keywords = {
+    A: ['商务', '简洁', '数据', '专业'],
+    B: ['科普', '插画', '易懂', '趣味'],
+    C: ['照片', '图文', '视觉', '创意'],
+    D: ['可爱', '卡通', '儿童', '活泼'],
+    E: ['手绘', '笔记', '轻松', '文艺']
+  };
+  return (keywords[style] || []).map(k => 
+    `<span class="px-2 py-0.5 bg-white/10 rounded text-xs">${k}</span>`
+  ).join('');
 }
 
 function updatePageCount(count) {
@@ -119,6 +297,72 @@ function updatePageCount(count) {
 
 function toggleSmartTitle(enabled) {
   state.smartTitle = enabled;
+}
+
+// ============ 内容预览 ============
+
+function updateContentPreview() {
+  const preview = document.getElementById('contentPreview');
+  if (!preview) return;
+  
+  const topic = document.getElementById('topic')?.value || state.topic;
+  const scene = state.scene;
+  
+  // 根据场景生成内容大纲预览
+  const outline = generateContentOutline(topic, scene, state.pageCount);
+  
+  preview.innerHTML = `
+    <div class="bg-surface rounded-xl p-4">
+      <h4 class="font-medium mb-3">
+        <i class="fas fa-list-alt mr-2 text-accent"></i>
+        内容大纲预览
+      </h4>
+      <div class="space-y-2 text-sm">
+        ${outline.map((item, i) => `
+          <div class="flex items-start gap-2">
+            <span class="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-xs flex-shrink-0">
+              ${i + 1}
+            </span>
+            <div>
+              <span class="font-medium">${item.title}</span>
+              ${item.type !== 'cover' && item.type !== 'ending' ? 
+                `<span class="text-gray-500 ml-2">(${item.points || ''})</span>` : ''}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// 根据场景生成内容大纲
+function generateContentOutline(topic, scene, pageCount) {
+  const structures = {
+    report: ['背景与目标', '执行过程', '关键成果', '数据分析', '问题与挑战', '下一步计划'],
+    proposal: ['问题与机会', '解决方案', '核心优势', '成功案例', '实施计划', '预期成果'],
+    training: ['培训目标', '基础知识', '核心技能', '实操演练', '案例分析', '行动计划'],
+    science: ['核心概念', '关键原理', '重要知识点', '数据展示', '实践应用'],
+    process: ['流程概述', '准备工作', '步骤详解', '注意事项', '常见问题']
+  };
+  
+  const sections = structures[scene] || structures.report;
+  const outline = [{ type: 'cover', title: '封面页' }];
+  
+  // 分配内容页
+  const contentPages = pageCount - 2;
+  const sectionsPerPage = Math.ceil(sections.length / contentPages);
+  
+  for (let i = 0; i < sections.length && outline.length < pageCount - 1; i++) {
+    outline.push({
+      type: 'content',
+      title: sections[i],
+      points: '3个要点'
+    });
+  }
+  
+  outline.push({ type: 'ending', title: '感谢聆听' });
+  
+  return outline.slice(0, pageCount);
 }
 
 // ============ 步骤导航 ============
@@ -136,6 +380,9 @@ function goToStep2() {
   
   document.getElementById('step1').classList.add('hidden');
   document.getElementById('step2').classList.remove('hidden');
+  
+  // 更新内容预览
+  updateContentPreview();
 }
 
 function goToStep3() {
@@ -206,88 +453,11 @@ async function startGeneration() {
   }
   
   // 显示进度条loading
-  card.innerHTML = `
-    <style>
-      @keyframes rotate {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-      }
-      @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.6; }
-      }
-      @keyframes shimmer {
-        0% { background-position: -200% 0; }
-        100% { background-position: 200% 0; }
-      }
-      .progress-rotate {
-        animation: rotate 2s linear infinite;
-      }
-      .progress-pulse {
-        animation: pulse 1.5s ease-in-out infinite;
-      }
-      .progress-shimmer {
-        background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
-        background-size: 200% 100%;
-        animation: shimmer 2s infinite;
-      }
-    </style>
-    <div class="text-center py-8">
-      <div class="relative w-24 h-24 mx-auto mb-6">
-        <!-- 外圈旋转 -->
-        <svg class="w-24 h-24 progress-rotate absolute top-0 left-0">
-          <circle cx="48" cy="48" r="46" stroke="#2a2a3a" stroke-width="2" fill="none"/>
-        </svg>
-        <!-- 主进度环 -->
-        <svg class="w-24 h-24 absolute top-0 left-0" style="transform: -rotate-90">
-          <circle cx="48" cy="48" r="40" stroke="#2a2a3a" stroke-width="6" fill="none"/>
-          <circle id="progressCircle" cx="48" cy="48" r="40" stroke="url(#gradient)" stroke-width="6" fill="none"
-            stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round"
-            style="transition: stroke-dashoffset 0.5s ease"/>
-          <defs>
-            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#00d4ff"/>
-              <stop offset="50%" stop-color="#a855f7"/>
-              <stop offset="100%" stop-color="#ff6b9d"/>
-            </linearGradient>
-          </defs>
-        </svg>
-        <!-- 内圈脉冲 -->
-        <div class="absolute inset-4 rounded-full bg-gradient-to-br from-cyan-500/20 to-pink-500/20 progress-pulse"></div>
-        <!-- 百分比 -->
-        <span id="progressPercent" class="absolute inset-0 flex items-center justify-center text-2xl font-bold progress-pulse">0%</span>
-      </div>
-      
-      <h3 id="progressTitle" class="text-lg font-semibold mb-2">正在生成PPT</h3>
-      <p id="progressMessage" class="text-gray-400 text-sm mb-4 progress-shimmer" style="background-clip: text; -webkit-background-clip: text;">准备中...</p>
-      
-      <!-- 步骤列表 -->
-      <div class="text-left text-sm space-y-2 mb-6 max-w-xs mx-auto">
-        <div id="step-init" class="flex items-center text-gray-500 transition-all duration-300">
-          <i class="fas fa-circle text-xs w-5"></i>
-          <span>初始化参数</span>
-        </div>
-        <div id="step-cover" class="flex items-center text-gray-500 transition-all duration-300">
-          <i class="fas fa-circle text-xs w-5"></i>
-          <span>生成封面背景</span>
-        </div>
-        <div id="step-content" class="flex items-center text-gray-500 transition-all duration-300">
-          <i class="fas fa-circle text-xs w-5"></i>
-          <span>生成内容页背景</span>
-        </div>
-        <div id="step-complete" class="flex items-center text-gray-500 transition-all duration-300">
-          <i class="fas fa-circle text-xs w-5"></i>
-          <span>完成打包</span>
-        </div>
-      </div>
-      
-      <p class="text-xs text-gray-500">AI正在努力创作中，预计需要1-2分钟</p>
-    </div>
-  `;
+  card.innerHTML = generateProgressHTML();
   
   resultModal.classList.remove('hidden');
   
-  // 先创建进度任务
+  // 创建任务
   try {
     const createResponse = await fetch(PROGRESS_API, {
       method: 'POST',
@@ -299,46 +469,39 @@ async function startGeneration() {
     });
     
     const createResult = await createResponse.json();
-    
-    if (!createResult.success) {
-      throw new Error('创建任务失败');
-    }
-    
-    state.taskId = createResult.taskId;
-    console.log('创建任务成功:', state.taskId);
-    
+    state.taskId = createResult.success ? createResult.taskId : `task_${Date.now()}`;
   } catch (error) {
-    console.error('创建任务失败:', error);
-    // 如果创建失败，使用本地taskId
-    state.taskId = `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    state.taskId = `task_${Date.now()}`;
   }
   
-  // 开始轮询进度
+  // 开始轮询
   startProgressPolling();
   
-  // 调用生成API
+  // 调用生成API（使用V4优化版）
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        ...state,
+        topic: state.topic,
+        platform: state.platform,
+        style: state.style,
+        scene: state.scene,
+        audience: state.audience,
+        pageCount: state.pageCount,
         taskId: state.taskId
       })
     });
     
     const result = await response.json();
     
-    // 停止轮询
     stopProgressPolling();
     
     if (result.success) {
-      // 更新统计（通过飞书API）
       updateGenerationStats();
-      
-      // 更新UI
       updateProgressCircle(100);
-      updateStepStatus(4);
+      updateStepStatus(result.totalPages + 2);
+      
       const msgEl = document.getElementById('progressMessage');
       if (msgEl) msgEl.textContent = '生成完成！';
       
@@ -358,12 +521,69 @@ async function startGeneration() {
   }
 }
 
+function generateProgressHTML() {
+  return `
+    <style>
+      @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+      @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+      .progress-rotate { animation: rotate 2s linear infinite; }
+      .progress-pulse { animation: pulse 1.5s ease-in-out infinite; }
+      .progress-shimmer { background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%); background-size: 200% 100%; animation: shimmer 2s infinite; }
+    </style>
+    <div class="text-center py-8">
+      <div class="relative w-24 h-24 mx-auto mb-6">
+        <svg class="w-24 h-24 progress-rotate absolute top-0 left-0">
+          <circle cx="48" cy="48" r="46" stroke="#2a2a3a" stroke-width="2" fill="none"/>
+        </svg>
+        <svg class="w-24 h-24 absolute top-0 left-0" style="transform: -rotate-90">
+          <circle cx="48" cy="48" r="40" stroke="#2a2a3a" stroke-width="6" fill="none"/>
+          <circle id="progressCircle" cx="48" cy="48" r="40" stroke="url(#gradient)" stroke-width="6" fill="none"
+            stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round"
+            style="transition: stroke-dashoffset 0.5s ease"/>
+          <defs>
+            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#00d4ff"/>
+              <stop offset="50%" stop-color="#a855f7"/>
+              <stop offset="100%" stop-color="#ff6b9d"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="absolute inset-4 rounded-full bg-gradient-to-br from-cyan-500/20 to-pink-500/20 progress-pulse"></div>
+        <span id="progressPercent" class="absolute inset-0 flex items-center justify-center text-2xl font-bold progress-pulse">0%</span>
+      </div>
+      
+      <h3 id="progressTitle" class="text-lg font-semibold mb-2">正在生成PPT</h3>
+      <p id="progressMessage" class="text-gray-400 text-sm mb-4 progress-shimmer" style="background-clip: text; -webkit-background-clip: text;">准备中...</p>
+      
+      <div class="text-left text-sm space-y-2 mb-6 max-w-xs mx-auto">
+        <div id="step-init" class="flex items-center text-gray-500 transition-all duration-300">
+          <i class="fas fa-circle text-xs w-5"></i>
+          <span>生成内容大纲</span>
+        </div>
+        <div id="step-cover" class="flex items-center text-gray-500 transition-all duration-300">
+          <i class="fas fa-circle text-xs w-5"></i>
+          <span>生成封面背景</span>
+        </div>
+        <div id="step-content" class="flex items-center text-gray-500 transition-all duration-300">
+          <i class="fas fa-circle text-xs w-5"></i>
+          <span>生成内容页背景</span>
+        </div>
+        <div id="step-complete" class="flex items-center text-gray-500 transition-all duration-300">
+          <i class="fas fa-circle text-xs w-5"></i>
+          <span>完成打包</span>
+        </div>
+      </div>
+      
+      <p class="text-xs text-gray-500">AI正在努力创作中，预计需要1-2分钟</p>
+    </div>
+  `;
+}
+
 // ============ 进度轮询 ============
 
 function startProgressPolling() {
-  if (state.pollTimer) {
-    clearInterval(state.pollTimer);
-  }
+  if (state.pollTimer) clearInterval(state.pollTimer);
   
   state.pollTimer = setInterval(async () => {
     if (!state.taskId) return;
@@ -380,23 +600,18 @@ function startProgressPolling() {
       if (result.success && result.progress) {
         const p = result.progress;
         
-        // 更新进度圆环
         updateProgressCircle(p.progress || 0);
         
-        // 更新消息
         const msgEl = document.getElementById('progressMessage');
         if (msgEl) msgEl.textContent = p.message || '处理中...';
         
-        // 更新步骤状态
         updateStepStatus(p.currentStep || 1);
         
-        // 更新当前页
         if (p.currentPage && p.totalPages) {
           const titleEl = document.getElementById('progressTitle');
           if (titleEl) titleEl.textContent = `正在生成第${p.currentPage}页/${p.totalPages}页`;
         }
         
-        // 检查是否完成
         if (p.status === 'completed' || p.status === 'failed') {
           stopProgressPolling();
         }
@@ -440,27 +655,19 @@ function updateStepStatus(currentStep) {
     
     if (index + 1 < currentStep) {
       el.className = 'flex items-center text-green-400';
-      if (icon) {
-        icon.className = 'fas fa-check-circle text-xs w-5';
-      }
+      if (icon) icon.className = 'fas fa-check-circle text-xs w-5';
     } else if (index + 1 === currentStep) {
       el.className = 'flex items-center text-accent';
-      if (icon) {
-        icon.className = 'fas fa-spinner fa-spin text-xs w-5';
-      }
+      if (icon) icon.className = 'fas fa-spinner fa-spin text-xs w-5';
     } else {
       el.className = 'flex items-center text-gray-500';
-      if (icon) {
-        icon.className = 'fas fa-circle text-xs w-5';
-      }
+      if (icon) icon.className = 'fas fa-circle text-xs w-5';
     }
   });
 }
 
-// 更新生成统计
 async function updateGenerationStats() {
   try {
-    // 更新首页显示的生成次数
     const genCountEl = document.getElementById('genCount');
     if (genCountEl) {
       const current = parseInt(genCountEl.textContent.replace(/,/g, '')) || 15000;
@@ -482,7 +689,7 @@ function displayResult(result, card) {
         <i class="fas fa-check text-3xl text-green-400"></i>
       </div>
       <h3 class="text-xl font-bold mb-2">${result.ppt_title}</h3>
-      <p class="text-gray-400">${result.style} · ${result.platform} · ${(result.images || []).length}页</p>
+      <p class="text-gray-400">${result.style} · ${result.scene || result.platform} · ${(result.images || []).length}页</p>
     </div>
     
     <div class="mb-6 p-4 bg-surface rounded-xl">
@@ -494,8 +701,11 @@ function displayResult(result, card) {
     result.images.forEach((img, i) => {
       if (img.url) {
         html += `
-          <div class="aspect-video bg-surface rounded-lg overflow-hidden">
+          <div class="aspect-video bg-surface rounded-lg overflow-hidden relative group">
             <img src="${img.url}" alt="第${img.page_id}页" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <span class="text-white text-sm">${img.title || `第${img.page_id}页`}</span>
+            </div>
           </div>
         `;
       }
@@ -690,6 +900,16 @@ document.addEventListener('DOMContentLoaded', () => {
     pageCountSlider.addEventListener('input', (e) => {
       pageCountDisplay.textContent = e.target.value + ' 页';
       updatePageCount(parseInt(e.target.value));
+      updateContentPreview();
+    });
+  }
+  
+  // 主题输入时更新预览
+  const topicInput = document.getElementById('topic');
+  if (topicInput) {
+    topicInput.addEventListener('input', () => {
+      state.topic = topicInput.value;
+      updateContentPreview();
     });
   }
 });
