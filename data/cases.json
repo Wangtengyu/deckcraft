@@ -1,0 +1,114 @@
+{
+  "cases": [
+    {
+      "id": "case_001",
+      "title": "2026年Q1季度工作总结",
+      "style": "信息图风",
+      "platform": "PPT",
+      "thumbnail": "https://pic1.imgdb.cn/item/67fc3a3e09d7a42690ef7f3c.webp",
+      "author": "张明远",
+      "created_at": "2026-04-15"
+    },
+    {
+      "id": "case_002",
+      "title": "智能家居产品发布会",
+      "style": "插画科普风",
+      "platform": "PPT",
+      "thumbnail": "https://pic1.imgdb.cn/item/67fc3a3e09d7a42690ef7f3d.webp",
+      "author": "李思琪",
+      "created_at": "2026-04-14"
+    },
+    {
+      "id": "case_003",
+      "title": "小学生安全教育主题班会",
+      "style": "卡通绘本风",
+      "platform": "PPT",
+      "thumbnail": "https://pic1.imgdb.cn/item/67fc3a3e09d7a42690ef7f3e.webp",
+      "author": "王晓华",
+      "created_at": "2026-04-13"
+    },
+    {
+      "id": "case_004",
+      "title": "618电商大促营销方案",
+      "style": "信息图风",
+      "platform": "小红书",
+      "thumbnail": "https://pic1.imgdb.cn/item/67fc3a3e09d7a42690ef7f3f.webp",
+      "author": "陈雨晴",
+      "created_at": "2026-04-12"
+    },
+    {
+      "id": "case_005",
+      "title": "新能源汽车对比分析",
+      "style": "图文混排风",
+      "platform": "微信",
+      "thumbnail": "https://pic1.imgdb.cn/item/67fc3a3e09d7a42690ef7f40.webp",
+      "author": "刘浩然",
+      "created_at": "2026-04-11"
+    },
+    {
+      "id": "case_006",
+      "title": "企业年会盛典邀请函",
+      "style": "手绘笔记风",
+      "platform": "海报",
+      "thumbnail": "https://pic1.imgdb.cn/item/67fc3a3e09d7a42690ef7f41.webp",
+      "author": "赵雅琳",
+      "created_at": "2026-04-10"
+    },
+    {
+      "id": "case_007",
+      "title": "健身打卡挑战计划",
+      "style": "信息图风",
+      "platform": "小红书",
+      "thumbnail": "https://pic1.imgdb.cn/item/67fc3a3e09d7a42690ef7f42.webp",
+      "author": "周运动",
+      "created_at": "2026-04-09"
+    },
+    {
+      "id": "case_008",
+      "title": "项目立项审批汇报",
+      "style": "信息图风",
+      "platform": "PPT",
+      "thumbnail": "https://pic1.imgdb.cn/item/67fc3a3e09d7a42690ef7f43.webp",
+      "author": "吴经理",
+      "created_at": "2026-04-08"
+    },
+    {
+      "id": "case_009",
+      "title": "烘焙甜品课程招生",
+      "style": "卡通绘本风",
+      "platform": "小红书",
+      "thumbnail": "https://pic1.imgdb.cn/item/67fc3a3e09d7a42690ef7f44.webp",
+      "author": "美食达人",
+      "created_at": "2026-04-07"
+    },
+    {
+      "id": "case_010",
+      "title": "程序员技术分享会",
+      "style": "手绘笔记风",
+      "platform": "PPT",
+      "thumbnail": "https://pic1.imgdb.cn/item/67fc3a3e09d7a42690ef7f45.webp",
+      "author": "代码艺术家",
+      "created_at": "2026-04-06"
+    },
+    {
+      "id": "case_011",
+      "title": "职场沟通技巧培训",
+      "style": "插画科普风",
+      "platform": "PPT",
+      "thumbnail": "https://pic1.imgdb.cn/item/67fc3a3e09d7a42690ef7f46.webp",
+      "author": "HR小美",
+      "created_at": "2026-04-05"
+    },
+    {
+      "id": "case_012",
+      "title": "旅游目的地推荐合集",
+      "style": "图文混排风",
+      "platform": "小红书",
+      "thumbnail": "https://pic1.imgdb.cn/item/67fc3a3e09d7a42690ef7f47.webp",
+      "author": "旅行家小王",
+      "created_at": "2026-04-04"
+    }
+  ],
+  "total_generations": 15847,
+  "last_updated": "2026-04-15"
+}

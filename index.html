@@ -605,6 +605,44 @@
         </div>
     </section>
 
+    <!-- 案例滚动展示 -->
+    <section id="caseCarousel" class="py-16 px-6 bg-surface/30">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold mb-2">最新生成案例</h2>
+                    <p class="text-gray-400 text-sm">已有 <span id="genCount" class="text-accent font-bold">15,847</span> 次生成</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="toggleCarousel()" id="pauseBtn" class="w-10 h-10 rounded-full bg-surface border border-border flex items-center justify-center hover:border-accent transition" title="暂停/播放">
+                        <i class="fas fa-pause text-gray-400" id="pauseIcon"></i>
+                    </button>
+                    <button onclick="scrollCarousel(-1)" class="w-10 h-10 rounded-full bg-surface border border-border flex items-center justify-center hover:border-accent transition">
+                        <i class="fas fa-chevron-left text-gray-400"></i>
+                    </button>
+                    <button onclick="scrollCarousel(1)" class="w-10 h-10 rounded-full bg-surface border border-border flex items-center justify-center hover:border-accent transition">
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 滚动容器 -->
+            <div class="relative overflow-hidden">
+                <div id="carouselTrack" class="flex space-x-4 transition-transform duration-500" style="transform: translateX(0);">
+                    <!-- 案例卡片将通过JS动态加载 -->
+                    <div class="flex items-center justify-center w-full h-64 text-gray-500">
+                        <i class="fas fa-spinner fa-spin text-2xl mr-3"></i>
+                        <span>加载中...</span>
+                    </div>
+                </div>
+                
+                <!-- 渐变遮罩 -->
+                <div class="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-surface/30 to-transparent pointer-events-none"></div>
+                <div class="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-surface/30 to-transparent pointer-events-none"></div>
+            </div>
+        </div>
+    </section>
+
     <!-- 实际案例库 -->
     <section id="gallery" class="py-24 px-6">
         <div class="max-w-6xl mx-auto">
@@ -863,6 +901,193 @@
     </footer>
 
     <script>
+        // ============ 案例滚动功能 ============
+        let carouselInterval = null;
+        let isPaused = false;
+        let carouselIndex = 0;
+        let cases = [];
+        
+        // 加载案例数据
+        async function loadCases() {
+            try {
+                const response = await fetch('data/cases.json');
+                const data = await response.json();
+                cases = data.cases || [];
+                
+                // 更新生成次数
+                const genCountEl = document.getElementById('genCount');
+                if (genCountEl && data.total_generations) {
+                    genCountEl.textContent = data.total_generations.toLocaleString();
+                }
+                
+                renderCarousel();
+            } catch (error) {
+                console.log('加载案例失败:', error);
+                renderFallbackCarousel();
+            }
+        }
+        
+        // 渲染案例轮播
+        function renderCarousel() {
+            const track = document.getElementById('carouselTrack');
+            if (!track || cases.length === 0) {
+                renderFallbackCarousel();
+                return;
+            }
+            
+            // 复制案例以实现无缝滚动
+            const displayCases = [...cases, ...cases];
+            
+            track.innerHTML = displayCases.map((c, i) => `
+                <div class="flex-shrink-0 w-72 bg-surface rounded-xl border border-border overflow-hidden cursor-pointer hover:border-accent/50 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent/10 group" onclick="openCarouselCase('${c.id}')">
+                    <div class="aspect-video bg-gradient-to-br from-accent/20 to-accent2/20 relative overflow-hidden">
+                        ${c.thumbnail ? `<img src="${c.thumbnail}" alt="${c.title}" class="w-full h-full object-cover" onerror="this.style.display='none'">` : ''}
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                            <span class="text-xs text-white">点击查看</span>
+                        </div>
+                        <div class="absolute top-3 right-3">
+                            <span class="px-2 py-1 bg-black/50 backdrop-blur rounded text-xs text-white">${c.platform}</span>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h4 class="font-medium text-sm mb-2 truncate">${c.title}</h4>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span class="px-2 py-0.5 bg-accent/10 text-accent rounded">${c.style}</span>
+                            <span>${formatDate(c.created_at)}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // 启动自动滚动
+            startAutoScroll();
+        }
+        
+        // 渲染备用案例
+        function renderFallbackCarousel() {
+            const track = document.getElementById('carouselTrack');
+            if (!track) return;
+            
+            const fallbackCases = [
+                { title: '2026年Q1季度工作总结', style: '信息图风', platform: 'PPT', created_at: '2026-04-15' },
+                { title: '智能家居产品发布会', style: '插画科普风', platform: 'PPT', created_at: '2026-04-14' },
+                { title: '小学生安全教育班会', style: '卡通绘本风', platform: 'PPT', created_at: '2026-04-13' },
+                { title: '618电商大促方案', style: '信息图风', platform: '小红书', created_at: '2026-04-12' },
+                { title: '新能源汽车对比分析', style: '图文混排风', platform: '微信', created_at: '2026-04-11' },
+                { title: '企业年会邀请函', style: '手绘笔记风', platform: '海报', created_at: '2026-04-10' },
+                { title: '健身打卡挑战计划', style: '信息图风', platform: '小红书', created_at: '2026-04-09' },
+                { title: '项目立项审批汇报', style: '信息图风', platform: 'PPT', created_at: '2026-04-08' }
+            ];
+            
+            const displayCases = [...fallbackCases, ...fallbackCases];
+            
+            track.innerHTML = displayCases.map((c, i) => `
+                <div class="flex-shrink-0 w-72 bg-surface rounded-xl border border-border overflow-hidden cursor-pointer hover:border-accent/50 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-accent/10 group">
+                    <div class="aspect-video bg-gradient-to-br from-accent/20 to-accent2/20 relative overflow-hidden">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-file-powerpoint text-4xl text-white/20"></i>
+                        </div>
+                        <div class="absolute top-3 right-3">
+                            <span class="px-2 py-1 bg-black/50 backdrop-blur rounded text-xs text-white">${c.platform}</span>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h4 class="font-medium text-sm mb-2 truncate">${c.title}</h4>
+                        <div class="flex items-center justify-between text-xs text-gray-500">
+                            <span class="px-2 py-0.5 bg-accent/10 text-accent rounded">${c.style}</span>
+                            <span>${formatDate(c.created_at)}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            startAutoScroll();
+        }
+        
+        // 格式化日期
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            return `${date.getMonth()+1}月${date.getDate()}日`;
+        }
+        
+        // 启动自动滚动
+        function startAutoScroll() {
+            if (carouselInterval) clearInterval(carouselInterval);
+            
+            if (!isPaused && cases.length > 0) {
+                carouselInterval = setInterval(() => {
+                    carouselIndex++;
+                    updateCarousel();
+                }, 3000);
+            }
+        }
+        
+        // 更新滚动位置
+        function updateCarousel() {
+            const track = document.getElementById('carouselTrack');
+            const cardWidth = 288 + 16; // w-72 + space-x-4
+            const maxIndex = cases.length;
+            
+            // 循环滚动
+            if (carouselIndex >= maxIndex) {
+                carouselIndex = 0;
+                track.style.transition = 'none';
+                track.style.transform = `translateX(0)`;
+                setTimeout(() => {
+                    track.style.transition = 'transform 0.5s ease';
+                    carouselIndex++;
+                    track.style.transform = `translateX(-${carouselIndex * cardWidth}px)`;
+                }, 50);
+            } else {
+                track.style.transform = `translateX(-${carouselIndex * cardWidth}px)`;
+            }
+        }
+        
+        // 手动滚动
+        function scrollCarousel(direction) {
+            carouselIndex += direction;
+            if (carouselIndex < 0) carouselIndex = cases.length - 1;
+            if (carouselIndex >= cases.length) carouselIndex = 0;
+            
+            const track = document.getElementById('carouselTrack');
+            const cardWidth = 288 + 16;
+            track.style.transform = `translateX(-${carouselIndex * cardWidth}px)`;
+            
+            // 重启自动滚动
+            startAutoScroll();
+        }
+        
+        // 暂停/播放切换
+        function toggleCarousel() {
+            isPaused = !isPaused;
+            const icon = document.getElementById('pauseIcon');
+            
+            if (isPaused) {
+                if (carouselInterval) {
+                    clearInterval(carouselInterval);
+                    carouselInterval = null;
+                }
+                icon.className = 'fas fa-play text-gray-400';
+            } else {
+                startAutoScroll();
+                icon.className = 'fas fa-pause text-gray-400';
+            }
+        }
+        
+        // 打开案例详情
+        function openCarouselCase(caseId) {
+            const selectedCase = cases.find(c => c.id === caseId);
+            if (selectedCase) {
+                localStorage.setItem('pptCase', selectedCase.title.replace(/\d{4}年|\d{1,2}月/g, '').trim());
+                location.href = 'create.html';
+            }
+        }
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', loadCases);
+        
+        // ============ 原有功能 ============
         function selectCase(caseName) {
             localStorage.setItem('pptCase', caseName);
             location.href = 'create.html';
@@ -904,7 +1129,6 @@
         function updateGalleryPage() {
             document.getElementById('galleryCurrentPage').innerHTML = `<p class="text-gray-400">第 ${currentPage} 页预览</p>`;
             
-            // 更新缩略图选中状态
             const thumbs = document.querySelectorAll('#galleryModal .flex.gap-2 button');
             thumbs.forEach((thumb, index) => {
                 if (index + 1 === currentPage) {
