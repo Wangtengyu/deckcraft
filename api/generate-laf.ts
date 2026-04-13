@@ -26,6 +26,8 @@ const PLATFORM_SIZES = {
 // 调用Coze API生成图片
 async function generateImage(prompt: string, apiKey: string) {
   try {
+    console.log('Calling Coze API with prompt:', prompt.substring(0, 100))
+    
     const response = await fetch(COZE_WORKFLOW_URL, {
       method: 'POST',
       headers: {
@@ -44,13 +46,18 @@ async function generateImage(prompt: string, apiKey: string) {
     })
     
     const result = await response.json()
+    console.log('Coze API response:', JSON.stringify(result).substring(0, 500))
     
     if (result.code !== 0) {
       throw new Error(result.msg || 'API调用失败')
     }
     
-    return result.data?.image_url || ''
+    const imageUrl = result.data?.image_url || result.data?.url || result.image_url || ''
+    console.log('Extracted image URL:', imageUrl)
+    
+    return imageUrl
   } catch (error) {
+    console.error('generateImage error:', error)
     throw new Error(`图片生成失败: ${error.message}`)
   }
 }
