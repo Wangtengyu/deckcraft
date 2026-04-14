@@ -1,63 +1,16 @@
 /**
- * 大纲生成API V2 - 使用智能模板生成大纲
- * 不调用AI图片生成，直接根据主题和场景生成结构化大纲
+ * 大纲生成API V3 - 使用火山方舟AI生成智能大纲
  */
 import cloud from '@lafjs/cloud'
 
-// 场景模板
-const SCENE_TEMPLATES = {
-  report: {
-    name: '工作汇报',
-    sections: [
-      { section: '背景与目标', points: ['项目背景与现状分析', '核心目标与预期成果', '关键里程碑与时间节点'] },
-      { section: '执行过程', points: ['前期调研与方案设计', '资源配置与团队分工', '实施步骤与关键动作'] },
-      { section: '关键成果', points: ['量化成果与数据表现', '质量提升与效率优化', '用户反馈与市场反响'] },
-      { section: '总结与展望', points: ['项目总结与经验沉淀', '下一步计划与改进方向'] }
-    ],
-    ending: '感谢聆听'
-  },
-  proposal: {
-    name: '项目方案',
-    sections: [
-      { section: '问题与机会', points: ['现状分析与痛点识别', '市场机会与发展趋势', '目标用户与需求洞察'] },
-      { section: '解决方案', points: ['核心理念与设计思路', '技术方案与实施路径', '资源需求与团队配置'] },
-      { section: '核心优势', points: ['差异化竞争力', '可行性与风险评估', '预期收益与ROI'] },
-      { section: '实施计划', points: ['阶段划分与里程碑', '时间表与资源安排', '成功标准与验收指标'] }
-    ],
-    ending: '期待合作'
-  },
-  training: {
-    name: '培训课件',
-    sections: [
-      { section: '培训目标', points: ['知识目标：掌握核心概念', '技能目标：提升实操能力', '态度目标：培养职业素养'] },
-      { section: '基础知识', points: ['概念定义与核心原理', '发展历程与现状分析', '关键术语与专业概念'] },
-      { section: '核心技能', points: ['技能一：具体操作步骤', '技能二：注意事项要点', '技能三：常见问题解决'] },
-      { section: '实践应用', points: ['案例分析与实践演练', '工具使用与资源推荐', '持续学习与能力提升'] }
-    ],
-    ending: '培训总结'
-  },
-  science: {
-    name: '知识科普',
-    sections: [
-      { section: '核心概念', points: ['什么是...？', '为什么重要？', '应用场景有哪些？'] },
-      { section: '关键原理', points: ['基本原理介绍', '技术实现方式', '发展历程回顾'] },
-      { section: '实践应用', points: ['典型案例分析', '实际应用场景', '未来发展趋势'] }
-    ],
-    ending: '感谢聆听'
-  },
-  other: {
-    name: '通用模板',
-    sections: [
-      { section: '背景介绍', points: ['背景信息', '核心问题', '解决方案'] },
-      { section: '主要内容', points: ['要点一', '要点二', '要点三'] },
-      { section: '总结展望', points: ['核心总结', '未来展望'] }
-    ],
-    ending: '感谢聆听'
-  }
-}
+// 火山方舟 API 配置
+const ARK_API_URL = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions'
+const ARK_API_KEY = process.env.ARK_API_KEY || '53316440-45a1-4b3d-bf07-c5a8a9d195ed'
+// 火山方舟模型ID（需要替换为实际的模型ID）
+const ARK_MODEL_ID = 'ep-20250414125000000-doubao' // 豆包模型
 
 export default async function (ctx: any) {
-  console.log('=== 大纲生成API ===')
+  console.log('=== 大纲生成API V3 (火山方舟) ===')
   
   try {
     const { topic, pageCount, refDocument, refUrl, scene } = ctx.body
@@ -68,40 +21,129 @@ export default async function (ctx: any) {
     
     console.log('主题:', topic, '页数:', pageCount, '场景:', scene)
     
-    // 选择场景模板
-    const template = SCENE_TEMPLATES[scene] || SCENE_TEMPLATES.other
+    // 场景说明
+    const sceneDesc = {
+      report: '工作汇报',
+      proposal: '项目方案',
+      training: '培训课件',
+      science: '知识科普',
+      other: '通用内容'
+    }[scene] || '通用内容'
     
-    // 根据页数调整章节数量
-    const targetPages = pageCount || 5
-    const sections = template.sections.slice(0, Math.max(2, targetPages - 2))
+    // 构建提示词
+    const prompt = `请为"${topic}"这个主题生成一个PPT大纲。
+
+要求：
+1. 场景类型：${sceneDesc}
+2. 页数要求：约${pageCount || 5}页（不含封面和结尾）
+3. 每个章节需要3个具体要点
+4. 内容要贴合主题，不要空泛
+
+请直接输出JSON格式，不要其他说明：
+{
+  "title": "PPT标题",
+  "subtitle": "副标题（可为空）",
+  "outline": [
+    {
+      "section": "章节名称",
+      "points": ["要点1", "要点2", "要点3"]
+    }
+  ],
+  "ending": "结尾语"
+}`
+
+    // 调用火山方舟 API
+    console.log('调用火山方舟API...')
+    const response = await fetch(ARK_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${ARK_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: ARK_MODEL_ID,
+        messages: [
+          {
+            role: 'system',
+            content: '你是一个PPT内容专家，擅长根据主题生成结构清晰、内容具体的大纲。'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000
+      })
+    })
     
-    // 生成标题（智能优化）
-    let title = topic
-    // 如果主题太短，添加一些修饰
-    if (topic.length < 4) {
-      title = `关于${topic}的汇报`
+    const result = await response.json()
+    console.log('火山方舟响应:', JSON.stringify(result).substring(0, 500))
+    
+    if (result.choices && result.choices[0]?.message?.content) {
+      let content = result.choices[0].message.content
+      
+      // 提取JSON（可能被markdown包裹）
+      const jsonMatch = content.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        try {
+          const outline = JSON.parse(jsonMatch[0])
+          
+          console.log('AI大纲生成成功:', outline.title, outline.outline?.length, '个章节')
+          
+          return {
+            ok: true,
+            outline: outline
+          }
+        } catch (parseError) {
+          console.error('JSON解析失败:', parseError)
+          // 继续使用fallback
+        }
+      }
     }
     
-    // 构建大纲
-    const outline = {
-      title: title,
-      subtitle: '',
-      outline: sections,
-      ending: template.ending
-    }
-    
-    console.log('大纲生成成功:', outline.title, outline.outline.length, '个章节')
-    
-    return {
-      ok: true,
-      outline: outline
-    }
+    // 如果AI调用失败，使用智能模板
+    console.log('AI调用失败，使用智能模板')
+    return generateFallbackOutline(topic, scene, pageCount)
     
   } catch (error) {
     console.error('大纲生成失败:', error)
-    return {
-      ok: false,
-      message: error.message || '大纲生成失败'
+    return generateFallbackOutline(ctx.body?.topic || '主题', ctx.body?.scene || 'other', ctx.body?.pageCount || 5)
+  }
+}
+
+// 备用模板生成
+function generateFallbackOutline(topic, scene, pageCount) {
+  const templates = {
+    report: {
+      sections: [
+        { section: '背景与目标', points: [`${topic}背景分析`, '核心目标', '关键里程碑'] },
+        { section: '执行过程', points: ['前期调研', '实施步骤', '关键动作'] },
+        { section: '关键成果', points: ['量化成果', '质量提升', '用户反馈'] },
+        { section: '总结展望', points: ['经验总结', '下一步计划'] }
+      ],
+      ending: '感谢聆听'
+    },
+    proposal: {
+      sections: [
+        { section: '问题与机会', points: [`${topic}现状分析`, '核心问题', '改进机会'] },
+        { section: '解决方案', points: ['解决思路', '具体方案', '实施路径'] },
+        { section: '预期效果', points: ['预期收益', '资源需求', '时间规划'] }
+      ],
+      ending: '期待合作'
+    }
+  }
+  
+  const template = templates[scene] || templates.report
+  const sections = template.sections.slice(0, Math.max(2, (pageCount || 5) - 2))
+  
+  return {
+    ok: true,
+    outline: {
+      title: topic,
+      subtitle: '',
+      outline: sections,
+      ending: template.ending
     }
   }
 }

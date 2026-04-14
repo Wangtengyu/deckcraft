@@ -415,7 +415,71 @@ ${contentDesc}
   return prompt
 }
 
-function generateContentPoints(section, count) {
+// ============ AI内容生成 ============
+async function generateSectionContent(topic, section, count, scene, apiKey) {
+  console.log(`生成章节内容: ${section}, 要点数: ${count}`)
+  
+  const sceneContext = {
+    report: '工作汇报',
+    proposal: '项目方案',
+    training: '培训课件',
+    science: '知识科普',
+    other: '通用内容'
+  }[scene] || '通用内容'
+  
+  const prompt = `请为"${topic}"这个主题的"${section}"章节生成${count}个具体要点。
+
+要求：
+1. 每个要点要具体、有内容，不要空泛
+2. 符合"${sceneContext}"场景
+3. 直接输出要点，每行一个，不要序号和额外说明
+
+示例格式：
+市场现状与用户需求分析
+竞争对手优劣势对比
+产品定位与差异化策略`
+
+  try {
+    // 使用Coze Chat API生成内容
+    const response = await fetch('https://api.coze.cn/v1/chat', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        bot_id: '7584118159226241076', // 使用workflow的bot
+        user_id: 'deckcraft_user',
+        additional_messages: [{
+          role: 'user',
+          content: prompt,
+          content_type: 'text'
+        }],
+        stream: false
+      })
+    })
+    
+    const result = await response.json()
+    
+    if (result.code === 0 && result.data?.messages) {
+      // 提取AI回复的内容
+      const assistantMsg = result.data.messages.find(m => m.role === 'assistant' && m.type === 'answer')
+      if (assistantMsg?.content) {
+        const lines = assistantMsg.content.split('\n').filter(l => l.trim())
+        return lines.slice(0, count).map(l => l.replace(/^[\d\.\-\*]+\s*/, '').trim())
+      }
+    }
+    
+    console.log('AI生成失败，使用模板:', result.msg)
+    return null
+  } catch (error) {
+    console.error('AI内容生成失败:', error)
+    return null
+  }
+}
+
+// 生成内容要点（优先AI，失败则用模板）
+function generateContentPoints(section, count, topic, scene) {
   // 根据场景生成具体内容
   const contentTemplates = {
     '背景与目标': ['项目背景与现状分析', '核心目标与预期成果', '关键里程碑与时间节点'],
