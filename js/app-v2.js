@@ -594,7 +594,20 @@ function confirmOutline() {
 }
 
 async function goToStep2() {
-  // 如果没有大纲，提示先生成
+  // 自定义内容模式：不需要大纲，直接进入下一步
+  if (state.contentMode === 'custom') {
+    state.currentStep = 2;
+    updateStepIndicator();
+    
+    document.getElementById('step1').classList.add('hidden');
+    document.getElementById('step2').classList.remove('hidden');
+    
+    // 初始化细分风格选择器
+    updateSubStyleSelector(state.style);
+    return;
+  }
+  
+  // AI自由发挥模式：需要先生成大纲
   if (!state.outline) {
     showToast('请先点击「生成大纲」按钮', 'warning');
     return;
