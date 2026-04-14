@@ -396,66 +396,59 @@ function generateRefImageDescription(refImages, refImageMode, refImageDescriptio
 
 function generatePrompt(page, style, subStyleConfig, context, refImages = [], refImageMode = 'embed', refImageDescriptions = []) {
   const visualStyle = subStyleConfig?.visualStyle || SUB_STYLE_CONFIG[style]?.description || ''
-  const bgColor = subStyleConfig?.bgColor || '#0a0a0f'
   
-  // 专业设计原则：
-  // 1. 背景负责营造氛围和视觉基调
-  // 2. 文字层负责信息传达
-  // 3. 两者要有明确的视觉层次
+  // Gamma 风格：背景纯色/渐变，不带任何装饰元素
+  // 核心原则：背景是画布，不抢内容风头
   
   let prompt = ''
   
   if (page.type === 'cover') {
-    // 封面：大气、有视觉冲击力、留出标题安全区
-    prompt = `You are a professional presentation designer. Create a stunning PPT cover background image.
+    prompt = `Create a premium presentation cover background.
 
-Design requirements:
-- Style: ${visualStyle}
-- Create a sophisticated visual atmosphere with depth and layers
-- Use gradient, geometric patterns, or abstract textures
-- Leave the CENTER AREA clean for title placement (avoid busy elements in center)
-- Color palette: ${bgColor} as base, with complementary accent colors
-- Add subtle visual interest on edges/corners (light particles, geometric lines, soft gradients)
-- NO text, NO icons, NO characters, NO photos
-- Aspect ratio: 16:9
-- Make it feel premium, professional, and visually compelling
+CRITICAL RULES:
+- ABSOLUTELY NO TEXT, NO WORDS, NO LETTERS, NO NUMBERS in the image
+- NO icons, NO characters, NO photos, NO shapes with text
+- Only abstract gradients, soft light effects, or subtle textures
 
-Output: A high-quality background image ready for professional typography overlay.`
+Design:
+- Deep dark gradient background (black to dark blue/gray)
+- Soft light particles or glow effects at edges only
+- Center 70% must be completely clean and empty
+- Minimalist, Apple keynote style
+- 16:9 aspect ratio
+
+Remember: This is a background for text overlay. The image should have ZERO text content.`
     
   } else if (page.type === 'ending') {
-    // 结尾页：简洁、优雅、有余韵
-    prompt = `You are a professional presentation designer. Create an elegant PPT ending page background.
+    prompt = `Create a minimal presentation ending background.
 
-Design requirements:
-- Style: ${visualStyle}
-- Clean and sophisticated, less visual elements than cover
-- Soft gradient or subtle texture
-- Color palette: ${bgColor} as base
-- Center area should be calm and clean for closing text
-- Minimal decorative elements, focus on elegance
-- NO text, NO icons, NO characters, NO photos
-- Aspect ratio: 16:9
-- Convey a sense of completion and professionalism
+CRITICAL RULES:
+- ABSOLUTELY NO TEXT, NO WORDS, NO LETTERS, NO NUMBERS in the image
+- NO icons, NO characters, NO photos
 
-Output: A refined background image for ending slide.`
+Design:
+- Clean dark gradient background
+- Simple and calm
+- Center ready for "Thank you" text
+- Minimalist, zen garden style
+- 16:9 aspect ratio`
     
   } else {
-    // 内容页：清晰、易读、有层次
-    prompt = `You are a professional presentation designer. Create a PPT content page background.
+    prompt = `Create a clean presentation content page background.
 
-Design requirements:
-- Style: ${visualStyle}
-- Clear visual hierarchy: top area for section title, bottom area for content
-- Background should support text readability, not compete with it
-- Use subtle gradients or light textures
-- Color palette: ${bgColor} as base, lighter shade for content area
-- Add minimal decorative elements on edges only
-- Create a sense of structure and organization
-- NO text, NO icons, NO characters, NO photos, NO card shapes
-- Aspect ratio: 16:9
-- The background should feel like a professional canvas for information
+CRITICAL RULES:
+- ABSOLUTELY NO TEXT, NO WORDS, NO LETTERS, NO NUMBERS in the image
+- NO icons, NO characters, NO photos, NO card shapes, NO decorative boxes
 
-Output: A clean, professional background optimized for content presentation.`
+Design:
+- Subtle gradient background (dark tones)
+- Top 20% slightly darker for title separation
+- Bottom 80% clean for content
+- Left edge can have a subtle color accent bar
+- Content-first, distraction-free
+- 16:9 aspect ratio
+
+Remember: This background will have text content overlaid. The image itself must contain ZERO text.`
   }
   
   // 检查禁用词
