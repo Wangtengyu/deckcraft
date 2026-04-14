@@ -862,35 +862,37 @@ export default async function (ctx) {
     const images = []
     const context = { topic: topic }
     
-    // ========== 生成每页背景 ==========
-    for (let i = 0; i < pages.length; i++) {
-      const page = pages[i]
-      
-      await updateProgress(taskId, {
-        currentStep: i + 2,
-        currentPage: i + 1,
-        message: `正在生成第${i + 1}页背景...`,
-        totalPages: pages.length
-      })
-      
+    // ========== 并行生成所有页面背景 ==========
+    console.log(`开始并行生成 ${pages.length} 页背景...`)
+    
+    await updateProgress(taskId, {
+      currentStep: 2,
+      message: `正在并行生成 ${pages.length} 页背景...`,
+      totalPages: pages.length
+    })
+    
+    // 并行生成所有页面
+    const imagePromises = pages.map(async (page, i) => {
       const prompt = generatePrompt(page, style, subStyleConfig, context, refImages, refImageMode, refImageDescriptions)
       console.log(`\n=== 第${i + 1}页 Prompt ===\n${prompt}\n`)
       
       const result = await generateBackground(prompt, apiKey, `${platformSize.width}x${platformSize.height}`, refImages)
       
-      images.push({
+      console.log(`第${i + 1}页生成${result.error ? '失败: ' + result.error : '成功'}`)
+      
+      return {
         page: i + 1,
         type: page.type,
         url: result.url,
         error: result.error
-      })
-      
-      if (result.error) {
-        console.error(`第${i + 1}页生成失败:`, result.error)
-      } else {
-        console.log(`第${i + 1}页生成成功`)
       }
-    }
+    })
+    
+    // 等待所有图片生成完成
+    const imageResults = await Promise.all(imagePromises)
+    images.push(...imageResults)
+    
+    console.log(`所有 ${images.length} 页背景生成完成`)
     
     // ========== 生成PPTX文件 ==========
     await updateProgress(taskId, {
