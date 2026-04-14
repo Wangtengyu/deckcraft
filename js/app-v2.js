@@ -969,6 +969,7 @@ async function startGeneration() {
         if (outlineResult.ok && outlineResult.outline) {
           state.outline = outlineResult.outline;
           console.log('自动生成大纲成功:', outlineResult.outline.title);
+          console.log('大纲内容:', JSON.stringify(outlineResult.outline, null, 2));
         }
       } catch (outlineError) {
         console.warn('大纲生成失败，使用默认结构:', outlineError);
@@ -1022,6 +1023,12 @@ async function startGeneration() {
       requestData.refImageDescriptions = state.refImageDescriptions;
       console.log('参考图(Base64):', state.refImages.length, '张');
     }
+    
+    // 调试：确认大纲是否传递
+    console.log('=== 发送到后端的数据 ===');
+    console.log('主题:', state.topic);
+    console.log('大纲存在:', !!state.outline);
+    console.log('大纲内容:', state.outline ? JSON.stringify(state.outline, null, 2).substring(0, 500) : '无');
     
     // 启动进度轮询
     startProgressPolling(taskId, card);
