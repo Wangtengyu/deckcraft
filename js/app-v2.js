@@ -908,6 +908,19 @@ async function startGeneration() {
     return;
   }
   
+  // 获取主题输入（关键修复！）
+  const topicInput = document.getElementById('topic');
+  const topic = topicInput ? topicInput.value.trim() : '';
+  
+  if (!topic) {
+    showToast('请输入PPT主题', 'error');
+    resultModal.classList.add('hidden');
+    return;
+  }
+  
+  state.topic = topic;
+  console.log('获取到的主题:', state.topic);
+  
   // 收集页面结构选项
   const hasCoverEl = document.getElementById('hasCover');
   const hasCatalogEl = document.getElementById('hasCatalog');
