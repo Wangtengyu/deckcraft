@@ -1,9 +1,8 @@
 /**
  * 图片上传API - 使用Laf云存储
+ * 需要在Laf控制台创建存储桶，或在环境变量设置BUCKET_NAME
  */
 import cloud from '@lafjs/cloud'
-
-const fs = require('fs')
 
 export default async function (ctx: any) {
   console.log('=== 图片上传API ===')
@@ -22,8 +21,13 @@ export default async function (ctx: any) {
     const ext = file.filename.split('.').pop() || 'png'
     const fileName = `ref_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${ext}`
     
-    // 使用Laf云存储
-    const bucket = cloud.storage.bucket()
+    // 使用Laf云存储 - 需要指定bucketName
+    // 从环境变量获取，或使用默认名称
+    const bucketName = process.env.BUCKET_NAME || 'deckcraft-uploads'
+    
+    console.log('使用存储桶:', bucketName)
+    
+    const bucket = cloud.storage.bucket(bucketName)
     
     // 上传文件
     await bucket.putObject({

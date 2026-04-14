@@ -227,6 +227,69 @@ const PLATFORM_SIZES = {
 
 // ============ 辅助函数 ============
 
+// Base64 转 URL（上传到免费图床）
+async function base64ToUrl(base64Data) {
+  // 去掉 data:image/xxx;base64, 前缀
+  const matches = base64Data.match(/^data:image\/(\w+);base64,(.+)$/);
+  if (!matches) {
+    return { url: base64Data, error: null }; // 可能已经是 URL
+  }
+  
+  const ext = matches[1];
+  const base64 = matches[2];
+  
+  try {
+    // 使用 sm.ms 免费图床
+    const buffer = Buffer.from(base64, 'base64');
+    const formData = new FormData();
+    const blob = new Blob([buffer], { type: `image/${ext}` });
+    formData.append('smfile', blob, `image.${ext}`);
+    
+    const response = await fetch('https://api.sm.ms/api/v2/upload', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const result = await response.json();
+    
+    if (result.success && result.data?.url) {
+      console.log('图片上传成功:', result.data.url);
+      return { url: result.data.url, error: null };
+    } else if (result.code === 'image_repeated') {
+      // 图片已存在，返回已有 URL
+      return { url: result.images, error: null };
+    } else {
+      console.error('sm.ms 上传失败:', result.message);
+      return { url: '', error: result.message || '上传失败' };
+    }
+  } catch (error) {
+    console.error('上传图片到图床失败:', error);
+    return { url: '', error: error.message };
+  }
+}
+
+// 批量处理 Base64 图片
+async function processRefImages(refImages) {
+  if (!refImages || refImages.length === 0) return [];
+  
+  const urls = [];
+  for (const img of refImages) {
+    // 如果已经是 URL，直接使用
+    if (img.startsWith('http')) {
+      urls.push(img);
+    } else {
+      // Base64 转 URL
+      const result = await base64ToUrl(img);
+      if (result.url) {
+        urls.push(result.url);
+      } else {
+        console.error('参考图处理失败:', result.error);
+      }
+    }
+  }
+  return urls;
+}
+
 function recommendSubStyle(mainStyle, scene, topic) {
   const styleConfig = SUB_STYLE_CONFIG[mainStyle]
   if (!styleConfig || !styleConfig.subStyles) {
@@ -609,9 +672,14 @@ export default async function (ctx) {
   const pageCount = parseInt(ctx.body?.pageCount) || 5
   const subStyleKey = ctx.body?.subStyle
   const userOutline = ctx.body?.outline
-  const refImages = ctx.body?.refImages || []
+  const refImagesRaw = ctx.body?.refImages || []
   const refImageMode = ctx.body?.refImageMode || 'embed'
   const refImageDescriptions = ctx.body?.refImageDescriptions || []
+  
+  // 处理参考图：Base64 转 URL
+  console.log('处理参考图:', refImagesRaw.length, '张')
+  const refImages = await processRefImages(refImagesRaw)
+  console.log('参考图 URL:', refImages)
   
   // 内容参数
   const contentDensity = ctx.body?.contentDensity || 'medium'

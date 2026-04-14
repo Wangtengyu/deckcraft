@@ -348,44 +348,14 @@ function initRefImageUploader() {
   refImagesInput.addEventListener('change', handleRefImageUpload);
 }
 
-// 上传图片到Laf云存储
-async function uploadImageToLaf(file) {
-  const formData = new FormData();
-  formData.append('file', file);
-  
-  try {
-    const response = await fetch('https://ig8u65l6vm.sealosbja.site/upload', {
-      method: 'POST',
-      body: formData
-    });
-    
-    const result = await response.json();
-    
-    if (result.success && result.url) {
-      return { url: result.url, error: null };
-    } else {
-      return { url: null, error: result.error || '上传失败' };
-    }
-  } catch (error) {
-    return { url: null, error: error.message };
-  }
-}
-
-// 批量上传参考图
-async function uploadRefImages(files) {
-  const urls = [];
-  const errors = [];
-  
-  for (const file of files) {
-    const result = await uploadImageToLaf(file);
-    if (result.url) {
-      urls.push(result.url);
-    } else {
-      errors.push(result.error);
-    }
-  }
-  
-  return { urls, errors };
+// 把图片文件转成 Base64
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 // ============ 进度轮询 ============
@@ -462,9 +432,10 @@ async function handleRefImageUpload(event) {
   if (!files || files.length === 0) return;
   
   state.refImageFiles = Array.from(files);
-  state.refImageDescriptions = new Array(files.length).fill(''); // 初始化描述数组
+  state.refImageDescriptions = new Array(files.length).fill('');
+  state.refImages = []; // 清空之前的
   
-  // 显示预览
+  // 显示预览并存储 Base64
   const previewContainer = document.getElementById('refImagePreview');
   if (!previewContainer) return;
   
@@ -472,27 +443,27 @@ async function handleRefImageUpload(event) {
   
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
-    const reader = new FileReader();
+    const base64 = await fileToBase64(file);
     
-    reader.onload = function(e) {
-      const div = document.createElement('div');
-      div.className = 'mr-3 mb-3';
-      div.innerHTML = `
-        <div class="relative">
-          <img src="${e.target.result}" class="w-24 h-24 object-cover rounded-lg border border-border">
-          <button onclick="removeRefImage(${i})" class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <input type="text" 
-               placeholder="图片描述（如：公司Logo）" 
-               class="mt-1 w-24 text-xs bg-surface border border-border rounded px-2 py-1"
-               onchange="updateRefImageDescription(${i}, this.value)">
-      `;
-      previewContainer.appendChild(div);
-    };
+    // 存储 Base64
+    state.refImages.push(base64);
     
-    reader.readAsDataURL(file);
+    // 显示预览
+    const div = document.createElement('div');
+    div.className = 'mr-3 mb-3';
+    div.innerHTML = `
+      <div class="relative">
+        <img src="${base64}" class="w-24 h-24 object-cover rounded-lg border border-border">
+        <button onclick="removeRefImage(${i})" class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <input type="text" 
+             placeholder="图片描述（如：公司Logo）" 
+             class="mt-1 w-24 text-xs bg-surface border border-border rounded px-2 py-1"
+             onchange="updateRefImageDescription(${i}, this.value)">
+    `;
+    previewContainer.appendChild(div);
   }
   
   // 显示参考图模式选择
@@ -995,27 +966,12 @@ async function startGeneration() {
       subtitle: state.outline?.subtitle || ''
     };
     
-    // 如果有参考图，先上传到图床
-    if (state.refImageFiles.length > 0) {
-      card.innerHTML = `
-        <div class="text-center py-8">
-          <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-accent border-t-transparent mb-4"></div>
-          <p class="text-gray-400">正在上传参考图...</p>
-        </div>
-      `;
-      
-      const { urls, errors } = await uploadRefImages(state.refImageFiles);
-      
-      if (errors.length > 0) {
-        console.warn('部分图片上传失败:', errors);
-      }
-      
-      if (urls.length > 0) {
-        requestData.refImages = urls;
-        console.log('参考图上传成功:', urls);
-      } else if (state.refImageFiles.length > 0) {
-        throw new Error('参考图上传失败，请重试');
-      }
+    // 直接使用 Base64 图片（不需要上传到云存储）
+    if (state.refImages && state.refImages.length > 0) {
+      requestData.refImages = state.refImages;
+      requestData.refImageMode = state.refImageMode;
+      requestData.refImageDescriptions = state.refImageDescriptions;
+      console.log('参考图(Base64):', state.refImages.length, '张');
     }
     
     // 启动进度轮询
