@@ -1066,6 +1066,15 @@ async function startGeneration() {
 }
 
 function displayResult(result, card) {
+  // 调试：打印完整返回结果
+  console.log('=== displayResult 收到的数据 ===');
+  console.log('result keys:', Object.keys(result));
+  console.log('pptx:', result.pptx ? 'exists' : 'null');
+  if (result.pptx) {
+    console.log('pptx.filename:', result.pptx.filename);
+    console.log('pptx.data length:', result.pptx.data ? result.pptx.data.length : 0);
+  }
+  
   state.generatedImages = result.images || [];
   
   const styleName = SUB_STYLE_CONFIG[result.style]?.name || result.style;
@@ -1074,6 +1083,7 @@ function displayResult(result, card) {
   
   // 检查是否有PPTX数据
   const hasPptx = result.pptx && result.pptx.data;
+  console.log('hasPptx:', hasPptx);
   
   let html = `
     <div class="text-center mb-6">
@@ -1121,6 +1131,16 @@ function displayResult(result, card) {
           <i class="fas fa-download mr-2"></i>
           下载PPT文件 (${result.pptx.filename})
         </button>
+      </div>
+    `;
+  } else {
+    // 没有pptx时显示提示
+    html += `
+      <div class="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mb-3">
+        <p class="text-sm text-center text-yellow-400">
+          <i class="fas fa-exclamation-triangle mr-2"></i>
+          PPT文件生成失败，请查看控制台或重试
+        </p>
       </div>
     `;
   }
