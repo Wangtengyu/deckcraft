@@ -636,34 +636,33 @@ async function generatePPTX(pages, images, title, subtitle, style, subStyleConfi
   console.log('=== 开始生成PPTX文件 ===')
   console.log('页数:', pages.length, '图片数:', images.length, '标题:', title, '副标题:', subtitle || '无')
   
-  let pptxgen, pptx
+  let PptxGenJS, pptx
   try {
-    pptxgen = require('pptxgenjs')
-    pptx = new pptxgen()
-    console.log('pptxgenjs加载成功')
+    PptxGenJS = require('pptxgenjs')
+    pptx = new PptxGenJS()
+    console.log('pptxgenjs加载成功, 版本:', pptx.version || 'unknown')
   } catch (e) {
     console.error('pptxgenjs加载失败:', e.message)
     return null
   }
   
-  // 设置PPT属性
-  pptx.author = 'DeckCraft AI'
-  pptx.title = title
-  pptx.subject = `由DeckCraft AI生成的${title}PPT`
-  
-  // 设置幻灯片尺寸 (16:9)
-  pptx.defineLayout({ name: 'CUSTOM', width: 13.33, height: 7.5 })
-  pptx.layout = 'CUSTOM'
-  
-  const textColor = subStyleConfig?.textColor || '1A1A1A'
-  
-  // 为每页创建幻灯片
-  for (let i = 0; i < pages.length; i++) {
-    const page = pages[i]
-    const img = images[i]
-    const slide = pptx.addSlide()
+  try {
+    // 设置PPT属性
+    pptx.author = 'DeckCraft AI'
+    pptx.title = title
+    pptx.subject = `由DeckCraft AI生成的${title}PPT`
     
-    console.log(`处理第${i + 1}页: ${page.type}`)
+    // 设置幻灯片尺寸 (16:9)
+    pptx.defineLayout({ name: 'CUSTOM', width: 13.33, height: 7.5 })
+    pptx.layout = 'CUSTOM'
+    
+    // 为每页创建幻灯片
+    for (let i = 0; i < pages.length; i++) {
+      const page = pages[i]
+      const img = images[i]
+      const slide = pptx.addSlide()
+      
+      console.log(`处理第${i + 1}页: ${page.type}`)
     
     // 添加背景图片
     if (img && img.url) {
@@ -905,6 +904,12 @@ async function generatePPTX(pages, images, title, subtitle, style, subStyleConfi
     filename: `${title}.pptx`,
     data: pptxData,
     mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+  }
+  
+  } catch (error) {
+    console.error('PPTX生成过程出错:', error.message)
+    console.error('错误堆栈:', error.stack)
+    return null
   }
 }
 
