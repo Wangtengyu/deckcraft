@@ -255,7 +255,7 @@ function checkForbiddenWords(text) {
 }
 
 // ============ 参考图说明生成 ============
-function generateRefImageDescription(refImages, refImageMode) {
+function generateRefImageDescription(refImages, refImageMode, refImageDescriptions = []) {
   if (!refImages || refImages.length === 0) return ''
   
   const modeTemplates = {
@@ -271,17 +271,20 @@ function generateRefImageDescription(refImages, refImageMode) {
   let description = '\n\n参考图说明（以下内容仅用于指导参考图的使用方式，不要把文字本身写进画面）：\n'
   
   if (refImages.length === 1) {
-    description += `提供的参考图放置在页面合适位置。${constraint}`
+    // 使用用户描述或默认描述
+    const imgDesc = refImageDescriptions[0] || '参考图片'
+    description += `提供的参考图是${imgDesc}，放置在页面合适位置。${constraint}`
   } else {
     refImages.forEach((img, idx) => {
-      description += `第${idx + 1}张参考图放置在页面合适位置。${constraint}\n`
+      const imgDesc = refImageDescriptions[idx] || `第${idx + 1}张参考图`
+      description += `第${idx + 1}张参考图是${imgDesc}，放置在页面合适位置。${constraint}\n`
     })
   }
   
   return description
 }
 
-function generatePrompt(page, style, subStyleConfig, context, refImages = [], refImageMode = 'embed') {
+function generatePrompt(page, style, subStyleConfig, context, refImages = [], refImageMode = 'embed', refImageDescriptions = []) {
   const visualStyle = subStyleConfig?.visualStyle || SUB_STYLE_CONFIG[style]?.description || ''
   const textColor = subStyleConfig?.textColor || '1A1A1A'
   
@@ -343,7 +346,7 @@ ${contentDesc}
   
   // 追加参考图说明
   if (refImages && refImages.length > 0) {
-    prompt += generateRefImageDescription(refImages, refImageMode)
+    prompt += generateRefImageDescription(refImages, refImageMode, refImageDescriptions)
   }
   
   return prompt
@@ -608,6 +611,7 @@ export default async function (ctx) {
   const userOutline = ctx.body?.outline  // 用户确认的大纲
   const refImages = ctx.body?.refImages || []  // 参考图URL列表
   const refImageMode = ctx.body?.refImageMode || 'embed'  // 参考图模式
+  const refImageDescriptions = ctx.body?.refImageDescriptions || []  // 参考图描述
   
   const platformSize = PLATFORM_SIZES[platform] || PLATFORM_SIZES.ppt
   const apiKey = COZE_API_KEY
@@ -696,7 +700,7 @@ export default async function (ctx) {
         totalPages: pages.length
       })
       
-      const prompt = generatePrompt(page, style, subStyleConfig, context, refImages, refImageMode)
+      const prompt = generatePrompt(page, style, subStyleConfig, context, refImages, refImageMode, refImageDescriptions)
       console.log(`\n=== 第${i + 1}页 Prompt ===\n${prompt}\n`)
       
       const result = await generateBackground(prompt, apiKey, `${platformSize.width}x${platformSize.height}`, refImages)

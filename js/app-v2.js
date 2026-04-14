@@ -456,6 +456,7 @@ async function handleRefImageUpload(event) {
   if (!files || files.length === 0) return;
   
   state.refImageFiles = Array.from(files);
+  state.refImageDescriptions = new Array(files.length).fill(''); // 初始化描述数组
   
   // 显示预览
   const previewContainer = document.getElementById('refImagePreview');
@@ -469,12 +470,18 @@ async function handleRefImageUpload(event) {
     
     reader.onload = function(e) {
       const div = document.createElement('div');
-      div.className = 'relative inline-block mr-2 mb-2';
+      div.className = 'mr-3 mb-3';
       div.innerHTML = `
-        <img src="${e.target.result}" class="w-20 h-20 object-cover rounded-lg border border-border">
-        <button onclick="removeRefImage(${i})" class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs">
-          <i class="fas fa-times"></i>
-        </button>
+        <div class="relative">
+          <img src="${e.target.result}" class="w-24 h-24 object-cover rounded-lg border border-border">
+          <button onclick="removeRefImage(${i})" class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <input type="text" 
+               placeholder="图片描述（如：公司Logo）" 
+               class="mt-1 w-24 text-xs bg-surface border border-border rounded px-2 py-1"
+               onchange="updateRefImageDescription(${i}, this.value)">
       `;
       previewContainer.appendChild(div);
     };
@@ -484,6 +491,11 @@ async function handleRefImageUpload(event) {
   
   // 显示参考图模式选择
   showRefImageModeSelector();
+}
+
+// 更新参考图描述
+function updateRefImageDescription(index, description) {
+  state.refImageDescriptions[index] = description;
 }
 
 // 显示参考图模式选择器
@@ -738,7 +750,10 @@ async function generateOutline() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         topic: topic,
-        pageCount: state.pageCount
+        pageCount: state.pageCount,
+        refDocument: state.refDocument, // 参考文档内容
+        refUrl: state.refUrl ? state.refUrl.content : null, // 参考链接内容
+        scene: state.scene // 使用场景
       })
     });
     
