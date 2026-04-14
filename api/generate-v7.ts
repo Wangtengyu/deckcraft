@@ -396,54 +396,66 @@ function generateRefImageDescription(refImages, refImageMode, refImageDescriptio
 
 function generatePrompt(page, style, subStyleConfig, context, refImages = [], refImageMode = 'embed', refImageDescriptions = []) {
   const visualStyle = subStyleConfig?.visualStyle || SUB_STYLE_CONFIG[style]?.description || ''
-  const textColor = subStyleConfig?.textColor || '1A1A1A'
+  const bgColor = subStyleConfig?.bgColor || '#0a0a0f'
+  
+  // 专业设计原则：
+  // 1. 背景负责营造氛围和视觉基调
+  // 2. 文字层负责信息传达
+  // 3. 两者要有明确的视觉层次
   
   let prompt = ''
   
-  // 恢复原skill的Prompt风格：描述布局，让AI生成有设计感的背景
-  // 文字区域用装饰框表示，PPTX会叠加真实可编辑文字
-  
   if (page.type === 'cover') {
-    const title = page.title || context.topic
-    prompt = `生成一张PPT封面页。
+    // 封面：大气、有视觉冲击力、留出标题安全区
+    prompt = `You are a professional presentation designer. Create a stunning PPT cover background image.
 
-视觉风格（以下内容仅用于指导风格，不要把文字本身写进画面）：${visualStyle}
+Design requirements:
+- Style: ${visualStyle}
+- Create a sophisticated visual atmosphere with depth and layers
+- Use gradient, geometric patterns, or abstract textures
+- Leave the CENTER AREA clean for title placement (avoid busy elements in center)
+- Color palette: ${bgColor} as base, with complementary accent colors
+- Add subtle visual interest on edges/corners (light particles, geometric lines, soft gradients)
+- NO text, NO icons, NO characters, NO photos
+- Aspect ratio: 16:9
+- Make it feel premium, professional, and visually compelling
 
-页面中央位置展示主标题区域，用装饰性矩形框或线条标示，框内留空。
-主标题区域下方展示副标题区域，用较小的装饰框标示。
-可以添加与主题相关的装饰性几何图形、图标、线条。
-整体留白充足，聚焦标题区域。禁止任何人物、人像、照片。`
+Output: A high-quality background image ready for professional typography overlay.`
     
   } else if (page.type === 'ending') {
-    const endingContent = page.content || '感谢聆听'
-    prompt = `生成一张PPT结尾页。
+    // 结尾页：简洁、优雅、有余韵
+    prompt = `You are a professional presentation designer. Create an elegant PPT ending page background.
 
-视觉风格（以下内容仅用于指导风格，不要把文字本身写进画面）：${visualStyle}
+Design requirements:
+- Style: ${visualStyle}
+- Clean and sophisticated, less visual elements than cover
+- Soft gradient or subtle texture
+- Color palette: ${bgColor} as base
+- Center area should be calm and clean for closing text
+- Minimal decorative elements, focus on elegance
+- NO text, NO icons, NO characters, NO photos
+- Aspect ratio: 16:9
+- Convey a sense of completion and professionalism
 
-页面中央位置展示结语区域，用装饰性元素标示。
-整体简洁，可以添加点缀性装饰。
-整体留白充足。禁止任何人物、人像、照片。`
+Output: A refined background image for ending slide.`
     
   } else {
-    // 内容页
-    const sectionTitle = page.section || '内容'
-    const points = page.points || []
-    
-    let contentDesc = ''
-    if (points.length > 0) {
-      contentDesc = points.map((p, i) => `要点${i + 1}区域：用卡片或装饰框标示`).join('\n')
-    }
-    
-    prompt = `生成一张PPT内容页。
+    // 内容页：清晰、易读、有层次
+    prompt = `You are a professional presentation designer. Create a PPT content page background.
 
-视觉风格（以下内容仅用于指导风格，不要把文字本身写进画面）：${visualStyle}
+Design requirements:
+- Style: ${visualStyle}
+- Clear visual hierarchy: top area for section title, bottom area for content
+- Background should support text readability, not compete with it
+- Use subtle gradients or light textures
+- Color palette: ${bgColor} as base, lighter shade for content area
+- Add minimal decorative elements on edges only
+- Create a sense of structure and organization
+- NO text, NO icons, NO characters, NO photos, NO card shapes
+- Aspect ratio: 16:9
+- The background should feel like a professional canvas for information
 
-页面顶部展示标题区域，用装饰性线条或色块标示。
-
-${contentDesc}
-
-可以添加与内容相关的装饰性图解元素、图标、分隔线。
-整体留白充足，层次清晰。禁止任何人物、人像、照片。`
+Output: A clean, professional background optimized for content presentation.`
   }
   
   // 检查禁用词
@@ -454,7 +466,7 @@ ${contentDesc}
     })
   }
   
-  // 追加参考图说明
+  // 参考图处理
   if (refImages && refImages.length > 0) {
     prompt += generateRefImageDescription(refImages, refImageMode, refImageDescriptions)
   }
@@ -680,78 +692,204 @@ async function generatePPTX(pages, images, title, subtitle, style, subStyleConfi
       slide.background = { color: subStyleConfig?.bgColor?.replace('#', '') || 'FFFFFF' }
     }
     
-    // 添加可编辑的文本框
+    // 添加可编辑的文本框 - 专业排版设计
     if (page.type === 'cover') {
-      // 封面页 - 主标题
+      // 封面页设计 - 居中对称，大气简洁
+      
+      // 顶部装饰线（霓虹蓝）
+      slide.addShape('rect', {
+        x: 5.16,
+        y: 1.5,
+        w: 3,
+        h: 0.03,
+        fill: { color: '00d4ff' },
+        line: { width: 0 }
+      })
+      
+      // 主标题区域 - 带轻微阴影提升层次
       slide.addText(title, {
-        x: 0.5,
-        y: 2.5,
-        w: 12.33,
-        h: 1.5,
+        x: 1,
+        y: 2,
+        w: 11.33,
+        h: 1.8,
         align: 'center',
-        fontSize: 48,
+        fontSize: 52,
         bold: true,
-        color: textColor,
+        color: 'FFFFFF',
+        fontFace: 'Microsoft YaHei',
+        valign: 'middle',
+        shadow: { type: 'outer', blur: 12, offset: 3, angle: 45, color: '000000', opacity: 0.4 }
+      })
+      
+      // 副标题
+      const subtitleText = subtitle || ''
+      if (subtitleText) {
+        slide.addText(subtitleText, {
+          x: 1,
+          y: 4,
+          w: 11.33,
+          h: 0.7,
+          align: 'center',
+          fontSize: 20,
+          color: 'FFFFFF',
+          fontFace: 'Microsoft YaHei',
+          transparency: 15,
+          shadow: { type: 'outer', blur: 6, offset: 1, angle: 45, color: '000000', opacity: 0.3 }
+        })
+      }
+      
+      // 底部装饰线（樱花粉）
+      slide.addShape('rect', {
+        x: 5.16,
+        y: 5.5,
+        w: 3,
+        h: 0.03,
+        fill: { color: 'ff6b9d' },
+        line: { width: 0 }
+      })
+      
+      // 品牌标识
+      slide.addText('DeckCraft', {
+        x: 1,
+        y: 6.7,
+        w: 11.33,
+        h: 0.4,
+        align: 'center',
+        fontSize: 11,
+        color: 'FFFFFF',
+        fontFace: 'Microsoft YaHei',
+        transparency: 40
+      })
+      
+    } else if (page.type === 'ending') {
+      // 结尾页设计 - 简洁优雅
+      
+      // 装饰圆环
+      slide.addShape('ellipse', {
+        x: 5.91,
+        y: 2.3,
+        w: 1.5,
+        h: 1.5,
+        fill: { type: 'none' },
+        line: { color: '00d4ff', width: 1.5, transparency: 50 }
+      })
+      
+      // 结语
+      const endingText = page.content || '感谢聆听'
+      slide.addText(endingText, {
+        x: 1,
+        y: 3.2,
+        w: 11.33,
+        h: 1.2,
+        align: 'center',
+        fontSize: 44,
+        bold: true,
+        color: 'FFFFFF',
+        fontFace: 'Microsoft YaHei',
+        shadow: { type: 'outer', blur: 8, offset: 2, angle: 45, color: '000000', opacity: 0.35 }
+      })
+      
+      // 底部装饰线
+      slide.addShape('rect', {
+        x: 5.66,
+        y: 4.8,
+        w: 2,
+        h: 0.03,
+        fill: { color: 'ff6b9d' },
+        line: { width: 0 }
+      })
+      
+    } else {
+      // 内容页设计 - 清晰层次，专业易读
+      
+      // 左侧装饰条
+      slide.addShape('rect', {
+        x: 0,
+        y: 0,
+        w: 0.08,
+        h: 7.5,
+        fill: { color: '00d4ff' },
+        line: { width: 0 }
+      })
+      
+      // 标题区域背景
+      slide.addShape('rect', {
+        x: 0.5,
+        y: 0.4,
+        w: 12.33,
+        h: 0.9,
+        fill: { color: '000000', transparency: 50 },
+        line: { width: 0 }
+      })
+      
+      // 章节标题
+      slide.addText(page.section || `第${i}部分`, {
+        x: 0.7,
+        y: 0.45,
+        w: 12,
+        h: 0.8,
+        align: 'left',
+        fontSize: 26,
+        bold: true,
+        color: 'FFFFFF',
         fontFace: 'Microsoft YaHei',
         valign: 'middle'
       })
       
-      // 副标题 - 使用传入的副标题或显示提示
-      const subtitleText = subtitle || ''
-      if (subtitleText) {
-        slide.addText(subtitleText, {
-          x: 0.5,
-          y: 4.2,
-          w: 12.33,
-          h: 0.8,
-          align: 'center',
-          fontSize: 24,
-          color: textColor,
-          fontFace: 'Microsoft YaHei'
-        })
-      }
-      
-    } else if (page.type === 'ending') {
-      // 结尾页 - 使用大纲中的ending或默认感谢语
-      const endingText = page.content || '感谢聆听'
-      slide.addText(endingText, {
-        x: 0.5,
-        y: 3,
-        w: 12.33,
-        h: 1.5,
-        align: 'center',
-        fontSize: 48,
-        bold: true,
-        color: textColor,
-        fontFace: 'Microsoft YaHei'
-      })
-      
-    } else {
-      // 内容页
-      slide.addText(page.section || `第${i}部分`, {
-        x: 0.5,
-        y: 0.5,
-        w: 12.33,
-        h: 1,
-        align: 'left',
-        fontSize: 32,
-        bold: true,
-        color: textColor,
-        fontFace: 'Microsoft YaHei'
-      })
-      
-      // 添加要点
+      // 要点内容
       const points = page.points || generateContentPoints(page.section, 3)
+      const startY = 1.6
+      const itemHeight = 1.5
+      
       points.forEach((point, idx) => {
-        slide.addText(`• ${point}`, {
-          x: 1,
-          y: 2.0 + idx * 1.2,
-          w: 11,
-          h: 0.8,
+        const y = startY + idx * itemHeight
+        
+        // 序号圆点
+        slide.addShape('ellipse', {
+          x: 0.6,
+          y: y + 0.1,
+          w: 0.45,
+          h: 0.45,
+          fill: { color: '00d4ff' },
+          line: { width: 0 }
+        })
+        
+        // 序号文字
+        slide.addText(`${idx + 1}`, {
+          x: 0.6,
+          y: y + 0.1,
+          w: 0.45,
+          h: 0.45,
+          align: 'center',
+          fontSize: 13,
+          bold: true,
+          color: 'FFFFFF',
+          fontFace: 'Arial',
+          valign: 'middle'
+        })
+        
+        // 内容条目背景
+        slide.addShape('rect', {
+          x: 1.3,
+          y: y,
+          w: 11.53,
+          h: 1.2,
+          fill: { color: 'FFFFFF', transparency: 12 },
+          line: { color: '00d4ff', width: 0.5, transparency: 60 }
+        })
+        
+        // 要点文字
+        slide.addText(point, {
+          x: 1.5,
+          y: y + 0.1,
+          w: 11.13,
+          h: 1,
           align: 'left',
-          fontSize: 20,
-          color: textColor,
-          fontFace: 'Microsoft YaHei'
+          fontSize: 16,
+          color: 'FFFFFF',
+          fontFace: 'Microsoft YaHei',
+          valign: 'middle',
+          shadow: { type: 'outer', blur: 4, offset: 1, angle: 45, color: '000000', opacity: 0.25 }
         })
       })
     }
