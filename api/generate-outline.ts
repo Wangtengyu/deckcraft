@@ -38,6 +38,8 @@ export default async function (ctx: any) {
 2. 页数要求：约${pageCount || 5}页（不含封面和结尾）
 3. 每个章节需要3个具体要点
 4. 内容要贴合主题，不要空泛
+${refDocument ? `\n参考文档内容（请参考这些内容生成大纲）：\n${refDocument.substring(0, 3000)}` : ''}
+${refUrl ? `\n参考链接内容（请参考这些内容生成大纲）：\n${refUrl.substring(0, 3000)}` : ''}
 
 请直接输出JSON格式，不要其他说明：
 {
