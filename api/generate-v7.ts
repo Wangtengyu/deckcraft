@@ -254,51 +254,83 @@ function checkForbiddenWords(text) {
   return found.length > 0 ? found : null
 }
 
-function generatePrompt(page, style, subStyleConfig, context) {
+// ============ 参考图说明生成 ============
+function generateRefImageDescription(refImages, refImageMode) {
+  if (!refImages || refImages.length === 0) return ''
+  
+  const modeTemplates = {
+    embed: '照片主体内容必须保持不变，可以添加与页面风格协调的相框或边框装饰。',
+    strict: '必须作为独立图层原样嵌入，不添加任何边框或装饰，保持原始比例不拉伸。',
+    content_ref: '作为内容参考，提取其中的信息结构，用当前页面的视觉风格重新绘制，不要直接使用这张图。',
+    style_ref: '作为风格参考，参考其配色和风格应用到当前页面内容，不要直接使用这张图。'
+  }
+  
+  const mode = refImageMode || 'embed'
+  const constraint = modeTemplates[mode] || modeTemplates.embed
+  
+  let description = '\n\n参考图说明（以下内容仅用于指导参考图的使用方式，不要把文字本身写进画面）：\n'
+  
+  if (refImages.length === 1) {
+    description += `提供的参考图放置在页面合适位置。${constraint}`
+  } else {
+    refImages.forEach((img, idx) => {
+      description += `第${idx + 1}张参考图放置在页面合适位置。${constraint}\n`
+    })
+  }
+  
+  return description
+}
+
+function generatePrompt(page, style, subStyleConfig, context, refImages = [], refImageMode = 'embed') {
   const visualStyle = subStyleConfig?.visualStyle || SUB_STYLE_CONFIG[style]?.description || ''
   const textColor = subStyleConfig?.textColor || '1A1A1A'
   
   let prompt = ''
   
-  // 重要：AI只生成纯背景图，所有文字由PPTX添加
-  // 这样才能保证文字可编辑，且避免文字重复
+  // 恢复原skill的Prompt风格：描述布局，让AI生成有设计感的背景
+  // 文字区域用装饰框表示，PPTX会叠加真实可编辑文字
   
   if (page.type === 'cover') {
-    prompt = `生成一张PPT封面页背景图。
+    const title = page.title || context.topic
+    prompt = `生成一张PPT封面页。
 
-视觉风格：${visualStyle}
+视觉风格（以下内容仅用于指导风格，不要把文字本身写进画面）：${visualStyle}
 
-要求：
-- 页面中央位置预留大面积空白区域用于放置标题
-- 上方1/3区域留白用于主标题
-- 下方区域留白用于副标题
-- 可以添加装饰性几何图形、线条、色块
-- 整体留白充足，不要有任何文字
-- 禁止任何人物、人像、照片`
+页面中央位置展示主标题区域，用装饰性矩形框或线条标示，框内留空。
+主标题区域下方展示副标题区域，用较小的装饰框标示。
+可以添加与主题相关的装饰性几何图形、图标、线条。
+整体留白充足，聚焦标题区域。禁止任何人物、人像、照片。`
     
   } else if (page.type === 'ending') {
-    prompt = `生成一张PPT结尾页背景图。
+    const endingContent = page.content || '感谢聆听'
+    prompt = `生成一张PPT结尾页。
 
-视觉风格：${visualStyle}
+视觉风格（以下内容仅用于指导风格，不要把文字本身写进画面）：${visualStyle}
 
-要求：
-- 页面中央预留空白区域用于放置结语
-- 可以添加装饰性元素
-- 整体简洁，大量留白，不要有任何文字
-- 禁止任何人物、人像、照片`
+页面中央位置展示结语区域，用装饰性元素标示。
+整体简洁，可以添加点缀性装饰。
+整体留白充足。禁止任何人物、人像、照片。`
     
   } else {
     // 内容页
-    prompt = `生成一张PPT内容页背景图。
+    const sectionTitle = page.section || '内容'
+    const points = page.points || []
+    
+    let contentDesc = ''
+    if (points.length > 0) {
+      contentDesc = points.map((p, i) => `要点${i + 1}区域：用卡片或装饰框标示`).join('\n')
+    }
+    
+    prompt = `生成一张PPT内容页。
 
-视觉风格：${visualStyle}
+视觉风格（以下内容仅用于指导风格，不要把文字本身写进画面）：${visualStyle}
 
-要求：
-- 页面顶部预留空白区域用于放置章节标题
-- 页面主体区域预留空白用于放置内容要点
-- 可以添加装饰性图解元素、分隔线
-- 整体留白充足，层次清晰，不要有任何文字
-- 禁止任何人物、人像、照片`
+页面顶部展示标题区域，用装饰性线条或色块标示。
+
+${contentDesc}
+
+可以添加与内容相关的装饰性图解元素、图标、分隔线。
+整体留白充足，层次清晰。禁止任何人物、人像、照片。`
   }
   
   // 检查禁用词
@@ -307,6 +339,11 @@ function generatePrompt(page, style, subStyleConfig, context) {
     forbiddenFound.forEach(word => {
       prompt = prompt.replace(new RegExp(word, 'g'), '')
     })
+  }
+  
+  // 追加参考图说明
+  if (refImages && refImages.length > 0) {
+    prompt += generateRefImageDescription(refImages, refImageMode)
   }
   
   return prompt
@@ -354,8 +391,9 @@ async function updateProgress(taskId, updates) {
 }
 
 // ============ Coze API调用 ============
-async function generateBackground(prompt, apiKey, size = '4096x2304') {
+async function generateBackground(prompt, apiKey, size = '4096x2304', refImages = []) {
   console.log('=== 开始生成背景图片 ===')
+  console.log('参考图数量:', refImages.length)
   
   try {
     const response = await fetch(COZE_WORKFLOW_URL, {
@@ -368,7 +406,7 @@ async function generateBackground(prompt, apiKey, size = '4096x2304') {
         workflow_id: WORKFLOW_ID,
         parameters: {
           prompt: prompt,
-          images_url: [],
+          images_url: refImages,  // 参考图URL列表
           size: size,
           watermark: false
         }
