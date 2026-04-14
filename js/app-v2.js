@@ -1085,7 +1085,10 @@ function displayResult(result, card) {
     </div>
     
     <div class="mb-6 p-4 bg-surface rounded-xl max-h-60 overflow-y-auto">
-      <p class="text-sm text-gray-400 mb-3"><i class="fas fa-eye mr-2"></i>预览生成的页面：</p>
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-sm text-gray-400"><i class="fas fa-eye mr-2"></i>背景图预览：</p>
+        <p class="text-xs text-accent">文字内容请下载PPT查看</p>
+      </div>
       <div class="grid grid-cols-2 gap-2">
   `;
   
@@ -1109,13 +1112,16 @@ function displayResult(result, card) {
     <div class="space-y-3">
   `;
   
-  // PPTX下载按钮
+  // PPTX下载按钮（突出显示）
   if (hasPptx) {
     html += `
-      <button onclick="downloadPptx('${result.pptx.filename}', '${result.pptx.data}')" class="w-full btn-primary text-white py-3 rounded-xl font-medium flex items-center justify-center">
-        <i class="fas fa-download mr-2"></i>
-        下载PPT文件 (${result.pptx.filename})
-      </button>
+      <div class="bg-accent/10 border border-accent/30 rounded-xl p-4 mb-3">
+        <p class="text-sm text-center mb-3 text-accent">✨ PPT已生成完成，包含完整文字内容</p>
+        <button onclick="downloadPptx('${result.pptx.filename}', '${result.pptx.data}')" class="w-full btn-primary text-white py-3 rounded-xl font-medium flex items-center justify-center">
+          <i class="fas fa-download mr-2"></i>
+          下载PPT文件 (${result.pptx.filename})
+        </button>
+      </div>
     `;
   }
   
