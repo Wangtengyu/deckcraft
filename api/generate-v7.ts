@@ -862,17 +862,38 @@ export default async function (ctx) {
     const images = []
     const context = { topic: topic }
     
-    // ========== 并行生成所有页面背景 ==========
-    console.log(`开始并行生成 ${pages.length} 页背景...`)
+    // ========== 并行生成所有页面背景（限制并发数为3）==========
+    console.log(`开始生成 ${pages.length} 页背景（并发数: 3）...`)
     
     await updateProgress(taskId, {
       currentStep: 2,
-      message: `正在并行生成 ${pages.length} 页背景...`,
+      message: `正在生成 ${pages.length} 页背景...`,
       totalPages: pages.length
     })
     
-    // 并行生成所有页面
-    const imagePromises = pages.map(async (page, i) => {
+    // 限制并发数的辅助函数
+    async function limitConcurrency(tasks, limit) {
+      const results = []
+      const executing = []
+      
+      for (const task of tasks) {
+        const p = task().then(result => {
+          executing.splice(executing.indexOf(p), 1)
+          return result
+        })
+        results.push(p)
+        executing.push(p)
+        
+        if (executing.length >= limit) {
+          await Promise.race(executing)
+        }
+      }
+      
+      return Promise.all(results)
+    }
+    
+    // 创建图片生成任务
+    const imageTasks = pages.map((page, i) => async () => {
       const prompt = generatePrompt(page, style, subStyleConfig, context, refImages, refImageMode, refImageDescriptions)
       console.log(`\n=== 第${i + 1}页 Prompt ===\n${prompt}\n`)
       
@@ -888,8 +909,8 @@ export default async function (ctx) {
       }
     })
     
-    // 等待所有图片生成完成
-    const imageResults = await Promise.all(imagePromises)
+    // 执行（最多同时3个请求）
+    const imageResults = await limitConcurrency(imageTasks, 3)
     images.push(...imageResults)
     
     console.log(`所有 ${images.length} 页背景生成完成`)
