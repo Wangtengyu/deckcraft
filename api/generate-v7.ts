@@ -606,6 +606,8 @@ export default async function (ctx) {
   const pageCount = parseInt(ctx.body?.pageCount) || 5
   const subStyleKey = ctx.body?.subStyle
   const userOutline = ctx.body?.outline  // 用户确认的大纲
+  const refImages = ctx.body?.refImages || []  // 参考图URL列表
+  const refImageMode = ctx.body?.refImageMode || 'embed'  // 参考图模式
   
   const platformSize = PLATFORM_SIZES[platform] || PLATFORM_SIZES.ppt
   const apiKey = COZE_API_KEY
@@ -694,10 +696,10 @@ export default async function (ctx) {
         totalPages: pages.length
       })
       
-      const prompt = generatePrompt(page, style, subStyleConfig, context)
+      const prompt = generatePrompt(page, style, subStyleConfig, context, refImages, refImageMode)
       console.log(`\n=== 第${i + 1}页 Prompt ===\n${prompt}\n`)
       
-      const result = await generateBackground(prompt, apiKey, `${platformSize.width}x${platformSize.height}`)
+      const result = await generateBackground(prompt, apiKey, `${platformSize.width}x${platformSize.height}`, refImages)
       
       images.push({
         page: i + 1,

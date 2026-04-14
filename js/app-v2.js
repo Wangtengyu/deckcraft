@@ -211,6 +211,46 @@ function initRefImageUploader() {
   refImagesInput.addEventListener('change', handleRefImageUpload);
 }
 
+// 上传图片到免费图床 (sm.ms)
+async function uploadImageToSmms(file) {
+  const formData = new FormData();
+  formData.append('smfile', file);
+  
+  try {
+    const response = await fetch('https://api.sm.ms/api/v2/upload', {
+      method: 'POST',
+      body: formData
+    });
+    
+    const result = await response.json();
+    
+    if (result.success && result.data && result.data.url) {
+      return { url: result.data.url, error: null };
+    } else {
+      return { url: null, error: result.message || '上传失败' };
+    }
+  } catch (error) {
+    return { url: null, error: error.message };
+  }
+}
+
+// 批量上传参考图
+async function uploadRefImages(files) {
+  const urls = [];
+  const errors = [];
+  
+  for (const file of files) {
+    const result = await uploadImageToSmms(file);
+    if (result.url) {
+      urls.push(result.url);
+    } else {
+      errors.push(result.error);
+    }
+  }
+  
+  return { urls, errors };
+}
+
 // 处理参考图上传
 async function handleRefImageUpload(event) {
   const files = event.target.files;
@@ -698,13 +738,40 @@ async function startGeneration() {
       scene: state.scene,
       pageCount: state.pageCount,
       outline: state.outline,  // 传递大纲数据
+      refImages: [],
       refImageMode: state.refImageFiles.length > 0 ? state.refImageMode : null
     };
     
-    // 如果有参考图，先上传
+    // 如果有参考图，先上传到图床
     if (state.refImageFiles.length > 0) {
-      // TODO: 实现图片上传到云存储
-      // requestData.refImages = uploadedUrls;
+      card.innerHTML = `
+        <div class="text-center py-8">
+          <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-accent border-t-transparent mb-4"></div>
+          <p class="text-gray-400">正在上传参考图...</p>
+        </div>
+      `;
+      
+      const { urls, errors } = await uploadRefImages(state.refImageFiles);
+      
+      if (errors.length > 0) {
+        console.warn('部分图片上传失败:', errors);
+      }
+      
+      if (urls.length > 0) {
+        requestData.refImages = urls;
+        console.log('参考图上传成功:', urls);
+      } else if (state.refImageFiles.length > 0) {
+        throw new Error('参考图上传失败，请重试');
+      }
+      
+      // 恢复loading状态
+      card.innerHTML = `
+        <div class="text-center py-8">
+          <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-accent border-t-transparent mb-4"></div>
+          <p class="text-gray-400">正在生成PPT，请稍候...</p>
+          <p class="text-xs text-gray-500 mt-2">风格: ${SUB_STYLE_CONFIG[state.style]?.name || state.style} · ${state.subStyle ? SUB_STYLE_CONFIG[state.style]?.subStyles[state.subStyle]?.name : ''}</p>
+        </div>
+      `;
     }
     
     const response = await fetch(API_URL, {
