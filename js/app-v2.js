@@ -3,12 +3,16 @@
  * Phase 2: 添加细分风格选择
  * Phase 3: 添加参考图处理
  * Phase 4: 添加进度反馈
+ * Phase 5: 添加文档和链接解析
  */
 
 // API配置
 const API_URL = 'https://ig8u65l6vm.sealosbja.site/generate';
 const MODIFY_API_URL = 'https://ig8u65l6vm.sealosbja.site/modify';
 const PROGRESS_API_URL = 'https://ig8u65l6vm.sealosbja.site/progress';
+const UPLOAD_API_URL = 'https://ig8u65l6vm.sealosbja.site/upload';
+const PARSE_DOC_API_URL = 'https://ig8u65l6vm.sealosbja.site/parse-document';
+const PARSE_URL_API_URL = 'https://ig8u65l6vm.sealosbja.site/parse-url';
 
 // 细分风格配置（与后端 generate-v6.ts 保持一致）
 const SUB_STYLE_CONFIG = {
@@ -71,13 +75,16 @@ let state = {
   audience: 'adult',
   scene: 'report',
   style: 'B',
-  subStyle: null,  // 新增：细分风格
+  subStyle: null,
   pageCount: 10,
   pageStructure: '',
   smartTitle: true,
-  refImages: [],  // 参考图URL列表
-  refImageFiles: [],  // 参考图文件列表
-  refImageMode: 'embed',  // 参考图模式
+  refImages: [],
+  refImageFiles: [],
+  refImageMode: 'embed',
+  refImageDescriptions: [], // 参考图描述
+  refDocument: null, // 参考文档内容
+  refUrl: null, // 参考链接内容
   userContent: '',
   apiKey: '',
   usePlatformApi: true,
@@ -91,7 +98,129 @@ document.addEventListener('DOMContentLoaded', function() {
   loadSponsorsList();
   initSubStyleSelector();
   initRefImageUploader();
+  initDocumentUploader();
+  initUrlParser();
 });
+
+// ============ 文档解析 ============
+function initDocumentUploader() {
+  const docInput = document.getElementById('refDocument');
+  if (!docInput) return;
+  
+  docInput.addEventListener('change', handleDocumentUpload);
+}
+
+async function handleDocumentUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  showToast('正在解析文档...', 'info');
+  
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  try {
+    const response = await fetch(PARSE_DOC_API_URL, {
+      method: 'POST',
+      body: formData
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      state.refDocument = result.content;
+      showToast('文档解析成功', 'success');
+      
+      // 显示解析结果
+      const docPreview = document.getElementById('docPreview');
+      if (docPreview) {
+        docPreview.innerHTML = `
+          <div class="p-3 bg-surface rounded-lg border border-border mt-2">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-medium"><i class="fas fa-file-alt mr-2 text-accent"></i>${result.fileName}</span>
+              <button onclick="clearDocument()" class="text-xs text-red-400 hover:text-red-300">清除</button>
+            </div>
+            <p class="text-xs text-gray-400 line-clamp-3">${result.content.substring(0, 200)}...</p>
+          </div>
+        `;
+        docPreview.classList.remove('hidden');
+      }
+    } else {
+      showToast(result.error || '文档解析失败', 'error');
+    }
+  } catch (error) {
+    showToast('文档解析失败: ' + error.message, 'error');
+  }
+}
+
+function clearDocument() {
+  state.refDocument = null;
+  const docInput = document.getElementById('refDocument');
+  if (docInput) docInput.value = '';
+  const docPreview = document.getElementById('docPreview');
+  if (docPreview) docPreview.classList.add('hidden');
+}
+
+// ============ 链接解析 ============
+function initUrlParser() {
+  const urlInput = document.getElementById('refUrl');
+  if (!urlInput) return;
+  
+  // 失去焦点时解析
+  urlInput.addEventListener('blur', handleUrlInput);
+}
+
+async function handleUrlInput(event) {
+  const url = event.target.value.trim();
+  if (!url || !url.startsWith('http')) return;
+  
+  // 如果已经解析过这个URL，跳过
+  if (state.refUrl && state.refUrl.url === url) return;
+  
+  showToast('正在解析链接...', 'info');
+  
+  try {
+    const response = await fetch(PARSE_URL_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      state.refUrl = { url, content: result.content, title: result.title };
+      showToast('链接解析成功', 'success');
+      
+      // 显示解析结果
+      const urlPreview = document.getElementById('urlPreview');
+      if (urlPreview) {
+        urlPreview.innerHTML = `
+          <div class="p-3 bg-surface rounded-lg border border-border mt-2">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-medium"><i class="fas fa-link mr-2 text-accent"></i>${result.title || url}</span>
+              <button onclick="clearUrl()" class="text-xs text-red-400 hover:text-red-300">清除</button>
+            </div>
+            <p class="text-xs text-gray-400 line-clamp-3">${result.content.substring(0, 200)}...</p>
+          </div>
+        `;
+        urlPreview.classList.remove('hidden');
+      }
+    } else {
+      showToast(result.error || '链接解析失败', 'error');
+    }
+  } catch (error) {
+    showToast('链接解析失败: ' + error.message, 'error');
+  }
+}
+
+function clearUrl() {
+  state.refUrl = null;
+  const urlInput = document.getElementById('refUrl');
+  if (urlInput) urlInput.value = '';
+  const urlPreview = document.getElementById('urlPreview');
+  if (urlPreview) urlPreview.classList.add('hidden');
+}
 
 // 加载赞助者列表
 async function loadSponsorsList() {
@@ -816,9 +945,12 @@ async function startGeneration() {
       platform: state.platform,
       scene: state.scene,
       pageCount: state.pageCount,
-      outline: state.outline,  // 传递大纲数据
+      outline: state.outline,
       refImages: [],
-      refImageMode: state.refImageFiles.length > 0 ? state.refImageMode : null
+      refImageMode: state.refImageFiles.length > 0 ? state.refImageMode : null,
+      refDocument: state.refDocument, // 参考文档内容
+      refUrl: state.refUrl ? state.refUrl.content : null, // 参考链接内容
+      refImageDescriptions: state.refImageDescriptions // 参考图描述
     };
     
     // 如果有参考图，先上传到图床

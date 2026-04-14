@@ -669,6 +669,13 @@
                         <div>
                             <label class="text-sm text-gray-400 mb-2 block">参考链接：</label>
                             <input type="url" id="refUrl" class="mt-1 w-full rounded-lg px-4 py-2.5 text-sm" placeholder="粘贴文章链接，AI会自动提取内容">
+                            <div id="urlPreview" class="hidden"></div>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-400 mb-2 block">参考文档：</label>
+                            <input type="file" id="refDocument" accept=".pdf,.doc,.docx,.txt,.md" class="mt-1 text-sm w-full file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#00d4ff]/10 file:text-[#00d4ff] hover:file:bg-[#00d4ff]/20 cursor-pointer">
+                            <p class="text-xs text-gray-500 mt-1">支持 PDF、Word、文本文件</p>
+                            <div id="docPreview" class="hidden"></div>
                         </div>
                         <div>
                             <label class="text-sm text-gray-400 mb-2 block">参考图片：</label>
