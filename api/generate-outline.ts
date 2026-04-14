@@ -6,8 +6,8 @@ import cloud from '@lafjs/cloud'
 // 火山方舟 API 配置
 const ARK_API_URL = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions'
 const ARK_API_KEY = process.env.ARK_API_KEY || '53316440-45a1-4b3d-bf07-c5a8a9d195ed'
-// 火山方舟模型ID（需要替换为实际的模型ID）
-const ARK_MODEL_ID = 'ep-20250414125000000-doubao' // 豆包模型
+// 火山方舟模型ID
+const ARK_MODEL_ID = 'doubao-seed-1-8-251228'
 
 export default async function (ctx: any) {
   console.log('=== 大纲生成API V3 (火山方舟) ===')
