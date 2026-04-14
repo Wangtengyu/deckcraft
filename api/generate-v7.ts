@@ -227,6 +227,53 @@ const PLATFORM_SIZES = {
 
 // ============ 辅助函数 ============
 
+// ============ AI内容生成（使用火山方舟）============
+const ARK_API_URL = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions'
+const ARK_API_KEY = process.env.ARK_API_KEY || '53316440-45a1-4b3d-bf07-c5a8a9d195ed'
+const ARK_MODEL_ID = 'doubao-seed-1-8-251228'
+
+// 生成内容要点（如果大纲中的内容不够具体）
+async function enrichContentWithAI(topic, section, refDocument, refUrlContent) {
+  const prompt = `为"${topic}"的"${section}"章节生成3个具体要点。
+${refDocument ? `\n参考文档内容：\n${refDocument.substring(0, 2000)}` : ''}
+${refUrlContent ? `\n参考链接内容：\n${refUrlContent.substring(0, 2000)}` : ''}
+
+要求：
+1. 要点要具体、有内容
+2. 如果有参考素材，要基于素材内容生成
+3. 每行一个要点，不要序号
+
+示例：
+市场调研数据显示用户需求集中在三个维度
+竞争对手分析揭示差异化机会
+产品定位策略需要调整`
+
+  try {
+    const response = await fetch(ARK_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${ARK_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: ARK_MODEL_ID,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7,
+        max_tokens: 500
+      })
+    })
+    
+    const result = await response.json()
+    if (result.choices?.[0]?.message?.content) {
+      const lines = result.choices[0].message.content.split('\n').filter(l => l.trim())
+      return lines.slice(0, 3).map(l => l.replace(/^[\d\.\-\*]+\s*/, '').trim())
+    }
+  } catch (e) {
+    console.error('AI内容生成失败:', e)
+  }
+  return null
+}
+
 // Base64 转 URL（上传到免费图床）
 async function base64ToUrl(base64Data) {
   // 去掉 data:image/xxx;base64, 前缀
@@ -752,6 +799,10 @@ export default async function (ctx) {
   const smartTitle = ctx.body?.smartTitle !== false
   const subtitle = ctx.body?.subtitle || ''
   
+  // 参考素材
+  const refDocument = ctx.body?.refDocument || ''
+  const refUrlContent = ctx.body?.refUrlContent || ''
+  
   // 页面结构选项
   const hasCover = ctx.body?.hasCover !== false
   const hasCatalog = ctx.body?.hasCatalog === true
@@ -814,11 +865,16 @@ export default async function (ctx) {
       // 内容页（根据选项）
       if (hasContent) {
         userOutline.outline.forEach((section, idx) => {
+          const points = section.points || []
+          // 如果大纲中的内容不够具体（少于3个字），提示会基于参考素材生成
+          const needEnrich = points.length === 0 || points.some(p => p.length < 5)
+          
           pages.push({
             type: 'content',
             section: section.section,
-            points: section.points || [],
-            pageId: idx + 2
+            points: points,
+            pageId: idx + 2,
+            needEnrich: needEnrich // 标记需要充实
           })
         })
       }

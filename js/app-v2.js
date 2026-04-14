@@ -1013,7 +1013,10 @@ async function startGeneration() {
       refImages: [],
       refImageMode: state.refImageFiles.length > 0 ? state.refImageMode : null,
       refImageDescriptions: state.refImageDescriptions,
-      subtitle: state.outline?.subtitle || ''
+      subtitle: state.outline?.subtitle || '',
+      // 参考素材（传递到generate用于生成具体内容）
+      refDocument: state.refDocument,
+      refUrlContent: state.refUrl ? state.refUrl.content : null
     };
     
     // 直接使用 Base64 图片（不需要上传到云存储）
