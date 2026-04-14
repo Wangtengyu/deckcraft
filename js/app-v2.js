@@ -213,23 +213,23 @@ function initRefImageUploader() {
   refImagesInput.addEventListener('change', handleRefImageUpload);
 }
 
-// 上传图片到免费图床 (sm.ms)
-async function uploadImageToSmms(file) {
+// 上传图片到Laf云存储
+async function uploadImageToLaf(file) {
   const formData = new FormData();
-  formData.append('smfile', file);
+  formData.append('file', file);
   
   try {
-    const response = await fetch('https://api.sm.ms/api/v2/upload', {
+    const response = await fetch('https://ig8u65l6vm.sealosbja.site/upload', {
       method: 'POST',
       body: formData
     });
     
     const result = await response.json();
     
-    if (result.success && result.data && result.data.url) {
-      return { url: result.data.url, error: null };
+    if (result.success && result.url) {
+      return { url: result.url, error: null };
     } else {
-      return { url: null, error: result.message || '上传失败' };
+      return { url: null, error: result.error || '上传失败' };
     }
   } catch (error) {
     return { url: null, error: error.message };
@@ -242,7 +242,7 @@ async function uploadRefImages(files) {
   const errors = [];
   
   for (const file of files) {
-    const result = await uploadImageToSmms(file);
+    const result = await uploadImageToLaf(file);
     if (result.url) {
       urls.push(result.url);
     } else {
