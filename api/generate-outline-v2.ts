@@ -10,7 +10,7 @@ const SCENE_TEMPLATES = {
     name: '工作汇报',
     sections: [
       { section: '背景与目标', points: ['项目背景与现状分析', '核心目标与预期成果', '关键里程碑与时间节点'] },
-      { section: '执行过程', points: ['前期调研与方案设计', '资源配置与团队分工', '实施步骤与关键动作'] },
+      { section: '执行过程', points: ['前期调研与方案设计', '资源配置与团队分工', '实施步骤与关键动作', '风险识别与应对措施'] },
       { section: '关键成果', points: ['量化成果与数据表现', '质量提升与效率优化', '用户反馈与市场反响'] },
       { section: '总结与展望', points: ['项目总结与经验沉淀', '下一步计划与改进方向'] }
     ],
@@ -57,7 +57,7 @@ const SCENE_TEMPLATES = {
 }
 
 export default async function (ctx: any) {
-  console.log('=== 大纲生成API ===')
+  console.log('=== 大纲生成API V2 ===')
   
   try {
     const { topic, pageCount, refDocument, refUrl, scene } = ctx.body

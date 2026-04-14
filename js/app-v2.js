@@ -960,12 +960,15 @@ async function startGeneration() {
       platform: state.platform,
       scene: state.scene,
       pageCount: state.pageCount,
+      contentDensity: state.contentDensity, // 内容密度
+      audience: state.audience, // 受众
+      userContent: state.userContent, // 自定义内容
+      smartTitle: state.smartTitle, // 智能标题
       outline: state.outline,
       refImages: [],
       refImageMode: state.refImageFiles.length > 0 ? state.refImageMode : null,
-      refDocument: state.refDocument, // 参考文档内容
-      refUrl: state.refUrl ? state.refUrl.content : null, // 参考链接内容
-      refImageDescriptions: state.refImageDescriptions // 参考图描述
+      refImageDescriptions: state.refImageDescriptions, // 参考图描述
+      subtitle: state.outline?.subtitle || '' // 副标题
     };
     
     // 如果有参考图，先上传到图床

@@ -271,7 +271,6 @@ function generateRefImageDescription(refImages, refImageMode, refImageDescriptio
   let description = '\n\n参考图说明（以下内容仅用于指导参考图的使用方式，不要把文字本身写进画面）：\n'
   
   if (refImages.length === 1) {
-    // 使用用户描述或默认描述
     const imgDesc = refImageDescriptions[0] || '参考图片'
     description += `提供的参考图是${imgDesc}，放置在页面合适位置。${constraint}`
   } else {
@@ -289,9 +288,6 @@ function generatePrompt(page, style, subStyleConfig, context, refImages = [], re
   const textColor = subStyleConfig?.textColor || '1A1A1A'
   
   let prompt = ''
-  
-  // 恢复原skill的Prompt风格：描述布局，让AI生成有设计感的背景
-  // 文字区域用装饰框表示，PPTX会叠加真实可编辑文字
   
   if (page.type === 'cover') {
     const title = page.title || context.topic
@@ -315,7 +311,6 @@ function generatePrompt(page, style, subStyleConfig, context, refImages = [], re
 整体留白充足。禁止任何人物、人像、照片。`
     
   } else {
-    // 内容页
     const sectionTitle = page.section || '内容'
     const points = page.points || []
     
@@ -336,7 +331,6 @@ ${contentDesc}
 整体留白充足，层次清晰。禁止任何人物、人像、照片。`
   }
   
-  // 检查禁用词
   const forbiddenFound = checkForbiddenWords(prompt)
   if (forbiddenFound) {
     forbiddenFound.forEach(word => {
@@ -344,7 +338,6 @@ ${contentDesc}
     })
   }
   
-  // 追加参考图说明
   if (refImages && refImages.length > 0) {
     prompt += generateRefImageDescription(refImages, refImageMode, refImageDescriptions)
   }
@@ -353,7 +346,6 @@ ${contentDesc}
 }
 
 function generateContentPoints(section, count) {
-  // 根据场景生成具体内容
   const contentTemplates = {
     '背景与目标': ['项目背景与现状分析', '核心目标与预期成果', '关键里程碑与时间节点'],
     '执行过程': ['前期调研与方案设计', '资源配置与团队分工', '实施步骤与关键动作', '风险识别与应对措施'],
@@ -409,7 +401,7 @@ async function generateBackground(prompt, apiKey, size = '4096x2304', refImages 
         workflow_id: WORKFLOW_ID,
         parameters: {
           prompt: prompt,
-          images_url: refImages,  // 参考图URL列表
+          images_url: refImages,
           size: size,
           watermark: false
         }
@@ -460,18 +452,15 @@ async function generatePPTX(pages, images, title, subtitle, style, subStyleConfi
     return null
   }
   
-  // 设置PPT属性
   pptx.author = 'DeckCraft AI'
   pptx.title = title
   pptx.subject = `由DeckCraft AI生成的${title}PPT`
   
-  // 设置幻灯片尺寸 (16:9)
   pptx.defineLayout({ name: 'CUSTOM', width: 13.33, height: 7.5 })
   pptx.layout = 'CUSTOM'
   
   const textColor = subStyleConfig?.textColor || '1A1A1A'
   
-  // 为每页创建幻灯片
   for (let i = 0; i < pages.length; i++) {
     const page = pages[i]
     const img = images[i]
@@ -479,7 +468,6 @@ async function generatePPTX(pages, images, title, subtitle, style, subStyleConfi
     
     console.log(`处理第${i + 1}页: ${page.type}`)
     
-    // 添加背景图片
     if (img && img.url) {
       try {
         const response = await fetch(img.url)
@@ -506,9 +494,7 @@ async function generatePPTX(pages, images, title, subtitle, style, subStyleConfi
       slide.background = { color: subStyleConfig?.bgColor?.replace('#', '') || 'FFFFFF' }
     }
     
-    // 添加可编辑的文本框
     if (page.type === 'cover') {
-      // 封面页 - 主标题
       slide.addText(title, {
         x: 0.5,
         y: 2.5,
@@ -522,7 +508,6 @@ async function generatePPTX(pages, images, title, subtitle, style, subStyleConfi
         valign: 'middle'
       })
       
-      // 副标题 - 使用传入的副标题或显示提示
       const subtitleText = subtitle || ''
       if (subtitleText) {
         slide.addText(subtitleText, {
@@ -538,7 +523,6 @@ async function generatePPTX(pages, images, title, subtitle, style, subStyleConfi
       }
       
     } else if (page.type === 'ending') {
-      // 结尾页 - 使用大纲中的ending或默认感谢语
       const endingText = page.content || '感谢聆听'
       slide.addText(endingText, {
         x: 0.5,
@@ -553,7 +537,6 @@ async function generatePPTX(pages, images, title, subtitle, style, subStyleConfi
       })
       
     } else {
-      // 内容页
       slide.addText(page.section || `第${i}部分`, {
         x: 0.5,
         y: 0.5,
@@ -566,7 +549,6 @@ async function generatePPTX(pages, images, title, subtitle, style, subStyleConfi
         fontFace: 'Microsoft YaHei'
       })
       
-      // 添加要点
       const points = page.points || generateContentPoints(page.section, 3)
       points.forEach((point, idx) => {
         slide.addText(`• ${point}`, {
@@ -608,35 +590,22 @@ export default async function (ctx) {
   const scene = ctx.body?.scene || 'report'
   const pageCount = parseInt(ctx.body?.pageCount) || 5
   const subStyleKey = ctx.body?.subStyle
-  const userOutline = ctx.body?.outline  // 用户确认的大纲
-  const refImages = ctx.body?.refImages || []  // 参考图URL列表
-  const refImageMode = ctx.body?.refImageMode || 'embed'  // 参考图模式
-  const refImageDescriptions = ctx.body?.refImageDescriptions || []  // 参考图描述
-  
-  // 新增参数
-  const contentDensity = ctx.body?.contentDensity || 'medium'  // 内容密度：low/medium/high
-  const audience = ctx.body?.audience || 'adult'  // 受众：child/student/adult/expert
-  const userContent = ctx.body?.userContent || ''  // 自定义内容
-  const smartTitle = ctx.body?.smartTitle !== false  // 智能标题（默认开启）
-  const subtitle = ctx.body?.subtitle || ''  // 副标题
+  const userOutline = ctx.body?.outline
+  const refImages = ctx.body?.refImages || []
+  const refImageMode = ctx.body?.refImageMode || 'embed'
+  const refImageDescriptions = ctx.body?.refImageDescriptions || []
   
   const platformSize = PLATFORM_SIZES[platform] || PLATFORM_SIZES.ppt
   const apiKey = COZE_API_KEY
   
-  // 根据内容密度调整要点数量
-  const pointsPerSection = contentDensity === 'low' ? 2 : (contentDensity === 'high' ? 4 : 3)
-  
-  // 推荐或使用指定的细分风格
   const { subStyleKey: recommendedKey, subStyleConfig } = subStyleKey
     ? { subStyleKey, subStyleConfig: SUB_STYLE_CONFIG[style]?.subStyles?.[subStyleKey] }
     : recommendSubStyle(style, scene, topic)
   
   console.log(`主风格: ${style}, 细分风格: ${recommendedKey || '无'}`)
-  console.log(`受众: ${audience}, 内容密度: ${contentDensity}, 每节要点: ${pointsPerSection}`)
   console.log(`大纲数据: ${userOutline ? '有' : '无'}`)
   
   try {
-    // ========== 生成内容大纲 ==========
     await updateProgress(taskId, {
       status: 'generating',
       currentStep: 1,
@@ -647,22 +616,18 @@ export default async function (ctx) {
       subStyle: recommendedKey
     })
     
-    // 如果有用户大纲，使用大纲内容
     let pages = []
     let pptTitle = topic
     
     if (userOutline && userOutline.outline && userOutline.outline.length > 0) {
-      // 使用用户大纲
       pptTitle = userOutline.title || topic
       
-      // 封面页
       pages.push({
         type: 'cover',
         section: '封面',
         title: pptTitle
       })
       
-      // 内容页（从大纲转换）
       userOutline.outline.forEach((section, idx) => {
         pages.push({
           type: 'content',
@@ -672,7 +637,6 @@ export default async function (ctx) {
         })
       })
       
-      // 结尾页
       if (userOutline.ending) {
         pages.push({
           type: 'ending',
@@ -683,11 +647,9 @@ export default async function (ctx) {
       
       console.log(`使用大纲生成 ${pages.length} 页`)
     } else {
-      // 使用默认结构
       const structure = NARRATIVE_STRUCTURES[scene] || NARRATIVE_STRUCTURES.other
       pages = structure.pages.slice(0, pageCount)
       
-      // 为每个内容页生成具体内容
       pages.forEach(page => {
         if (page.type === 'content' && !page.points) {
           page.points = generateContentPoints(page.section, page.points || 3)
@@ -700,7 +662,6 @@ export default async function (ctx) {
     const images = []
     const context = { topic: topic }
     
-    // ========== 生成每页背景 ==========
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i]
       
@@ -730,14 +691,12 @@ export default async function (ctx) {
       }
     }
     
-    // ========== 生成PPTX文件 ==========
     await updateProgress(taskId, {
       currentStep: pages.length + 2,
       message: '正在生成PPTX文件...'
     })
     
-    // 从大纲或请求中获取副标题（优先级：传入参数 > 大纲 > 空）
-    const pptSubtitle = subtitle || userOutline?.subtitle || ''
+    const pptSubtitle = userOutline?.subtitle || ctx.body?.subtitle || ''
     
     let pptxResult = null
     try {
@@ -746,7 +705,6 @@ export default async function (ctx) {
       console.error('PPTX生成失败:', error)
     }
     
-    // ========== 完成 ==========
     const finalProgress = await updateProgress(taskId, {
       status: 'completed',
       currentStep: pages.length + 3,
@@ -766,13 +724,7 @@ export default async function (ctx) {
         pages: pages,
         images: images,
         pptx: pptxResult,
-        progress: finalProgress,
-        // 返回参数信息，便于调试
-        params: {
-          audience: audience,
-          contentDensity: contentDensity,
-          pointsPerSection: pointsPerSection
-        }
+        progress: finalProgress
       }
     }
     
