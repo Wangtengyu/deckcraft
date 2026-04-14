@@ -561,6 +561,9 @@
                 </div>
             </div>
 
+            <!-- 细分风格选择器（动态生成） -->
+            <div id="subStyleSelector"></div>
+
             <!-- 页面结构 -->
             <div class="mb-8">
                 <label class="block text-sm font-medium mb-3">
@@ -661,6 +664,10 @@
                             <label class="text-sm text-gray-400 mb-2 block">参考图片：</label>
                             <input type="file" id="refImages" multiple accept="image/*" class="mt-1 text-sm w-full file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#00d4ff]/10 file:text-[#00d4ff] hover:file:bg-[#00d4ff]/20 cursor-pointer">
                             <p class="text-xs text-gray-500 mt-1">支持多张图片上传</p>
+                            <!-- 参考图预览区域 -->
+                            <div id="refImagePreview" class="mt-3 flex flex-wrap"></div>
+                            <!-- 参考图模式选择器 -->
+                            <div id="refImageModeSelector"></div>
                         </div>
                     </div>
                 </div>
@@ -804,6 +811,6 @@
 
     <!-- 删除内联script，使用app.js -->
     
-    <script src="js/app.js"></script>
+    <script src="js/app-v2.js"></script>
 </body>
 </html>
