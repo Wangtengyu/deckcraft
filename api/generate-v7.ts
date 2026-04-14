@@ -389,9 +389,17 @@ async function generateBackground(prompt, apiKey, size = '4096x2304') {
 // ============ PPTX生成 ============
 async function generatePPTX(pages, images, title, style, subStyleConfig) {
   console.log('=== 开始生成PPTX文件 ===')
+  console.log('页数:', pages.length, '图片数:', images.length)
   
-  const pptxgen = require('pptxgenjs')
-  const pptx = new pptxgen()
+  let pptxgen, pptx
+  try {
+    pptxgen = require('pptxgenjs')
+    pptx = new pptxgen()
+    console.log('pptxgenjs加载成功')
+  } catch (e) {
+    console.error('pptxgenjs加载失败:', e.message)
+    return null
+  }
   
   // 设置PPT属性
   pptx.author = 'DeckCraft AI'
