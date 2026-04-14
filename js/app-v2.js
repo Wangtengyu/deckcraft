@@ -112,15 +112,15 @@ async function loadSponsorsList() {
 
 function initSubStyleSelector() {
   const styleContainer = document.getElementById('styleSelector');
-  if (!styleContainer) return;
+  if (!styleContainer) {
+    console.log('风格选择器容器未找到');
+    return;
+  }
   
-  // 监听主风格变化
-  const originalSelectStyle = window.selectStyle;
-  window.selectStyle = function(style) {
-    state.style = style;
-    updateOptionCards('style', style);
-    updateSubStyleSelector(style);
-  };
+  // 初始化时显示当前默认风格的细分选择器
+  if (state.style) {
+    updateSubStyleSelector(state.style);
+  }
 }
 
 // 更新细分风格选择器
@@ -603,6 +603,10 @@ function displayResult(result, card) {
   
   const styleName = SUB_STYLE_CONFIG[result.style]?.name || result.style;
   const subStyleName = result.subStyle && SUB_STYLE_CONFIG[result.style]?.subStyles[result.subStyle]?.name;
+  const pageCount = result.images?.length || result.pages?.length || 0;
+  
+  // 检查是否有PPTX数据
+  const hasPptx = result.pptx && result.pptx.data;
   
   let html = `
     <div class="text-center mb-6">
@@ -610,7 +614,7 @@ function displayResult(result, card) {
         <i class="fas fa-check text-3xl text-green-400"></i>
       </div>
       <h3 class="text-xl font-bold mb-2">${result.topic || 'PPT生成完成'}</h3>
-      <p class="text-gray-400">${styleName}${subStyleName ? ' · ' + subStyleName : ''} · ${result.images?.length || result.pages?.length || 0}页</p>
+      <p class="text-gray-400">${styleName}${subStyleName ? ' · ' + subStyleName : ''} · ${pageCount}页</p>
     </div>
     
     <div class="mb-6 p-4 bg-surface rounded-xl max-h-60 overflow-y-auto">
@@ -618,11 +622,12 @@ function displayResult(result, card) {
       <div class="grid grid-cols-2 gap-2">
   `;
   
+  // 显示生成的图片预览
   if (result.images && result.images.length > 0) {
     result.images.forEach(img => {
       if (img.url) {
         html += `
-          <div class="aspect-video bg-surface rounded-lg overflow-hidden">
+          <div class="aspect-video bg-surface rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition" onclick="window.open('${img.url}', '_blank')">
             <img src="${img.url}" alt="第${img.page}页" class="w-full h-full object-cover">
           </div>
         `;
@@ -635,10 +640,27 @@ function displayResult(result, card) {
     </div>
     
     <div class="space-y-3">
-      <a href="${result.downloadUrl || '#'}" class="block w-full btn-primary text-white py-3 rounded-xl font-medium text-center">
+  `;
+  
+  // PPTX下载按钮
+  if (hasPptx) {
+    html += `
+      <button onclick="downloadPptx('${result.pptx.filename}', '${result.pptx.data}')" class="w-full btn-primary text-white py-3 rounded-xl font-medium flex items-center justify-center">
         <i class="fas fa-download mr-2"></i>
-        下载PPT文件
-      </a>
+        下载PPT文件 (${result.pptx.filename})
+      </button>
+    `;
+  }
+  
+  // 图片预览按钮
+  html += `
+    <button onclick="previewImages()" class="w-full btn-secondary py-3 rounded-xl font-medium flex items-center justify-center">
+      <i class="fas fa-images mr-2"></i>
+      预览所有图片
+    </button>
+  `;
+  
+  html += `
       <button onclick="closeResultModal()" class="w-full text-gray-400 py-3 rounded-xl font-medium hover:text-white transition">
         继续生成
       </button>
@@ -646,6 +668,49 @@ function displayResult(result, card) {
   `;
   
   card.innerHTML = html;
+}
+
+// 下载PPTX文件
+function downloadPptx(filename, base64Data) {
+  try {
+    // 将base64转换为Blob
+    const byteCharacters = atob(base64Data);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
+    
+    // 创建下载链接
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showToast('PPT文件下载成功！', 'success');
+  } catch (error) {
+    console.error('下载失败:', error);
+    showToast('下载失败: ' + error.message, 'error');
+  }
+}
+
+// 预览所有图片
+function previewImages() {
+  if (!state.generatedImages || state.generatedImages.length === 0) {
+    showToast('没有可预览的图片', 'error');
+    return;
+  }
+  
+  // 在新窗口打开第一张图片
+  const firstImg = state.generatedImages.find(img => img.url);
+  if (firstImg) {
+    window.open(firstImg.url, '_blank');
+  }
 }
 
 function closeResultModal() {
