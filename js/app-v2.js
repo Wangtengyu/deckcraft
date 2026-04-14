@@ -2,11 +2,13 @@
  * DeckCraft - 前端交互逻辑 V2.0
  * Phase 2: 添加细分风格选择
  * Phase 3: 添加参考图处理
+ * Phase 4: 添加进度反馈
  */
 
 // API配置
 const API_URL = 'https://ig8u65l6vm.sealosbja.site/generate';
 const MODIFY_API_URL = 'https://ig8u65l6vm.sealosbja.site/modify';
+const PROGRESS_API_URL = 'https://ig8u65l6vm.sealosbja.site/progress';
 
 // 细分风格配置（与后端 generate-v6.ts 保持一致）
 const SUB_STYLE_CONFIG = {
@@ -249,6 +251,74 @@ async function uploadRefImages(files) {
   }
   
   return { urls, errors };
+}
+
+// ============ 进度轮询 ============
+let progressInterval = null;
+
+// 开始轮询进度
+function startProgressPolling(taskId, card) {
+  // 清除之前的轮询
+  if (progressInterval) {
+    clearInterval(progressInterval);
+  }
+  
+  // 每2秒查询一次进度
+  progressInterval = setInterval(async () => {
+    try {
+      const response = await fetch(PROGRESS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'get', taskId })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success && result.progress) {
+        const progress = result.progress;
+        
+        // 更新进度显示
+        updateProgressDisplay(progress, card);
+        
+        // 如果完成或失败，停止轮询
+        if (progress.status === 'completed' || progress.status === 'failed') {
+          clearInterval(progressInterval);
+          progressInterval = null;
+        }
+      }
+    } catch (error) {
+      console.warn('进度查询失败:', error);
+    }
+  }, 2000);
+}
+
+// 更新进度显示
+function updateProgressDisplay(progress, card) {
+  const percent = progress.progress || 0;
+  const message = progress.message || '处理中...';
+  const currentPage = progress.currentPage || 0;
+  const totalPages = progress.totalPages || 0;
+  
+  card.innerHTML = `
+    <div class="text-center py-8">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-accent border-t-transparent mb-4"></div>
+      <p class="text-gray-400">${message}</p>
+      <div class="mt-4 w-64 mx-auto">
+        <div class="bg-surface rounded-full h-2 overflow-hidden">
+          <div class="bg-accent h-full transition-all duration-300" style="width: ${percent}%"></div>
+        </div>
+        <p class="text-xs text-gray-500 mt-2">${percent}% ${totalPages > 0 ? `· 第${currentPage}/${totalPages}页` : ''}</p>
+      </div>
+    </div>
+  `;
+}
+
+// 停止轮询
+function stopProgressPolling() {
+  if (progressInterval) {
+    clearInterval(progressInterval);
+    progressInterval = null;
+  }
 }
 
 // 处理参考图上传
@@ -717,12 +787,20 @@ async function startGeneration() {
     return;
   }
   
+  // 生成任务ID
+  const taskId = `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
   // 显示loading
   card.innerHTML = `
     <div class="text-center py-8">
       <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-accent border-t-transparent mb-4"></div>
-      <p class="text-gray-400">正在生成PPT，请稍候...</p>
-      <p class="text-xs text-gray-500 mt-2">风格: ${SUB_STYLE_CONFIG[state.style]?.name || state.style} · ${state.subStyle ? SUB_STYLE_CONFIG[state.style]?.subStyles[state.subStyle]?.name : ''}</p>
+      <p class="text-gray-400">正在初始化...</p>
+      <div class="mt-4 w-64 mx-auto">
+        <div class="bg-surface rounded-full h-2 overflow-hidden">
+          <div class="bg-accent h-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+        <p class="text-xs text-gray-500 mt-2">0%</p>
+      </div>
     </div>
   `;
   
@@ -731,6 +809,7 @@ async function startGeneration() {
   try {
     // 构建请求数据
     const requestData = {
+      taskId: taskId,
       style: state.style,
       subStyle: state.subStyle,
       topic: state.topic,
@@ -763,17 +842,12 @@ async function startGeneration() {
       } else if (state.refImageFiles.length > 0) {
         throw new Error('参考图上传失败，请重试');
       }
-      
-      // 恢复loading状态
-      card.innerHTML = `
-        <div class="text-center py-8">
-          <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-accent border-t-transparent mb-4"></div>
-          <p class="text-gray-400">正在生成PPT，请稍候...</p>
-          <p class="text-xs text-gray-500 mt-2">风格: ${SUB_STYLE_CONFIG[state.style]?.name || state.style} · ${state.subStyle ? SUB_STYLE_CONFIG[state.style]?.subStyles[state.subStyle]?.name : ''}</p>
-        </div>
-      `;
     }
     
+    // 启动进度轮询
+    startProgressPolling(taskId, card);
+    
+    // 发送生成请求（异步，不等待完成）
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -782,12 +856,16 @@ async function startGeneration() {
     
     const result = await response.json();
     
+    // 停止进度轮询
+    stopProgressPolling();
+    
     if (result.code === 0 || result.success) {
       displayResult(result.data || result, card);
     } else {
       throw new Error(result.message || result.error || '生成失败');
     }
   } catch (error) {
+    stopProgressPolling();
     card.innerHTML = `
       <div class="text-center py-8">
         <i class="fas fa-exclamation-circle text-4xl text-red-400 mb-4"></i>
