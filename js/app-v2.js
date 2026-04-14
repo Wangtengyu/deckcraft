@@ -77,20 +77,26 @@ let state = {
   style: 'B',
   subStyle: null,
   pageCount: 10,
-  pageStructure: '',
+  // 页面结构选项
+  hasCover: true,
+  hasCatalog: false,
+  hasContent: true,
+  hasEnding: true,
   smartTitle: true,
+  // 参考素材
   refImages: [],
   refImageFiles: [],
   refImageMode: 'embed',
-  refImageDescriptions: [], // 参考图描述
-  refDocument: null, // 参考文档内容
-  refUrl: null, // 参考链接内容
+  refImageDescriptions: [],
+  refDocument: null,
+  refUrl: null,
   userContent: '',
   apiKey: '',
   usePlatformApi: true,
   contentMode: 'custom',
   outline: null,
-  generatedImages: []
+  generatedImages: [],
+  addToGallery: false
 };
 
 // 页面加载时初始化
@@ -931,6 +937,19 @@ async function startGeneration() {
     return;
   }
   
+  // 收集页面结构选项
+  const hasCoverEl = document.getElementById('hasCover');
+  const hasCatalogEl = document.getElementById('hasCatalog');
+  const hasContentEl = document.getElementById('hasContent');
+  const hasEndingEl = document.getElementById('hasEnding');
+  const addToGalleryEl = document.getElementById('addToGallery');
+  
+  state.hasCover = hasCoverEl ? hasCoverEl.checked : true;
+  state.hasCatalog = hasCatalogEl ? hasCatalogEl.checked : false;
+  state.hasContent = hasContentEl ? hasContentEl.checked : true;
+  state.hasEnding = hasEndingEl ? hasEndingEl.checked : true;
+  state.addToGallery = addToGalleryEl ? addToGalleryEl.checked : false;
+  
   // 生成任务ID
   const taskId = `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   
@@ -960,15 +979,20 @@ async function startGeneration() {
       platform: state.platform,
       scene: state.scene,
       pageCount: state.pageCount,
-      contentDensity: state.contentDensity, // 内容密度
-      audience: state.audience, // 受众
-      userContent: state.userContent, // 自定义内容
-      smartTitle: state.smartTitle, // 智能标题
+      contentDensity: state.contentDensity,
+      audience: state.audience,
+      userContent: state.userContent,
+      smartTitle: state.smartTitle,
+      // 页面结构选项
+      hasCover: state.hasCover,
+      hasCatalog: state.hasCatalog,
+      hasContent: state.hasContent,
+      hasEnding: state.hasEnding,
       outline: state.outline,
       refImages: [],
       refImageMode: state.refImageFiles.length > 0 ? state.refImageMode : null,
-      refImageDescriptions: state.refImageDescriptions, // 参考图描述
-      subtitle: state.outline?.subtitle || '' // 副标题
+      refImageDescriptions: state.refImageDescriptions,
+      subtitle: state.outline?.subtitle || ''
     };
     
     // 如果有参考图，先上传到图床

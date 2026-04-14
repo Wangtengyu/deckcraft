@@ -608,17 +608,23 @@ export default async function (ctx) {
   const scene = ctx.body?.scene || 'report'
   const pageCount = parseInt(ctx.body?.pageCount) || 5
   const subStyleKey = ctx.body?.subStyle
-  const userOutline = ctx.body?.outline  // 用户确认的大纲
-  const refImages = ctx.body?.refImages || []  // 参考图URL列表
-  const refImageMode = ctx.body?.refImageMode || 'embed'  // 参考图模式
-  const refImageDescriptions = ctx.body?.refImageDescriptions || []  // 参考图描述
+  const userOutline = ctx.body?.outline
+  const refImages = ctx.body?.refImages || []
+  const refImageMode = ctx.body?.refImageMode || 'embed'
+  const refImageDescriptions = ctx.body?.refImageDescriptions || []
   
-  // 新增参数
-  const contentDensity = ctx.body?.contentDensity || 'medium'  // 内容密度：low/medium/high
-  const audience = ctx.body?.audience || 'adult'  // 受众：child/student/adult/expert
-  const userContent = ctx.body?.userContent || ''  // 自定义内容
-  const smartTitle = ctx.body?.smartTitle !== false  // 智能标题（默认开启）
-  const subtitle = ctx.body?.subtitle || ''  // 副标题
+  // 内容参数
+  const contentDensity = ctx.body?.contentDensity || 'medium'
+  const audience = ctx.body?.audience || 'adult'
+  const userContent = ctx.body?.userContent || ''
+  const smartTitle = ctx.body?.smartTitle !== false
+  const subtitle = ctx.body?.subtitle || ''
+  
+  // 页面结构选项
+  const hasCover = ctx.body?.hasCover !== false
+  const hasCatalog = ctx.body?.hasCatalog === true
+  const hasContent = ctx.body?.hasContent !== false
+  const hasEnding = ctx.body?.hasEnding !== false
   
   const platformSize = PLATFORM_SIZES[platform] || PLATFORM_SIZES.ppt
   const apiKey = COZE_API_KEY
@@ -633,6 +639,7 @@ export default async function (ctx) {
   
   console.log(`主风格: ${style}, 细分风格: ${recommendedKey || '无'}`)
   console.log(`受众: ${audience}, 内容密度: ${contentDensity}, 每节要点: ${pointsPerSection}`)
+  console.log(`页面结构: 封面=${hasCover}, 目录=${hasCatalog}, 内容=${hasContent}, 结尾=${hasEnding}`)
   console.log(`大纲数据: ${userOutline ? '有' : '无'}`)
   
   try {
@@ -655,25 +662,37 @@ export default async function (ctx) {
       // 使用用户大纲
       pptTitle = userOutline.title || topic
       
-      // 封面页
-      pages.push({
-        type: 'cover',
-        section: '封面',
-        title: pptTitle
-      })
-      
-      // 内容页（从大纲转换）
-      userOutline.outline.forEach((section, idx) => {
+      // 封面页（根据选项）
+      if (hasCover) {
         pages.push({
-          type: 'content',
-          section: section.section,
-          points: section.points || [],
-          pageId: idx + 2
+          type: 'cover',
+          section: '封面',
+          title: pptTitle
         })
-      })
+      }
       
-      // 结尾页
-      if (userOutline.ending) {
+      // 目录页（根据选项）
+      if (hasCatalog) {
+        pages.push({
+          type: 'toc',
+          section: '目录'
+        })
+      }
+      
+      // 内容页（根据选项）
+      if (hasContent) {
+        userOutline.outline.forEach((section, idx) => {
+          pages.push({
+            type: 'content',
+            section: section.section,
+            points: section.points || [],
+            pageId: idx + 2
+          })
+        })
+      }
+      
+      // 结尾页（根据选项）
+      if (hasEnding && userOutline.ending) {
         pages.push({
           type: 'ending',
           section: '结尾',
@@ -685,12 +704,23 @@ export default async function (ctx) {
     } else {
       // 使用默认结构
       const structure = NARRATIVE_STRUCTURES[scene] || NARRATIVE_STRUCTURES.other
-      pages = structure.pages.slice(0, pageCount)
+      let filteredPages = []
+      
+      // 根据选项过滤页面
+      structure.pages.forEach(page => {
+        if (page.type === 'cover' && hasCover) filteredPages.push(page)
+        else if (page.type === 'toc' && hasCatalog) filteredPages.push(page)
+        else if (page.type === 'content' && hasContent) filteredPages.push(page)
+        else if (page.type === 'ending' && hasEnding) filteredPages.push(page)
+      })
+      
+      // 按页数限制
+      pages = filteredPages.slice(0, pageCount)
       
       // 为每个内容页生成具体内容
       pages.forEach(page => {
         if (page.type === 'content' && !page.points) {
-          page.points = generateContentPoints(page.section, page.points || 3)
+          page.points = generateContentPoints(page.section, pointsPerSection)
         }
       })
       
@@ -771,7 +801,11 @@ export default async function (ctx) {
         params: {
           audience: audience,
           contentDensity: contentDensity,
-          pointsPerSection: pointsPerSection
+          pointsPerSection: pointsPerSection,
+          hasCover: hasCover,
+          hasCatalog: hasCatalog,
+          hasContent: hasContent,
+          hasEnding: hasEnding
         }
       }
     }
