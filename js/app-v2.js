@@ -472,7 +472,7 @@ function updateCostEstimate() {
 
 // ============ 步骤导航 ============
 
-function goToStep2() {
+async function goToStep2() {
   const topic = document.getElementById('topic').value.trim();
   if (!topic) {
     showToast('请输入PPT主题', 'error');
@@ -480,10 +480,153 @@ function goToStep2() {
   }
   
   state.topic = topic;
+  
+  // 显示大纲生成loading
+  const step1Content = document.getElementById('step1');
+  const originalContent = step1Content.innerHTML;
+  
+  // 在step1中显示loading
+  const loadingHtml = `
+    <div class="text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-accent border-t-transparent mb-4"></div>
+      <p class="text-gray-400">正在生成内容大纲...</p>
+      <p class="text-xs text-gray-500 mt-2">AI正在为您规划PPT结构</p>
+    </div>
+  `;
+  
+  // 保存原始内容并显示loading
+  step1Content.dataset.originalContent = originalContent;
+  
+  try {
+    // 调用大纲生成API
+    const response = await fetch('https://ig8u65l6vm.sealosbja.site/generate-outline', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic: topic,
+        pageCount: state.pageCount
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.ok && result.outline) {
+      state.outline = result.outline;
+      
+      // 显示大纲确认界面
+      showOutlineConfirm(result.outline);
+    } else {
+      throw new Error(result.message || '大纲生成失败');
+    }
+  } catch (error) {
+    console.error('大纲生成失败:', error);
+    showToast('大纲生成失败，使用默认结构', 'warning');
+    
+    // 使用默认大纲
+    state.outline = null;
+    
+    // 恢复步骤1内容
+    step1Content.innerHTML = step1Content.dataset.originalContent;
+    
+    // 直接进入步骤2
+    state.currentStep = 2;
+    updateStepIndicator();
+    document.getElementById('step2').classList.remove('hidden');
+    updateSubStyleSelector(state.style);
+  }
+}
+
+// 显示大纲确认界面
+function showOutlineConfirm(outline) {
+  const step1 = document.getElementById('step1');
+  
+  let outlineHtml = `
+    <div class="card rounded-2xl p-6 md:p-8">
+      <div class="mb-6">
+        <h2 class="text-2xl font-bold mb-2">内容大纲</h2>
+        <p class="text-gray-400 text-sm">AI已为您生成大纲，确认后继续选择风格</p>
+      </div>
+      
+      <div class="mb-6 p-4 rounded-xl bg-gradient-to-r from-accent/10 to-accent2/10 border border-accent/20">
+        <div class="flex items-center">
+          <i class="fas fa-lightbulb text-accent mr-3"></i>
+          <span class="font-medium">${outline.title}</span>
+        </div>
+      </div>
+      
+      <div class="space-y-4 mb-8 max-h-80 overflow-y-auto">
+  `;
+  
+  outline.outline.forEach((section, idx) => {
+    outlineHtml += `
+      <div class="p-4 bg-surface rounded-xl border border-border">
+        <div class="flex items-start">
+          <span class="w-6 h-6 rounded-full bg-accent/20 text-accent flex items-center justify-center text-sm font-medium mr-3 flex-shrink-0">${idx + 1}</span>
+          <div class="flex-1">
+            <h3 class="font-medium mb-2">${section.section}</h3>
+            <ul class="text-sm text-gray-400 space-y-1">
+              ${section.points.map(p => `<li class="flex items-start"><span class="text-accent mr-2">•</span>${p}</li>`).join('')}
+            </ul>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  if (outline.ending) {
+    outlineHtml += `
+      <div class="p-4 bg-surface rounded-xl border border-border">
+        <div class="flex items-start">
+          <span class="w-6 h-6 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center text-sm mr-3 flex-shrink-0"><i class="fas fa-flag text-xs"></i></span>
+          <div class="flex-1">
+            <h3 class="font-medium mb-1">结尾</h3>
+            <p class="text-sm text-gray-400">${outline.ending}</p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  
+  outlineHtml += `
+      </div>
+      
+      <div class="flex gap-4">
+        <button onclick="regenerateOutline()" class="flex-1 btn-secondary text-white py-3 rounded-xl font-medium flex items-center justify-center">
+          <i class="fas fa-refresh mr-2"></i>
+          重新生成
+        </button>
+        <button onclick="confirmOutline()" class="flex-1 btn-primary text-white py-3 rounded-xl font-medium flex items-center justify-center">
+          确认大纲
+          <i class="fas fa-arrow-right ml-2"></i>
+        </button>
+      </div>
+    </div>
+  `;
+  
+  step1.innerHTML = outlineHtml;
+}
+
+// 重新生成大纲
+async function regenerateOutline() {
+  state.outline = null;
+  
+  // 重新触发大纲生成
+  const step1 = document.getElementById('step1');
+  step1.innerHTML = step1.dataset.originalContent;
+  
+  await goToStep2();
+}
+
+// 确认大纲，进入步骤2
+function confirmOutline() {
   state.currentStep = 2;
   updateStepIndicator();
   
-  document.getElementById('step1').classList.add('hidden');
+  // 恢复步骤1内容
+  const step1 = document.getElementById('step1');
+  step1.innerHTML = step1.dataset.originalContent;
+  step1.classList.add('hidden');
+  
   document.getElementById('step2').classList.remove('hidden');
   
   // 初始化细分风格选择器
@@ -558,13 +701,13 @@ async function startGeneration() {
   try {
     // 构建请求数据
     const requestData = {
-      ...state,
       style: state.style,
       subStyle: state.subStyle,
       topic: state.topic,
       platform: state.platform,
       scene: state.scene,
       pageCount: state.pageCount,
+      outline: state.outline,  // 传递大纲数据
       refImageMode: state.refImageFiles.length > 0 ? state.refImageMode : null
     };
     

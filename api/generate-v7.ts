@@ -261,25 +261,42 @@ function generatePrompt(page, style, subStyleConfig, context) {
   let prompt = ''
   
   if (page.type === 'cover') {
+    const title = page.title || context.topic
     prompt = `生成一张PPT封面页。
 
 视觉风格（以下内容仅用于指导风格，不要把文字本身写进画面）：${visualStyle}
 
-页面中央位置展示主标题区域，留白充足。
+页面中央位置展示主标题「${title}」，粗体，字号大，单行展示。
+主标题下方可展示副标题区域。
 整体留白充足，聚焦标题区域。禁止任何人物、人像、照片。`
+    
   } else if (page.type === 'ending') {
+    const endingContent = page.content || '感谢聆听'
     prompt = `生成一张PPT结尾页。
 
 视觉风格（以下内容仅用于指导风格，不要把文字本身写进画面）：${visualStyle}
 
-页面中央位置展示结语区域，留白充足。
-整体留白充足。禁止任何人物、人像、照片。`
+页面中央位置展示结语「${endingContent}」，字号适中。
+整体简洁，大量留白。禁止任何人物、人像、照片。`
+    
   } else {
+    // 内容页
+    const sectionTitle = page.section || '内容'
+    const points = page.points || []
+    
+    let contentDesc = ''
+    if (points.length > 0) {
+      contentDesc = points.map((p, i) => `要点${i + 1}：「${p}」`).join('\n')
+    }
+    
     prompt = `生成一张信息图海报。
 
 视觉风格（以下内容仅用于指导风格，不要把文字本身写进画面）：${visualStyle}
 
-页面顶部标题区域，中央内容区域。
+页面顶部展示标题「${sectionTitle}」，粗体，字号适中。
+
+${contentDesc}
+
 整体留白充足，层次清晰。禁止任何人物、人像、照片。`
   }
   
@@ -544,6 +561,7 @@ export default async function (ctx) {
   const scene = ctx.body?.scene || 'report'
   const pageCount = parseInt(ctx.body?.pageCount) || 5
   const subStyleKey = ctx.body?.subStyle
+  const userOutline = ctx.body?.outline  // 用户确认的大纲
   
   const platformSize = PLATFORM_SIZES[platform] || PLATFORM_SIZES.ppt
   const apiKey = COZE_API_KEY
@@ -554,6 +572,7 @@ export default async function (ctx) {
     : recommendSubStyle(style, scene, topic)
   
   console.log(`主风格: ${style}, 细分风格: ${recommendedKey || '无'}`)
+  console.log(`大纲数据: ${userOutline ? '有' : '无'}`)
   
   try {
     // ========== 生成内容大纲 ==========
@@ -567,15 +586,55 @@ export default async function (ctx) {
       subStyle: recommendedKey
     })
     
-    const structure = NARRATIVE_STRUCTURES[scene] || NARRATIVE_STRUCTURES.other
-    const pages = structure.pages.slice(0, pageCount)
+    // 如果有用户大纲，使用大纲内容
+    let pages = []
+    let pptTitle = topic
     
-    // 为每个内容页生成具体内容
-    pages.forEach(page => {
-      if (page.type === 'content' && !page.points) {
-        page.points = generateContentPoints(page.section, page.points || 3)
+    if (userOutline && userOutline.outline && userOutline.outline.length > 0) {
+      // 使用用户大纲
+      pptTitle = userOutline.title || topic
+      
+      // 封面页
+      pages.push({
+        type: 'cover',
+        section: '封面',
+        title: pptTitle
+      })
+      
+      // 内容页（从大纲转换）
+      userOutline.outline.forEach((section, idx) => {
+        pages.push({
+          type: 'content',
+          section: section.section,
+          points: section.points || [],
+          pageId: idx + 2
+        })
+      })
+      
+      // 结尾页
+      if (userOutline.ending) {
+        pages.push({
+          type: 'ending',
+          section: '结尾',
+          content: userOutline.ending
+        })
       }
-    })
+      
+      console.log(`使用大纲生成 ${pages.length} 页`)
+    } else {
+      // 使用默认结构
+      const structure = NARRATIVE_STRUCTURES[scene] || NARRATIVE_STRUCTURES.other
+      pages = structure.pages.slice(0, pageCount)
+      
+      // 为每个内容页生成具体内容
+      pages.forEach(page => {
+        if (page.type === 'content' && !page.points) {
+          page.points = generateContentPoints(page.section, page.points || 3)
+        }
+      })
+      
+      console.log(`使用默认结构生成 ${pages.length} 页`)
+    }
     
     const images = []
     const context = { topic: topic }
