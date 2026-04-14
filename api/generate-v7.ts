@@ -260,44 +260,45 @@ function generatePrompt(page, style, subStyleConfig, context) {
   
   let prompt = ''
   
+  // 重要：AI只生成纯背景图，所有文字由PPTX添加
+  // 这样才能保证文字可编辑，且避免文字重复
+  
   if (page.type === 'cover') {
-    const title = page.title || context.topic
-    prompt = `生成一张PPT封面页。
+    prompt = `生成一张PPT封面页背景图。
 
-视觉风格（以下内容仅用于指导风格，不要把文字本身写进画面）：${visualStyle}
+视觉风格：${visualStyle}
 
-页面中央位置展示主标题「${title}」，粗体，字号大，单行展示。
-主标题下方可展示副标题区域。
-整体留白充足，聚焦标题区域。禁止任何人物、人像、照片。`
+要求：
+- 页面中央位置预留大面积空白区域用于放置标题
+- 上方1/3区域留白用于主标题
+- 下方区域留白用于副标题
+- 可以添加装饰性几何图形、线条、色块
+- 整体留白充足，不要有任何文字
+- 禁止任何人物、人像、照片`
     
   } else if (page.type === 'ending') {
-    const endingContent = page.content || '感谢聆听'
-    prompt = `生成一张PPT结尾页。
+    prompt = `生成一张PPT结尾页背景图。
 
-视觉风格（以下内容仅用于指导风格，不要把文字本身写进画面）：${visualStyle}
+视觉风格：${visualStyle}
 
-页面中央位置展示结语「${endingContent}」，字号适中。
-整体简洁，大量留白。禁止任何人物、人像、照片。`
+要求：
+- 页面中央预留空白区域用于放置结语
+- 可以添加装饰性元素
+- 整体简洁，大量留白，不要有任何文字
+- 禁止任何人物、人像、照片`
     
   } else {
     // 内容页
-    const sectionTitle = page.section || '内容'
-    const points = page.points || []
-    
-    let contentDesc = ''
-    if (points.length > 0) {
-      contentDesc = points.map((p, i) => `要点${i + 1}：「${p}」`).join('\n')
-    }
-    
-    prompt = `生成一张信息图海报。
+    prompt = `生成一张PPT内容页背景图。
 
-视觉风格（以下内容仅用于指导风格，不要把文字本身写进画面）：${visualStyle}
+视觉风格：${visualStyle}
 
-页面顶部展示标题「${sectionTitle}」，粗体，字号适中。
-
-${contentDesc}
-
-整体留白充足，层次清晰。禁止任何人物、人像、照片。`
+要求：
+- 页面顶部预留空白区域用于放置章节标题
+- 页面主体区域预留空白用于放置内容要点
+- 可以添加装饰性图解元素、分隔线
+- 整体留白充足，层次清晰，不要有任何文字
+- 禁止任何人物、人像、照片`
   }
   
   // 检查禁用词
@@ -404,9 +405,9 @@ async function generateBackground(prompt, apiKey, size = '4096x2304') {
 }
 
 // ============ PPTX生成 ============
-async function generatePPTX(pages, images, title, style, subStyleConfig) {
+async function generatePPTX(pages, images, title, subtitle, style, subStyleConfig) {
   console.log('=== 开始生成PPTX文件 ===')
-  console.log('页数:', pages.length, '图片数:', images.length)
+  console.log('页数:', pages.length, '图片数:', images.length, '标题:', title, '副标题:', subtitle || '无')
   
   let pptxgen, pptx
   try {
@@ -466,7 +467,7 @@ async function generatePPTX(pages, images, title, style, subStyleConfig) {
     
     // 添加可编辑的文本框
     if (page.type === 'cover') {
-      // 封面页
+      // 封面页 - 主标题
       slide.addText(title, {
         x: 0.5,
         y: 2.5,
@@ -480,20 +481,25 @@ async function generatePPTX(pages, images, title, style, subStyleConfig) {
         valign: 'middle'
       })
       
-      slide.addText('点击编辑副标题', {
-        x: 0.5,
-        y: 4.2,
-        w: 12.33,
-        h: 0.8,
-        align: 'center',
-        fontSize: 24,
-        color: textColor,
-        fontFace: 'Microsoft YaHei'
-      })
+      // 副标题 - 使用传入的副标题或显示提示
+      const subtitleText = subtitle || ''
+      if (subtitleText) {
+        slide.addText(subtitleText, {
+          x: 0.5,
+          y: 4.2,
+          w: 12.33,
+          h: 0.8,
+          align: 'center',
+          fontSize: 24,
+          color: textColor,
+          fontFace: 'Microsoft YaHei'
+        })
+      }
       
     } else if (page.type === 'ending') {
-      // 结尾页
-      slide.addText('感谢聆听', {
+      // 结尾页 - 使用大纲中的ending或默认感谢语
+      const endingText = page.content || '感谢聆听'
+      slide.addText(endingText, {
         x: 0.5,
         y: 3,
         w: 12.33,
@@ -675,9 +681,12 @@ export default async function (ctx) {
       message: '正在生成PPTX文件...'
     })
     
+    // 从大纲或请求中获取副标题
+    const pptSubtitle = userOutline?.subtitle || ctx.body?.subtitle || ''
+    
     let pptxResult = null
     try {
-      pptxResult = await generatePPTX(pages, images, topic, style, subStyleConfig)
+      pptxResult = await generatePPTX(pages, images, pptTitle, pptSubtitle, style, subStyleConfig)
     } catch (error) {
       console.error('PPTX生成失败:', error)
     }

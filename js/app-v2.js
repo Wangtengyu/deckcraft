@@ -508,6 +508,11 @@ async function generateOutline() {
     if (result.ok && result.outline) {
       state.outline = result.outline;
       displayOutline(result.outline, outlineList);
+      
+      // 显示副标题输入框
+      const subtitleInput = document.getElementById('subtitleInput');
+      if (subtitleInput) subtitleInput.classList.remove('hidden');
+      
       showToast('大纲生成成功', 'success');
     } else {
       throw new Error(result.message || '大纲生成失败');
@@ -570,6 +575,12 @@ function confirmOutline() {
   if (!state.outline) {
     showToast('请先生成大纲', 'warning');
     return;
+  }
+  
+  // 保存副标题到大纲
+  const subtitleInput = document.getElementById('subtitle');
+  if (subtitleInput && subtitleInput.value.trim()) {
+    state.outline.subtitle = subtitleInput.value.trim();
   }
   
   state.currentStep = 2;
