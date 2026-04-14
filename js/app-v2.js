@@ -941,6 +941,55 @@ async function startGeneration() {
   resultModal.classList.remove('hidden');
   
   try {
+    // 如果没有大纲，自动生成
+    if (!state.outline || !state.outline.outline || state.outline.outline.length === 0) {
+      // 更新loading提示
+      card.innerHTML = `
+        <div class="text-center py-8">
+          <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-accent border-t-transparent mb-4"></div>
+          <p class="text-gray-400">正在生成内容大纲...</p>
+        </div>
+      `;
+      
+      try {
+        const outlineResponse = await fetch('https://ig8u65l6vm.sealosbja.site/generate-outline', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            topic: state.topic,
+            pageCount: state.pageCount,
+            refDocument: state.refDocument,
+            refUrl: state.refUrl ? state.refUrl.content : null,
+            scene: state.scene
+          })
+        });
+        
+        const outlineResult = await outlineResponse.json();
+        
+        if (outlineResult.ok && outlineResult.outline) {
+          state.outline = outlineResult.outline;
+          console.log('自动生成大纲成功:', outlineResult.outline.title);
+        }
+      } catch (outlineError) {
+        console.warn('大纲生成失败，使用默认结构:', outlineError);
+        // 继续执行，使用默认结构
+      }
+      
+      // 恢复loading状态
+      card.innerHTML = `
+        <div class="text-center py-8">
+          <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-accent border-t-transparent mb-4"></div>
+          <p class="text-gray-400">正在生成PPT...</p>
+          <div class="mt-4 w-64 mx-auto">
+            <div class="bg-surface rounded-full h-2 overflow-hidden">
+              <div class="bg-accent h-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">0%</p>
+          </div>
+        </div>
+      `;
+    }
+    
     // 构建请求数据
     const requestData = {
       taskId: taskId,
