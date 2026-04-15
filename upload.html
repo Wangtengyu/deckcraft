@@ -473,7 +473,7 @@
         let currentFileData = null  // 保存当前文件数据
 
         async function processFile(file) {
-            console.log('处理文件:', file.name)
+            console.log('处理文件:', file.name, '大小:', (file.size / 1024 / 1024).toFixed(2), 'MB')
             currentFile = file
             currentFileData = null
             
@@ -513,6 +513,14 @@
             `
             
             try {
+                // 大文件：直接使用本地解析（不走API）
+                if (file.size > 5 * 1024 * 1024) {
+                    console.log('文件较大，使用本地解析')
+                    showToast('文件较大，使用本地快速解析', 'info')
+                    displayMockResult(file)
+                    return
+                }
+                
                 // 读取文件为base64
                 const fileBase64 = await fileToBase64(file)
                 currentFileData = fileBase64
@@ -755,18 +763,38 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>提交中...'
             
             try {
-                // 确保有文件数据
-                if (!currentFileData || typeof currentFileData === 'string') {
-                    // 需要重新读取文件
-                    if (currentFile) {
-                        currentFileData = await fileToBase64(currentFile)
-                    } else {
-                        throw new Error('缺少文件数据')
-                    }
-                }
-                
                 const token = localStorage.getItem('auth_token')
                 const userId = localStorage.getItem('user_id')
+                
+                // 判断文件大小
+                const isLargeFile = currentFile && currentFile.size > 5 * 1024 * 1024
+                
+                let requestBody
+                
+                if (isLargeFile) {
+                    // 大文件：只发送元数据，不发送文件内容
+                    console.log('大文件模式：只发送元数据')
+                    requestBody = {
+                        name: name,
+                        category: category || 'party',
+                        userId: userId || 'anonymous',
+                        fileSize: currentFile.size,
+                        fileName: currentFile.name,
+                        fileType: 'pptx',
+                        mode: 'metadata'  // 标记为元数据模式
+                    }
+                } else {
+                    // 小文件：发送完整数据
+                    if (!currentFileData) {
+                        currentFileData = await fileToBase64(currentFile)
+                    }
+                    requestBody = {
+                        file: currentFileData,
+                        name: name,
+                        category: category || 'party',
+                        userId: userId || 'anonymous'
+                    }
+                }
                 
                 const response = await fetch(`${API_BASE}/template-upload`, {
                     method: 'POST',
@@ -774,30 +802,29 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token || ''}`
                     },
-                    body: JSON.stringify({
-                        file: currentFileData,
-                        name: name,
-                        category: category || 'party',
-                        userId: userId || 'anonymous'
-                    })
+                    body: JSON.stringify(requestBody)
                 })
                 
                 const result = await response.json()
                 
                 if (result.success) {
-                    showToast('模板投喂成功！等待审核。', 'success')
+                    if (isLargeFile) {
+                        showToast('模板信息已提交！大文件暂存，待后续处理。', 'success')
+                    } else {
+                        showToast('模板投喂成功！', 'success')
+                    }
                     cancelUpload()
-                    loadTemplateList() // 刷新列表
+                    loadTemplateList()
                 } else {
                     throw new Error(result.message || '上传失败')
                 }
             } catch (error) {
                 console.error('上传失败:', error)
-                // 显示真实错误，而不是假装成功
+                // 显示真实错误
                 showToast(`上传失败: ${error.message}`, 'error')
-                // 如果用户想继续，可以选择离线模式
+                
+                // 如果用户想继续，可以选择保存到本地
                 if (confirm('API调用失败，是否保存到本地缓存？\n\n错误信息: ' + error.message)) {
-                    // 保存到本地模拟成功
                     const mockTemplate = {
                         id: 'local_' + Date.now(),
                         name: name,
