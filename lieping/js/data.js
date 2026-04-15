@@ -607,3 +607,313 @@ const MILESTONES = {
         condition: (data) => data.progress >= 100
     }
 };
+
+// ============================================
+// 节省建议数据
+// ============================================
+
+// 支出类别节省建议
+const SAVINGS_SUGGESTIONS = {
+    food: {
+        name: '餐饮',
+        emoji: '🍜',
+        avgCost: 1800,
+        tips: [
+            '自己做饭，每周省2次外卖',
+            '带饭上班，健康又省钱',
+            '减少奶茶咖啡，每月省300+',
+            '团购优惠，周末特惠关注'
+        ],
+        potentialPercent: 30
+    },
+    transport: {
+        name: '交通',
+        emoji: '🚗',
+        avgCost: 500,
+        tips: [
+            '公共交通代替打车',
+            '拼车上下班',
+            '自行车/电动车短途',
+            '申请交通补贴'
+        ],
+        potentialPercent: 25
+    },
+    shopping: {
+        name: '购物',
+        emoji: '🛒',
+        avgCost: 400,
+        tips: [
+            '设置购物冷静期',
+            '使用比价软件',
+            '关注二手平台',
+            '等待折扣季集中购买'
+        ],
+        potentialPercent: 40
+    },
+    entertainment: {
+        name: '娱乐',
+        emoji: '🎮',
+        avgCost: 300,
+        tips: [
+            '减少KTV/酒吧消费',
+            '免费公园/博物馆代替付费娱乐',
+            '视频会员共享',
+            '游戏内购慎重'
+        ],
+        potentialPercent: 35
+    },
+    social: {
+        name: '社交',
+        emoji: '🎉',
+        avgCost: 500,
+        tips: [
+            '减少无效社交',
+            '在家请客代替外出聚餐',
+            'AA制主动提议',
+            '选择性参加活动'
+        ],
+        potentialPercent: 30
+    },
+    travel: {
+        name: '旅行',
+        emoji: '✈️',
+        avgCost: 400,
+        tips: [
+            '淡季出行，机票便宜50%',
+            '周边游代替远途',
+            '民宿代替酒店',
+            '提前规划，避免临时高价'
+        ],
+        potentialPercent: 35
+    },
+    daily: {
+        name: '日用品',
+        emoji: '🧴',
+        avgCost: 200,
+        tips: [
+            '批发/囤货更划算',
+            '替换装/大容量装',
+            '关注超市特卖',
+            '自制清洁剂'
+        ],
+        potentialPercent: 25
+    },
+    communication: {
+        name: '通讯',
+        emoji: '📱',
+        avgCost: 150,
+        tips: [
+            '更换更便宜的套餐',
+            '宽带融合套餐',
+            '取消不必要的增值服务',
+            '使用WiFi通话'
+        ],
+        potentialPercent: 30
+    }
+};
+
+// 有趣的花费对比
+const FUN_COMPARISONS = [
+    { name: '奶茶', price: 25, emoji: '🧋', perMonth: 30 },
+    { name: '电影', price: 60, emoji: '🎬', perMonth: 4 },
+    { name: '外卖', price: 40, emoji: '🍔', perMonth: 20 },
+    { name: '游戏', price: 100, emoji: '🎮', perMonth: 2 },
+    { name: '口红', price: 200, emoji: '💄', perMonth: 1 },
+    { name: '烟', price: 30, emoji: '🚬', perMonth: 30 },
+    { name: '咖啡', price: 35, emoji: '☕', perMonth: 20 },
+    { name: '美发', price: 200, emoji: '💇', perMonth: 1 }
+];
+
+// 用户标签配置
+const USER_TAGS = {
+    saver: {
+        name: '攒钱小能手',
+        color1: '#10b981',
+        color2: '#34d399',
+        emoji: '💰',
+        condition: (data) => data.savingsRate >= 40
+    },
+    investor: {
+        name: '复利信徒',
+        color1: '#6366f1',
+        color2: '#a855f7',
+        emoji: '📈',
+        condition: (data) => data.monthlyPassiveIncome > 0
+    },
+    minimalist: {
+        name: '极简生活家',
+        color1: '#64748b',
+        color2: '#94a3b8',
+        emoji: '🌿',
+        condition: (data) => data.totalExpense < data.income * 0.5
+    },
+    lateStarter: {
+        name: '躺平预备役',
+        color1: '#f59e0b',
+        color2: '#fbbf24',
+        emoji: '😴',
+        condition: (data) => data.progress >= 30
+    },
+    earlyBird: {
+        name: '早起鸟',
+        color1: '#ef4444',
+        color2: '#f87171',
+        emoji: '🌅',
+        condition: (data) => data.yearsToGoal <= 10
+    },
+    highSaver: {
+        name: '省钱达人',
+        color1: '#8b5cf6',
+        color2: '#c084fc',
+        emoji: '🎯',
+        condition: (data) => data.savingsRate >= 50
+    },
+    passiveMaster: {
+        name: '被动收入大师',
+        color1: '#0ea5e9',
+        color2: '#38bdf8',
+        emoji: '🏆',
+        condition: (data) => data.monthlyPassiveIncome >= data.totalExpense * 0.5
+    },
+    fireFighter: {
+        name: 'FIRE战士',
+        color1: '#f97316',
+        color2: '#fb923c',
+        emoji: '🔥',
+        condition: (data) => data.progress >= 50
+    }
+};
+
+// 财富金字塔配置
+const WEALTH_PYRAMID = [
+    {
+        name: '财务自由',
+        emoji: '👑',
+        color: 'from-yellow-400 to-amber-500',
+        description: '被动收入覆盖全部支出',
+        requirements: ['本金 ≥ 年支出×25', '多元化被动收入', '风险对冲配置']
+    },
+    {
+        name: '资产配置',
+        emoji: '⚖️',
+        color: 'from-purple-400 to-pink-500',
+        description: '分散投资，风险对冲',
+        requirements: ['股票/基金配置', '债券/理财打底', '应急现金储备']
+    },
+    {
+        name: '复利增长',
+        emoji: '🌱',
+        color: 'from-green-400 to-emerald-500',
+        description: '让钱为你工作',
+        requirements: ['年化收益6%+', '长期持有不动摇', '定期再投资']
+    },
+    {
+        name: '强制储蓄',
+        emoji: '💎',
+        color: 'from-blue-400 to-cyan-500',
+        description: '先存后花，月光可耻',
+        requirements: ['储蓄率≥30%', '自动转账存钱', '专款专用账户']
+    },
+    {
+        name: '收入基础',
+        emoji: '💼',
+        color: 'from-indigo-400 to-blue-500',
+        description: '主动+被动双重收入',
+        requirements: ['提升职业技能', '拓展收入来源', '增加被动收入']
+    }
+];
+
+// 目标阶段配置
+const GOAL_PHASES = {
+    short: {
+        name: '短期目标',
+        emoji: '🎯',
+        color: '#10b981',
+        duration: '1年内',
+        milestones: [
+            '建立3-6个月应急基金',
+            '还清高息债务',
+            '养成记账习惯',
+            '完成第一个10万'
+        ]
+    },
+    medium: {
+        name: '中期目标',
+        emoji: '🚀',
+        color: '#f59e0b',
+        duration: '3-5年',
+        milestones: [
+            '攒够投资本金50万',
+            '被动收入覆盖基本支出',
+            '构建多元化收入结构',
+            '达成躺平目标的50%'
+        ]
+    },
+    long: {
+        name: '长期目标',
+        emoji: '🏆',
+        color: '#6366f1',
+        duration: '10年+',
+        milestones: [
+            '达成财务自由',
+            '被动收入≥年支出×25',
+            '可选择躺平或继续奋斗',
+            '传承财富智慧'
+        ]
+    }
+};
+
+// 成就系统
+const ACHIEVEMENTS = {
+    firstStep: {
+        name: '第一步',
+        emoji: '👣',
+        description: '完成首次测算',
+        unlocked: true
+    },
+    week1: {
+        name: '一周坚持',
+        emoji: '📅',
+        description: '连续记账7天'
+    },
+    month1: {
+        name: '月度达人',
+        emoji: '📆',
+        description: '月度储蓄目标达成'
+    },
+    noWaste: {
+        name: '零浪费',
+        emoji: '🌱',
+        description: '整月无非必要支出'
+    },
+    investPro: {
+        name: '投资专家',
+        emoji: '📈',
+        description: '开始定投指数基金'
+    },
+    sideHustle: {
+        name: '副业开启',
+        emoji: '💼',
+        description: '拥有稳定副业收入'
+    },
+    houseReady: {
+        name: '首付就绪',
+        emoji: '🏠',
+        description: '攒够购房首付'
+    },
+    halfWay: {
+        name: '半程冠军',
+        emoji: '🏅',
+        description: '达成躺平目标50%'
+    }
+};
+
+// 游戏化等级
+const LEVELS = [
+    { name: '青铜', min: 0, emoji: '🥉' },
+    { name: '白银', min: 10, emoji: '🥈' },
+    { name: '黄金', min: 30, emoji: '🥇' },
+    { name: '铂金', min: 50, emoji: '💎' },
+    { name: '钻石', min: 75, emoji: '💠' },
+    { name: '王者', min: 100, emoji: '👑' }
+];

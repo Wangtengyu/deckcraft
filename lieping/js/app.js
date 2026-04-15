@@ -1098,3 +1098,383 @@ const onboardingHandler = {
         showPage('city');
     }
 };
+
+// ============================================
+// 财富金字塔页面
+// ============================================
+function initPyramidPage() {
+    const container = document.getElementById('wealth-pyramid');
+    if (!container) return;
+    
+    container.innerHTML = WEALTH_PYRAMID.map((layer, index) => `
+        <div class="pyramid-layer glass-card p-4 text-center bg-gradient-to-r ${layer.color} bg-opacity-20 rounded-xl"
+             onclick="showPyramidDetail(${index})">
+            <div class="text-3xl mb-2">${layer.emoji}</div>
+            <div class="font-bold">${layer.name}</div>
+            <div class="text-xs text-slate-400">${layer.description}</div>
+        </div>
+    `).join('');
+    
+    // 计算复利威力对比
+    calculateCompoundComparison();
+}
+
+function showPyramidDetail(index) {
+    const layer = WEALTH_PYRAMID[index];
+    showToast(`${layer.emoji} ${layer.name}: ${layer.requirements.join(' | ')}`, 'info');
+}
+
+function calculateCompoundComparison() {
+    const monthly = 3000;
+    const annual = 0.06;
+    const yearsA = 10;
+    
+    // 场景A：立即复利
+    const resultA = calculateCompoundTotal(monthly, annual, yearsA);
+    const gainA = resultA - monthly * 12 * yearsA;
+    
+    // 场景B：前3年只存不投
+    const resultB = monthly * 12 * 3 + calculateCompoundTotal(monthly, annual, 7);
+    const gainB = resultB - monthly * 12 * yearsA;
+    
+    // 更新UI
+    document.getElementById('scene-a-result').textContent = '¥' + Math.round(resultA).toLocaleString();
+    document.getElementById('scene-a-gain').textContent = '¥' + Math.round(gainA).toLocaleString();
+    document.getElementById('scene-b-result').textContent = '¥' + Math.round(resultB).toLocaleString();
+    document.getElementById('scene-b-gain').textContent = '¥' + Math.round(gainB).toLocaleString();
+    document.getElementById('compound-loss').textContent = '¥' + Math.round(gainA - gainB).toLocaleString();
+}
+
+function calculateCompoundTotal(monthly, annualRate, years) {
+    const monthlyRate = annualRate / 12;
+    const months = years * 12;
+    let total = 0;
+    
+    for (let i = 0; i < months; i++) {
+        total = total * (1 + monthlyRate) + monthly;
+    }
+    
+    return total;
+}
+
+// ============================================
+// 省钱攻略页面
+// ============================================
+function initSavingsPage() {
+    const { expense, income } = appState.profile;
+    const monthlyIncome = calculateMonthlyIncome();
+    
+    // 生成节省建议
+    const suggestions = [];
+    const savingsMap = {
+        food: expense.food || 0,
+        transport: expense.transport || 0,
+        shopping: expense.shopping || 0,
+        entertainment: expense.entertainment || 0,
+        social: expense.social || 0,
+        travel: expense.travel || 0,
+        daily: expense.daily || 0,
+        communication: expense.communication || 0
+    };
+    
+    let totalPotential = 0;
+    
+    Object.entries(savingsMap).forEach(([key, amount]) => {
+        const suggestion = SAVINGS_SUGGESTIONS[key];
+        if (!suggestion || amount <= 0) return;
+        
+        const potential = amount * (suggestion.potentialPercent / 100);
+        const level = suggestion.potentialPercent >= 35 ? 'high' : (suggestion.potentialPercent >= 25 ? 'medium' : 'low');
+        
+        totalPotential += potential;
+        
+        suggestions.push({
+            key,
+            ...suggestion,
+            current: amount,
+            potential: Math.round(potential),
+            level
+        });
+    });
+    
+    // 按节省潜力排序
+    suggestions.sort((a, b) => b.potential - a.potential);
+    
+    // 渲染建议列表
+    const container = document.getElementById('savings-suggestions');
+    if (container) {
+        container.innerHTML = suggestions.map(s => `
+            <div class="saving-card ${s.level} glass-card p-4" onclick="showSavingDetail('${s.key}')">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-center gap-3">
+                        <div class="text-3xl">${s.emoji}</div>
+                        <div>
+                            <div class="font-bold">${s.name}</div>
+                            <div class="text-sm text-slate-400">
+                                当前 <span class="text-white">¥${s.current}</span> / 平均 ¥${s.avgCost}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-green-400 font-bold">-¥${s.potential}/月</div>
+                        <div class="text-xs text-slate-400">${s.potentialPercent}%优化空间</div>
+                    </div>
+                </div>
+                <div class="text-xs text-slate-400">
+                    💡 ${s.tips[0]}
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    // 更新节省潜力总览
+    document.getElementById('total-savings-potential').textContent = Math.round(totalPotential).toLocaleString();
+    document.getElementById('yearly-savings-potential').textContent = '¥' + Math.round(totalPotential * 12).toLocaleString();
+    document.getElementById('decade-savings-potential').textContent = '¥' + Math.round(totalPotential * 12 * 10 * 1.06).toLocaleString();
+    
+    // 生成有趣对比
+    generateFunComparisons(totalPotential);
+}
+
+function showSavingDetail(key) {
+    const suggestion = SAVINGS_SUGGESTIONS[key];
+    const tips = suggestion.tips.map(t => `• ${t}`).join('\n');
+    showToast(`${suggestion.emoji} ${suggestion.name}建议:\n${tips}`, 'info');
+}
+
+function generateFunComparisons(totalSavings) {
+    const container = document.getElementById('fun-comparisons');
+    if (!container) return;
+    
+    // 计算每月可节省的花费数量
+    const comparisons = FUN_COMPARISONS.map(item => {
+        const count = Math.floor(totalSavings / item.price);
+        return { ...item, count };
+    }).filter(c => c.count >= 1).slice(0, 4);
+    
+    if (comparisons.length === 0) {
+        comparisons.push(...FUN_COMPARISONS.slice(0, 4).map(c => ({ ...c, count: 0 })));
+    }
+    
+    container.innerHTML = comparisons.map(item => `
+        <div class="glass-card p-4 rounded-xl">
+            <div class="text-3xl mb-2">${item.emoji}</div>
+            <div class="font-bold">${item.count}个${item.name}</div>
+            <div class="text-xs text-slate-400">省下的钱可以买</div>
+        </div>
+    `).join('');
+}
+
+function calculateMonthlyIncome() {
+    const { income } = appState.profile;
+    return (
+        (income.self || 0) + (income.partner || 0) +
+        ((income.bonus || 0) + (income.partnerBonus || 0)) / 12 +
+        (income.rent || 0) + (income.invest || 0) + (income.side || 0)
+    );
+}
+
+// ============================================
+// 目标规划页面
+// ============================================
+function initGoalsPage() {
+    const { plan } = appState.profile;
+    const monthlySavings = plan?.monthlySavings || 0;
+    const targetAmount = plan?.targetAmount || 0;
+    const currentSavings = appState.user.currentSavings;
+    
+    // 计算用户标签
+    const userTags = calculateUserTags();
+    const mainTag = userTags[0] || USER_TAGS.saver;
+    
+    // 更新主标签
+    document.getElementById('user-tag').textContent = `${mainTag.emoji} ${mainTag.name}`;
+    
+    // 更新标签列表
+    const tagsContainer = document.getElementById('user-tags-list');
+    if (tagsContainer) {
+        tagsContainer.innerHTML = userTags.map(tag => `
+            <span class="user-tag text-white" style="--tag-color1: ${tag.color1}; --tag-color2: ${tag.color2}">
+                ${tag.emoji} ${tag.name}
+            </span>
+        `).join('');
+    }
+    
+    // 生成三阶段目标
+    generateGoalTimeline(targetAmount, monthlySavings, currentSavings);
+    
+    // 生成成就系统
+    generateAchievements(plan);
+}
+
+function calculateUserTags() {
+    const { plan } = appState.profile;
+    const { monthlySavings, monthlyExpense, targetAmount } = plan || {};
+    const monthlyIncome = calculateMonthlyIncome();
+    
+    const data = {
+        savingsRate: monthlyIncome > 0 ? (monthlySavings / monthlyIncome * 100) : 0,
+        monthlyPassiveIncome: appState.profile.income?.invest || 0,
+        totalExpense: monthlyExpense || 0,
+        income: monthlyIncome || 0,
+        progress: targetAmount > 0 ? (appState.user.currentSavings / targetAmount * 100) : 0,
+        yearsToGoal: calculateYearsToGoal(targetAmount) || 999
+    };
+    
+    return Object.values(USER_TAGS).filter(tag => tag.condition(data));
+}
+
+function generateGoalTimeline(targetAmount, monthlySavings, currentSavings) {
+    const container = document.getElementById('goal-timeline');
+    if (!container) return;
+    
+    // 计算各阶段目标金额
+    const emergencyFund = monthlySavings * 6; // 6个月支出作为应急基金
+    
+    const phases = [
+        {
+            ...GOAL_PHASES.short,
+            amount: emergencyFund,
+            progress: Math.min(100, Math.round(currentSavings / emergencyFund * 100)),
+            status: currentSavings >= emergencyFund ? 'completed' : 'active'
+        },
+        {
+            ...GOAL_PHASES.medium,
+            amount: 500000,
+            progress: Math.min(100, Math.round(currentSavings / 500000 * 100)),
+            status: currentSavings >= 500000 ? 'completed' : (currentSavings >= emergencyFund ? 'active' : 'locked')
+        },
+        {
+            ...GOAL_PHASES.long,
+            amount: targetAmount,
+            progress: Math.min(100, Math.round(currentSavings / targetAmount * 100)),
+            status: currentSavings >= targetAmount ? 'completed' : (currentSavings >= 500000 ? 'active' : 'locked')
+        }
+    ];
+    
+    container.innerHTML = phases.map((phase, index) => `
+        <div class="goal-phase mb-6">
+            <div class="glass-card p-4 ${phase.status === 'locked' ? 'opacity-50' : ''}">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <div class="text-2xl">${phase.emoji}</div>
+                        <div>
+                            <div class="font-bold">${phase.name}</div>
+                            <div class="text-xs text-slate-400">${phase.duration}</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold" style="color: ${phase.color}">¥${phase.amount.toLocaleString()}</div>
+                        <div class="text-xs text-slate-400">${phase.progress}%完成</div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="h-2 bg-slate-700 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all" 
+                             style="width: ${phase.progress}%; background: ${phase.color}"></div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    ${phase.milestones.map(m => `
+                        <div class="text-xs text-slate-400 flex items-center gap-1">
+                            <span>✓</span> ${m}
+                        </div>
+                    `).join('')}
+                </div>
+                
+                ${phase.status === 'completed' ? '<div class="mt-2 text-center text-green-400 text-sm">🎉 已达成!</div>' : ''}
+                ${phase.status === 'locked' ? '<div class="mt-2 text-center text-slate-500 text-sm">🔒 先完成上阶段</div>' : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+function generateAchievements(plan) {
+    const container = document.getElementById('achievements-grid');
+    if (!container) return;
+    
+    const { progress } = plan || {};
+    
+    container.innerHTML = Object.entries(ACHIEVEMENTS).map(([key, achievement]) => {
+        let unlocked = achievement.unlocked;
+        
+        // 根据进度解锁
+        if (key === 'halfWay' && progress >= 50) unlocked = true;
+        if (key === 'houseReady' && appState.user.currentSavings >= 300000) unlocked = true;
+        
+        return `
+            <div class="glass-card p-4 text-center ${unlocked ? '' : 'opacity-50 grayscale'}">
+                <div class="text-3xl mb-2">${achievement.emoji}</div>
+                <div class="text-sm font-bold">${achievement.name}</div>
+                <div class="text-xs text-slate-400">${achievement.description}</div>
+                ${unlocked ? '<div class="text-xs text-green-400 mt-1">✓ 已解锁</div>' : '<div class="text-xs text-slate-500 mt-1">未解锁</div>'}
+            </div>
+        `;
+    }).join('');
+}
+
+// ============================================
+// 更新分享卡片
+// ============================================
+function updateShareCard() {
+    const { plan, city } = appState.profile;
+    if (!plan) return;
+    
+    const cityName = city ? CITY_DATA[city]?.name : '未知城市';
+    
+    document.getElementById('share-city').textContent = cityName;
+    document.getElementById('share-target').textContent = plan.targetAmount.toLocaleString();
+    document.getElementById('share-progress').textContent = plan.progress + '%';
+    document.getElementById('share-years').textContent = document.getElementById('years-to-goal')?.textContent || '∞';
+    document.getElementById('share-monthly').textContent = '¥' + Math.round(plan.monthlySavings).toLocaleString();
+    document.getElementById('share-progress-bar').textContent = plan.progress + '%';
+    document.getElementById('share-progress-fill').style.width = plan.progress + '%';
+    
+    // 更新成就文字
+    const achievementText = plan.beatPercent >= 80 
+        ? '储蓄率击败90%的年轻人' 
+        : (plan.beatPercent >= 50 ? '储蓄率击败70%的年轻人' : '正在向躺平迈进');
+    document.getElementById('share-achievement').textContent = achievementText;
+    
+    // 更新用户标签
+    const userTags = calculateUserTags();
+    if (userTags.length > 0) {
+        const mainTag = userTags[0];
+        document.getElementById('share-user-tag').textContent = `${mainTag.emoji} ${mainTag.name}`;
+    }
+    
+    // 更新标题
+    if (plan.progress >= 100) {
+        document.getElementById('share-title').textContent = '🎉 我已达成躺平!';
+    } else if (plan.progress >= 50) {
+        document.getElementById('share-title').textContent = '🚀 半程达成!';
+    } else {
+        document.getElementById('share-title').textContent = '💪 我的财务体检报告';
+    }
+}
+
+// ============================================
+// 页面初始化钩子
+// ============================================
+const originalShowPage = showPage;
+showPage = function(pageId) {
+    originalShowPage(pageId);
+    
+    // 页面特定初始化
+    switch(pageId) {
+        case 'pyramid':
+            initPyramidPage();
+            break;
+        case 'savings':
+            initSavingsPage();
+            break;
+        case 'goals':
+            initGoalsPage();
+            break;
+        case 'share':
+            updateShareCard();
+            break;
+    }
+};
