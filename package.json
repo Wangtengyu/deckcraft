@@ -1,5 +1,15 @@
 {
+  "name": "fdeck",
+  "version": "1.0.0",
+  "description": "FDeck PPT生成工具 - 图片库优先，AI生图兜底",
+  "scripts": {
+    "extract": "node scripts/extract-images-from-ppt.js batch",
+    "extract-single": "node scripts/extract-images-from-ppt.js single",
+    "stats": "node scripts/extract-images-from-ppt.js stats"
+  },
   "dependencies": {
-    "pptxgenjs": "^4.0.1"
+    "pptxgenjs": "^4.0.1",
+    "adm-zip": "^0.5.10",
+    "sharp": "^0.33.0"
   }
 }

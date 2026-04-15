@@ -1,0 +1,472 @@
+{
+  "images": [
+    {
+      "id": "tpl_guobao_001_cover",
+      "path": "templates-assets/images/tpl_guobao_001/image1.png",
+      "type": "cover",
+      "style": "party_red",
+      "keywords": [
+        "国宝",
+        "文化",
+        "展示",
+        "高端",
+        "动态",
+        "党政"
+      ],
+      "colors": [
+        "#C41E3A",
+        "#FFD700",
+        "#8B0000"
+      ],
+      "layout": "center",
+      "mood": "庄重大气、华贵典雅",
+      "usage_count": 0,
+      "quality_score": 4.8,
+      "source": "template_tpl_guobao_001"
+    },
+    {
+      "id": "tpl_guobao_001_content_01",
+      "path": "templates-assets/images/tpl_guobao_001/image2.png",
+      "type": "content",
+      "style": "party_red",
+      "keywords": [
+        "国宝",
+        "文化",
+        "展示",
+        "内容页"
+      ],
+      "colors": [
+        "#C41E3A",
+        "#FFF8DC"
+      ],
+      "layout": "left_title",
+      "mood": "庄重典雅",
+      "usage_count": 0,
+      "quality_score": 4.5,
+      "source": "template_tpl_guobao_001"
+    },
+    {
+      "id": "tpl_guobao_001_content_02",
+      "path": "templates-assets/images/tpl_guobao_001/image3.png",
+      "type": "content",
+      "style": "party_red",
+      "keywords": [
+        "国宝",
+        "文化",
+        "展示",
+        "内容页"
+      ],
+      "colors": [
+        "#C41E3A",
+        "#FFD700"
+      ],
+      "layout": "numbered",
+      "mood": "庄重大气",
+      "usage_count": 0,
+      "quality_score": 4.6,
+      "source": "template_tpl_guobao_001"
+    },
+    {
+      "id": "tpl_guobao_001_content_03",
+      "path": "templates-assets/images/tpl_guobao_001/image4.png",
+      "type": "content",
+      "style": "party_red",
+      "keywords": [
+        "国宝",
+        "文化",
+        "展示",
+        "内容页"
+      ],
+      "colors": [
+        "#8B0000",
+        "#FFF8DC"
+      ],
+      "layout": "big_points",
+      "mood": "华贵典雅",
+      "usage_count": 0,
+      "quality_score": 4.7,
+      "source": "template_tpl_guobao_001"
+    },
+    {
+      "id": "tpl_guobao_001_content_04",
+      "path": "templates-assets/images/tpl_guobao_001/image5.png",
+      "type": "content",
+      "style": "party_red",
+      "keywords": [
+        "国宝",
+        "文化",
+        "展示",
+        "内容页"
+      ],
+      "colors": [
+        "#C41E3A",
+        "#FFD700"
+      ],
+      "layout": "card",
+      "mood": "庄重大气",
+      "usage_count": 0,
+      "quality_score": 4.5,
+      "source": "template_tpl_guobao_001"
+    },
+    {
+      "id": "tpl_guobao_001_content_05",
+      "path": "templates-assets/images/tpl_guobao_001/image6.png",
+      "type": "content",
+      "style": "party_red",
+      "keywords": [
+        "国宝",
+        "文化",
+        "展示",
+        "内容页"
+      ],
+      "colors": [
+        "#C41E3A",
+        "#FFF8DC"
+      ],
+      "layout": "timeline",
+      "mood": "典雅庄重",
+      "usage_count": 0,
+      "quality_score": 4.6,
+      "source": "template_tpl_guobao_001"
+    },
+    {
+      "id": "tpl_guobao_001_content_06",
+      "path": "templates-assets/images/tpl_guobao_001/image7.png",
+      "type": "content",
+      "style": "party_red",
+      "keywords": [
+        "国宝",
+        "文化",
+        "展示",
+        "内容页"
+      ],
+      "colors": [
+        "#8B0000",
+        "#FFD700"
+      ],
+      "layout": "left_title",
+      "mood": "华贵典雅",
+      "usage_count": 0,
+      "quality_score": 4.5,
+      "source": "template_tpl_guobao_001"
+    },
+    {
+      "id": "tpl_guobao_001_content_07",
+      "path": "templates-assets/images/tpl_guobao_001/image8.png",
+      "type": "content",
+      "style": "party_red",
+      "keywords": [
+        "国宝",
+        "文化",
+        "展示",
+        "内容页"
+      ],
+      "colors": [
+        "#C41E3A",
+        "#FFF8DC"
+      ],
+      "layout": "numbered",
+      "mood": "庄重大气",
+      "usage_count": 0,
+      "quality_score": 4.6,
+      "source": "template_tpl_guobao_001"
+    },
+    {
+      "id": "tpl_guobao_001_content_08",
+      "path": "templates-assets/images/tpl_guobao_001/image9.png",
+      "type": "content",
+      "style": "party_red",
+      "keywords": [
+        "国宝",
+        "文化",
+        "展示",
+        "内容页"
+      ],
+      "colors": [
+        "#C41E3A",
+        "#FFD700"
+      ],
+      "layout": "big_points",
+      "mood": "典雅华贵",
+      "usage_count": 0,
+      "quality_score": 4.7,
+      "source": "template_tpl_guobao_001"
+    },
+    {
+      "id": "tpl_guobao_001_ending",
+      "path": "templates-assets/images/tpl_guobao_001/image10.png",
+      "type": "ending",
+      "style": "party_red",
+      "keywords": [
+        "国宝",
+        "文化",
+        "展示",
+        "结尾页"
+      ],
+      "colors": [
+        "#8B0000",
+        "#FFD700"
+      ],
+      "layout": "center",
+      "mood": "庄重典雅",
+      "usage_count": 0,
+      "quality_score": 4.8,
+      "source": "template_tpl_guobao_001"
+    },
+    {
+      "id": "tpl_guobao-display_1776219637257_1",
+      "path": "templates-assets/images/library/tpl_guobao-display_1776219637257_1.png",
+      "type": "cover",
+      "style": "business",
+      "keywords": [
+        "商务",
+        "企业",
+        "汇报",
+        "方案",
+        "计划"
+      ],
+      "colors": [
+        "#202000",
+        "#000000",
+        "#404020"
+      ],
+      "layout": "center",
+      "mood": "简洁专业、清爽大气",
+      "usage_count": 0,
+      "quality_score": 4.443098958333334,
+      "source": "template_tpl_guobao-display_1776219637257",
+      "extracted_from": "guobao-display"
+    },
+    {
+      "id": "tpl_guobao-display_1776219637257_2",
+      "path": "templates-assets/images/library/tpl_guobao-display_1776219637257_2.png",
+      "type": "content",
+      "style": "business",
+      "keywords": [
+        "商务",
+        "企业",
+        "汇报",
+        "方案",
+        "计划"
+      ],
+      "colors": [
+        "#000000",
+        "#202000",
+        "#002020"
+      ],
+      "layout": "center",
+      "mood": "简洁专业、清爽大气",
+      "usage_count": 0,
+      "quality_score": 5,
+      "source": "template_tpl_guobao-display_1776219637257",
+      "extracted_from": "guobao-display"
+    },
+    {
+      "id": "tpl_guobao-display_1776219637257_3",
+      "path": "templates-assets/images/library/tpl_guobao-display_1776219637257_3.png",
+      "type": "content",
+      "style": "warm",
+      "keywords": [
+        "培训",
+        "教育",
+        "生活",
+        "健康",
+        "家庭"
+      ],
+      "colors": [
+        "#202000",
+        "#e0e0e0",
+        "#000000"
+      ],
+      "layout": "center",
+      "mood": "温暖舒适、亲切自然",
+      "usage_count": 0,
+      "quality_score": 4.442498553240741,
+      "source": "template_tpl_guobao-display_1776219637257",
+      "extracted_from": "guobao-display"
+    },
+    {
+      "id": "tpl_guobao-display_1776219637257_4",
+      "path": "templates-assets/images/library/tpl_guobao-display_1776219637257_4.png",
+      "type": "content",
+      "style": "warm",
+      "keywords": [
+        "培训",
+        "教育",
+        "生活",
+        "健康",
+        "家庭"
+      ],
+      "colors": [
+        "#000000",
+        "#202000",
+        "#806040"
+      ],
+      "layout": "center",
+      "mood": "温暖舒适、亲切自然",
+      "usage_count": 0,
+      "quality_score": 4.443098958333334,
+      "source": "template_tpl_guobao-display_1776219637257",
+      "extracted_from": "guobao-display"
+    },
+    {
+      "id": "tpl_guobao-display_1776219637257_5",
+      "path": "templates-assets/images/library/tpl_guobao-display_1776219637257_5.png",
+      "type": "content",
+      "style": "warm",
+      "keywords": [
+        "培训",
+        "教育",
+        "生活",
+        "健康",
+        "家庭"
+      ],
+      "colors": [
+        "#000000",
+        "#806040",
+        "#a08060"
+      ],
+      "layout": "center",
+      "mood": "温暖舒适、亲切自然",
+      "usage_count": 0,
+      "quality_score": 4.443098958333334,
+      "source": "template_tpl_guobao-display_1776219637257",
+      "extracted_from": "guobao-display"
+    },
+    {
+      "id": "tpl_guobao-display_1776219637257_6",
+      "path": "templates-assets/images/library/tpl_guobao-display_1776219637257_6.png",
+      "type": "content",
+      "style": "warm",
+      "keywords": [
+        "培训",
+        "教育",
+        "生活",
+        "健康",
+        "家庭"
+      ],
+      "colors": [
+        "#e0e0e0",
+        "#000000",
+        "#202020"
+      ],
+      "layout": "center",
+      "mood": "温暖舒适、亲切自然",
+      "usage_count": 0,
+      "quality_score": 5,
+      "source": "template_tpl_guobao-display_1776219637257",
+      "extracted_from": "guobao-display"
+    },
+    {
+      "id": "tpl_guobao-display_1776219637257_7",
+      "path": "templates-assets/images/library/tpl_guobao-display_1776219637257_7.png",
+      "type": "content",
+      "style": "business",
+      "keywords": [
+        "商务",
+        "企业",
+        "汇报",
+        "方案",
+        "计划"
+      ],
+      "colors": [
+        "#000000",
+        "#c0c0c0",
+        "#202000"
+      ],
+      "layout": "center",
+      "mood": "简洁专业、清爽大气",
+      "usage_count": 0,
+      "quality_score": 4.443098958333334,
+      "source": "template_tpl_guobao-display_1776219637257",
+      "extracted_from": "guobao-display"
+    },
+    {
+      "id": "tpl_guobao-display_1776219637257_8",
+      "path": "templates-assets/images/library/tpl_guobao-display_1776219637257_8.png",
+      "type": "content",
+      "style": "business",
+      "keywords": [
+        "商务",
+        "企业",
+        "汇报",
+        "方案",
+        "计划"
+      ],
+      "colors": [
+        "#000000",
+        "#c0c0c0",
+        "#a0a0a0"
+      ],
+      "layout": "center",
+      "mood": "简洁专业、清爽大气",
+      "usage_count": 0,
+      "quality_score": 5,
+      "source": "template_tpl_guobao-display_1776219637257",
+      "extracted_from": "guobao-display"
+    },
+    {
+      "id": "tpl_guobao-display_1776219637257_9",
+      "path": "templates-assets/images/library/tpl_guobao-display_1776219637257_9.png",
+      "type": "content",
+      "style": "warm",
+      "keywords": [
+        "培训",
+        "教育",
+        "生活",
+        "健康",
+        "家庭"
+      ],
+      "colors": [
+        "#000000",
+        "#202000",
+        "#806040"
+      ],
+      "layout": "center",
+      "mood": "温暖舒适、亲切自然",
+      "usage_count": 0,
+      "quality_score": 5,
+      "source": "template_tpl_guobao-display_1776219637257",
+      "extracted_from": "guobao-display"
+    },
+    {
+      "id": "tpl_guobao-display_1776219637257_10",
+      "path": "templates-assets/images/library/tpl_guobao-display_1776219637257_10.png",
+      "type": "ending",
+      "style": "warm",
+      "keywords": [
+        "培训",
+        "教育",
+        "生活",
+        "健康",
+        "家庭"
+      ],
+      "colors": [
+        "#000000",
+        "#806040",
+        "#604080"
+      ],
+      "layout": "center",
+      "mood": "温暖舒适、亲切自然",
+      "usage_count": 0,
+      "quality_score": 5,
+      "source": "template_tpl_guobao-display_1776219637257",
+      "extracted_from": "guobao-display"
+    }
+  ],
+  "stats": {
+    "total_images": 20,
+    "by_style": {
+      "party_red": 10,
+      "business": 4,
+      "warm": 6
+    },
+    "by_type": {
+      "cover": 2,
+      "content": 16,
+      "ending": 2
+    },
+    "last_updated": "2026-04-15T02:20:40.300Z",
+    "version": "1.0"
+  }
+}
