@@ -1547,6 +1547,15 @@ export default async function (ctx) {
           aiImages: aiCount,
           costSaving: Math.round(libraryCount / images.length * 100) + '%'
         },
+        // V9新增：演讲稿询问
+        askSpeechScript: true,  // 前端收到此字段后询问用户
+        pptContent: {  // 用于演讲稿生成
+          title: pptTitle,
+          pages: pages.map(p => ({
+            title: p.section || p.title || '',
+            content: p.points ? p.points.join('、') : (p.content || '')
+          }))
+        },
         brand: { en: BRAND_EN, cn: BRAND_CN }
       }
     }
