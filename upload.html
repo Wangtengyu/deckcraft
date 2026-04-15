@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模板投喂 - 秒演</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0a0a0f',
+                        surface: '#12121a',
+                        card: '#1a1a24',
+                        border: '#2a2a3a',
+                        accent: '#00d4ff',
+                        accent2: '#ff6b9d',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #0a0a0f;
+            color: #ffffff;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #00d4ff 0%, #ff6b9d 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff 0%, #00a8cc 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.35);
+        }
+        
+        .btn-secondary {
+            background: #1a1a24;
+            border: 1px solid #2a2a3a;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            border-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+        }
+        
+        .upload-zone {
+            border: 2px dashed #2a2a3a;
+            transition: all 0.3s ease;
+        }
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.05);
+        }
+        
+        .feature-card {
+            background: linear-gradient(145deg, #1a1a24 0%, #12121a 100%);
+        }
+        
+        input, textarea, select {
+            background: #1a1a24 !important;
+            border: 1px solid #2a2a3a !important;
+            color: white !important;
+            transition: all 0.3s ease;
+        }
+        input:focus, textarea:focus, select:focus {
+            border-color: #00d4ff !important;
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1) !important;
+            outline: none !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-dark/90 backdrop-blur-md border-b border-white/5">
+        <div class="max-w-6xl mx-auto px-4 md:px-6 py-4 flex justify-between items-center">
+            <!-- Logo -->
+            <a href="index.html" class="flex items-center space-x-2">
+                <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-accent to-accent2 flex items-center justify-center">
+                    <i class="fas fa-layer-group text-white text-sm"></i>
+                </div>
+                <div class="flex items-baseline">
+                    <span class="text-lg font-bold">FDeck</span>
+                    <span class="text-xs text-gray-500 ml-1.5 hidden sm:inline">/ 秒演</span>
+                </div>
+            </a>
+            
+            <!-- 导航链接 -->
+            <div class="flex items-center space-x-6">
+                <a href="index.html" class="text-gray-400 hover:text-white transition text-sm font-medium">首页</a>
+                <a href="upload.html" class="text-white text-sm font-medium">模板投喂</a>
+                <a href="index.html#templates" class="text-gray-400 hover:text-white transition text-sm font-medium">我的模板</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <main class="pt-24 pb-12 px-4 md:px-6">
+        <div class="max-w-4xl mx-auto">
+            <!-- 标题 -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold mb-2">模板投喂</h1>
+                <p class="text-gray-400">上传PPT模板，图片自动入库复用</p>
+            </div>
+            
+            <!-- 上传区域 -->
+            <div class="feature-card rounded-2xl border border-border p-8 mb-8">
+                <div 
+                    id="uploadZone" 
+                    class="upload-zone rounded-xl p-12 text-center cursor-pointer"
+                    onclick="document.getElementById('fileInput').click()"
+                >
+                    <input type="file" id="fileInput" accept=".pptx" class="hidden" onchange="handleFileSelect(event)">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent/10 flex items-center justify-center">
+                        <i class="fas fa-cloud-upload-alt text-3xl text-accent"></i>
+                    </div>
+                    <p class="text-lg font-medium mb-2">拖拽上传或点击选择</p>
+                    <p class="text-gray-500 text-sm">支持格式：.pptx</p>
+                </div>
+            </div>
+            
+            <!-- 解析结果预览 -->
+            <div id="parseResult" class="hidden feature-card rounded-2xl border border-border p-6 mb-8">
+                <h3 class="text-lg font-bold mb-4">解析结果</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <!-- 模板名称 -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">模板名称</label>
+                        <input type="text" id="templateName" class="w-full rounded-xl px-4 py-3" placeholder="例如：党政红金模板">
+                    </div>
+                    
+                    <!-- 分类选择 -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">分类</label>
+                        <select id="templateCategory" class="w-full rounded-xl px-4 py-3">
+                            <option value="party">党政</option>
+                            <option value="business">商务</option>
+                            <option value="tech">科技</option>
+                            <option value="education">教育</option>
+                            <option value="life">生活</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- 解析信息 -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-surface rounded-xl p-4">
+                        <p class="text-gray-500 text-xs mb-1">风格识别</p>
+                        <p id="styleType" class="text-accent font-medium">-</p>
+                    </div>
+                    <div class="bg-surface rounded-xl p-4">
+                        <p class="text-gray-500 text-xs mb-1">提取图片</p>
+                        <p id="imageCount" class="text-accent font-medium">0 张</p>
+                    </div>
+                    <div class="bg-surface rounded-xl p-4">
+                        <p class="text-gray-500 text-xs mb-1">页面数量</p>
+                        <p id="pageCount" class="text-accent font-medium">0 页</p>
+                    </div>
+                    <div class="bg-surface rounded-xl p-4">
+                        <p class="text-gray-500 text-xs mb-1">文件大小</p>
+                        <p id="fileSize" class="text-accent font-medium">-</p>
+                    </div>
+                </div>
+                
+                <!-- 提取的图片预览 -->
+                <div id="imagePreview" class="mb-6">
+                    <p class="text-sm font-medium mb-2">提取的图片预览</p>
+                    <div id="imageGrid" class="grid grid-cols-4 md:grid-cols-6 gap-2">
+                        <!-- 图片缩略图将动态插入 -->
+                    </div>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="flex space-x-3">
+                    <button onclick="submitTemplate()" class="flex-1 btn-primary text-white py-3 rounded-xl font-medium">
+                        <i class="fas fa-check mr-2"></i>
+                        确认入库
+                    </button>
+                    <button onclick="cancelUpload()" class="btn-secondary text-white py-3 px-6 rounded-xl font-medium">
+                        取消
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 已投喂模板列表 -->
+            <div class="feature-card rounded-2xl border border-border p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-bold">已投喂模板</h3>
+                    <span class="text-gray-500 text-sm">共 <span id="totalTemplates">3</span> 个</span>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left text-gray-500 text-sm border-b border-border">
+                                <th class="pb-3">模板</th>
+                                <th class="pb-3">分类</th>
+                                <th class="pb-3">图片数</th>
+                                <th class="pb-3">使用次数</th>
+                                <th class="pb-3">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="templateList">
+                            <tr class="border-b border-border/50">
+                                <td class="py-4">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-red-900/50 to-amber-900/50 flex items-center justify-center">
+                                            <i class="fas fa-flag text-red-300"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">国宝文化展示</p>
+                                            <p class="text-xs text-gray-500">党政红金风格</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-4 text-gray-400">党政</td>
+                                <td class="py-4 text-accent">20</td>
+                                <td class="py-4 text-gray-400">0</td>
+                                <td class="py-4">
+                                    <button class="text-red-400 hover:text-red-300 text-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 拖拽上传
+        const uploadZone = document.getElementById('uploadZone')
+        
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault()
+            uploadZone.classList.add('dragover')
+        })
+        
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover')
+        })
+        
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault()
+            uploadZone.classList.remove('dragover')
+            const files = e.dataTransfer.files
+            if (files.length > 0 && files[0].name.endsWith('.pptx')) {
+                processFile(files[0])
+            } else {
+                alert('请上传.pptx格式的文件')
+            }
+        })
+        
+        function handleFileSelect(event) {
+            const file = event.target.files[0]
+            if (file) {
+                processFile(file)
+            }
+        }
+        
+        function processFile(file) {
+            console.log('处理文件:', file.name)
+            
+            // 显示解析结果
+            document.getElementById('parseResult').classList.remove('hidden')
+            
+            // 模拟解析结果（实际需要调用后端API）
+            document.getElementById('templateName').value = file.name.replace('.pptx', '')
+            document.getElementById('styleType').textContent = '党政红金'
+            document.getElementById('imageCount').textContent = '20 张'
+            document.getElementById('pageCount').textContent = '8 页'
+            document.getElementById('fileSize').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB'
+            
+            // 模拟图片预览
+            const imageGrid = document.getElementById('imageGrid')
+            imageGrid.innerHTML = ''
+            for (let i = 0; i < 8; i++) {
+                imageGrid.innerHTML += `
+                    <div class="aspect-video bg-surface rounded-lg overflow-hidden">
+                        <div class="w-full h-full bg-gradient-to-br from-red-900/30 to-amber-900/30"></div>
+                    </div>
+                `
+            }
+        }
+        
+        function submitTemplate() {
+            const name = document.getElementById('templateName').value
+            const category = document.getElementById('templateCategory').value
+            
+            if (!name) {
+                alert('请输入模板名称')
+                return
+            }
+            
+            // TODO: 调用后端API上传模板
+            console.log('提交模板:', { name, category })
+            alert('模板投喂成功！')
+            
+            // 重置
+            cancelUpload()
+        }
+        
+        function cancelUpload() {
+            document.getElementById('parseResult').classList.add('hidden')
+            document.getElementById('fileInput').value = ''
+        }
+    </script>
+</body>
+</html>

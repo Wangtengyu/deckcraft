@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>秒演 - AI一键生成专业PPT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0a0a0f',
+                        surface: '#12121a',
+                        card: '#1a1a24',
+                        border: '#2a2a3a',
+                        accent: '#00d4ff',
+                        accent2: '#ff6b9d',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #0a0a0f;
+            color: #ffffff;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #00d4ff 0%, #ff6b9d 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            border-color: rgba(0, 212, 255, 0.4);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff 0%, #00a8cc 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.35);
+        }
+        
+        .input-focus:focus {
+            border-color: rgba(0, 212, 255, 0.5);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+        }
+        
+        .tab-active {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(255, 107, 157, 0.15) 100%);
+            border-color: rgba(0, 212, 255, 0.4);
+            color: #00d4ff;
+        }
+        
+        .platform-btn.active {
+            background: linear-gradient(135deg, #00d4ff 0%, #ff6b9d 100%);
+            color: white;
+        }
+        
+        .template-card {
+            background: linear-gradient(145deg, #1a1a24 0%, #12121a 100%);
+        }
+        
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #12121a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a3a;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-dark/90 backdrop-blur-md border-b border-white/5">
+        <div class="max-w-6xl mx-auto px-4 md:px-6 py-4 flex justify-between items-center">
+            <!-- Logo -->
+            <div class="flex items-center space-x-2">
+                <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-accent to-accent2 flex items-center justify-center">
+                    <i class="fas fa-layer-group text-white text-sm"></i>
+                </div>
+                <div class="flex items-baseline">
+                    <span class="text-lg font-bold">FDeck</span>
+                    <span class="text-xs text-gray-500 ml-1.5 hidden sm:inline">/ 秒演</span>
+                </div>
+            </div>
+            
+            <!-- 导航 -->
+            <div class="flex items-center space-x-6">
+                <a href="#templates" class="text-gray-400 hover:text-white transition text-sm font-medium">模板库</a>
+                <a href="#" class="text-gray-400 hover:text-white transition text-sm font-medium">我的贡献</a>
+                <button class="text-sm text-gray-400 hover:text-white transition flex items-center space-x-1">
+                    <i class="fas fa-user"></i>
+                    <span>登录</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-28 pb-16 px-4 md:px-6">
+        <div class="max-w-4xl mx-auto text-center">
+            <!-- 主标题 -->
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+                一键生成<span class="gradient-text">专业PPT</span>
+            </h1>
+            <p class="text-gray-400 text-lg md:text-xl mb-10">
+                输入主题，AI秒级产出精美演示文稿
+            </p>
+            
+            <!-- 搜索/输入区 -->
+            <div class="max-w-2xl mx-auto mb-6">
+                <div class="flex flex-col md:flex-row gap-3">
+                    <div class="flex-1 relative">
+                        <i class="fas fa-wand-magic-sparkles absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                        <input 
+                            type="text" 
+                            id="topicInput"
+                            placeholder="输入PPT主题，如：2024年度工作汇报" 
+                            class="w-full bg-surface border border-border rounded-xl pl-12 pr-4 py-4 text-white placeholder-gray-500 focus:outline-none input-focus transition"
+                            onkeypress="if(event.key==='Enter') generatePPT()"
+                        >
+                    </div>
+                    <button onclick="generatePPT()" class="btn-primary text-white px-8 py-4 rounded-xl font-medium whitespace-nowrap">
+                        <i class="fas fa-rocket mr-2"></i>
+                        立即生成
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 平台选择 -->
+            <div class="flex justify-center items-center space-x-4 text-sm">
+                <span class="text-gray-500">生成平台：</span>
+                <div class="flex items-center space-x-2">
+                    <button class="platform-btn active px-4 py-2 rounded-lg border border-border text-gray-300 transition flex items-center space-x-2" onclick="selectPlatform(this, 'ppt')">
+                        <i class="fas fa-file-powerpoint"></i>
+                        <span>PPT</span>
+                    </button>
+                    <button class="platform-btn px-4 py-2 rounded-lg border border-border text-gray-300 transition flex items-center space-x-2" onclick="selectPlatform(this, 'xiaohongshu')">
+                        <i class="fab fa-redhat"></i>
+                        <span>小红书</span>
+                    </button>
+                    <button class="platform-btn px-4 py-2 rounded-lg border border-border text-gray-300 transition flex items-center space-x-2" onclick="selectPlatform(this, 'wechat')">
+                        <i class="fab fa-weixin"></i>
+                        <span>微信</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 模板展示区 -->
+    <section id="templates" class="py-12 px-4 md:px-6">
+        <div class="max-w-6xl mx-auto">
+            <!-- 分类标签 -->
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-xl font-bold">精选模板</h2>
+                <div class="flex items-center space-x-2 overflow-x-auto pb-2 scrollbar-hide" style="-ms-overflow-style: none; scrollbar-width: none;">
+                    <button class="category-tab tab-active px-4 py-2 rounded-lg border border-border text-sm whitespace-nowrap transition" onclick="filterCategory(this, 'all')">全部</button>
+                    <button class="category-tab px-4 py-2 rounded-lg border border-border text-gray-400 text-sm whitespace-nowrap hover:border-accent/30 transition" onclick="filterCategory(this, 'party')">党政</button>
+                    <button class="category-tab px-4 py-2 rounded-lg border border-border text-gray-400 text-sm whitespace-nowrap hover:border-accent/30 transition" onclick="filterCategory(this, 'business')">商务</button>
+                    <button class="category-tab px-4 py-2 rounded-lg border border-border text-gray-400 text-sm whitespace-nowrap hover:border-accent/30 transition" onclick="filterCategory(this, 'tech')">科技</button>
+                    <button class="category-tab px-4 py-2 rounded-lg border border-border text-gray-400 text-sm whitespace-nowrap hover:border-accent/30 transition" onclick="filterCategory(this, 'education')">教育</button>
+                    <button class="category-tab px-4 py-2 rounded-lg border border-border text-gray-400 text-sm whitespace-nowrap hover:border-accent/30 transition" onclick="filterCategory(this, 'life')">生活</button>
+                </div>
+            </div>
+            
+            <!-- 模板卡片网格 -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6" id="templateGrid">
+                <!-- 模板卡片 1 -->
+                <div class="template-card rounded-xl border border-border overflow-hidden card-hover cursor-pointer" onclick="useTemplate('年度工作汇报')">
+                    <div class="aspect-video bg-gradient-to-br from-blue-900/50 to-cyan-900/50 relative overflow-hidden">
+                        <div class="absolute inset-0 p-4 flex flex-col justify-between">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-8 h-8 rounded bg-white/10 flex items-center justify-center">
+                                    <i class="fas fa-chart-line text-xs text-cyan-300"></i>
+                                </div>
+                                <div class="h-2 w-16 bg-white/20 rounded"></div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="h-2 w-full bg-white/15 rounded"></div>
+                                <div class="h-2 w-3/4 bg-white/10 rounded"></div>
+                                <div class="grid grid-cols-3 gap-2 mt-3">
+                                    <div class="h-8 bg-white/10 rounded"></div>
+                                    <div class="h-8 bg-white/10 rounded"></div>
+                                    <div class="h-8 bg-white/10 rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-medium text-sm mb-1">年度工作汇报</h3>
+                                <p class="text-xs text-gray-500">12,847 使用</p>
+                            </div>
+                            <button class="px-3 py-1.5 bg-accent/10 text-accent text-xs rounded-lg hover:bg-accent/20 transition">
+                                使用
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 模板卡片 2 -->
+                <div class="template-card rounded-xl border border-border overflow-hidden card-hover cursor-pointer" onclick="useTemplate('项目方案提案')">
+                    <div class="aspect-video bg-gradient-to-br from-purple-900/50 to-pink-900/50 relative overflow-hidden">
+                        <div class="absolute inset-0 p-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+                                    <i class="fas fa-project-diagram text-pink-300"></i>
+                                </div>
+                                <div class="flex space-x-1">
+                                    <div class="w-2 h-2 bg-red-400 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="h-2 w-20 bg-white/20 rounded"></div>
+                                <div class="h-2 w-full bg-white/10 rounded"></div>
+                                <div class="h-2 w-4/5 bg-white/10 rounded"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-medium text-sm mb-1">项目方案提案</h3>
+                                <p class="text-xs text-gray-500">8,392 使用</p>
+                            </div>
+                            <button class="px-3 py-1.5 bg-accent/10 text-accent text-xs rounded-lg hover:bg-accent/20 transition">
+                                使用
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 模板卡片 3 -->
+                <div class="template-card rounded-xl border border-border overflow-hidden card-hover cursor-pointer" onclick="useTemplate('产品发布会')">
+                    <div class="aspect-video bg-gradient-to-br from-orange-900/50 to-red-900/50 relative overflow-hidden">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="text-center">
+                                <div class="w-14 h-14 mx-auto bg-white/10 rounded-xl flex items-center justify-center mb-3">
+                                    <i class="fas fa-rocket text-xl text-orange-300"></i>
+                                </div>
+                                <div class="h-2 w-24 bg-white/20 rounded mx-auto mb-2"></div>
+                                <div class="h-1.5 w-16 bg-white/10 rounded mx-auto"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-medium text-sm mb-1">产品发布会</h3>
+                                <p class="text-xs text-gray-500">6,128 使用</p>
+                            </div>
+                            <button class="px-3 py-1.5 bg-accent/10 text-accent text-xs rounded-lg hover:bg-accent/20 transition">
+                                使用
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 模板卡片 4 -->
+                <div class="template-card rounded-xl border border-border overflow-hidden card-hover cursor-pointer" onclick="useTemplate('教学课件')">
+                    <div class="aspect-video bg-gradient-to-br from-green-900/50 to-teal-900/50 relative overflow-hidden">
+                        <div class="absolute inset-0 p-4 flex items-center justify-center">
+                            <div class="grid grid-cols-2 gap-3 w-full">
+                                <div class="bg-white/10 rounded-lg p-2 aspect-square flex items-center justify-center">
+                                    <i class="fas fa-book text-green-300"></i>
+                                </div>
+                                <div class="bg-white/10 rounded-lg p-2 aspect-square flex items-center justify-center">
+                                    <i class="fas fa-pencil-alt text-teal-300"></i>
+                                </div>
+                                <div class="col-span-2 bg-white/10 rounded-lg p-2">
+                                    <div class="h-1.5 bg-white/20 rounded mb-1"></div>
+                                    <div class="h-1 bg-white/10 rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-medium text-sm mb-1">教学课件</h3>
+                                <p class="text-xs text-gray-500">5,934 使用</p>
+                            </div>
+                            <button class="px-3 py-1.5 bg-accent/10 text-accent text-xs rounded-lg hover:bg-accent/20 transition">
+                                使用
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 模板卡片 5 -->
+                <div class="template-card rounded-xl border border-border overflow-hidden card-hover cursor-pointer" onclick="useTemplate('主题党日活动')">
+                    <div class="aspect-video bg-gradient-to-br from-red-900/50 to-yellow-900/50 relative overflow-hidden">
+                        <div class="absolute inset-0 p-4 flex flex-col justify-between">
+                            <div class="flex items-center justify-between">
+                                <div class="w-8 h-8 rounded-full bg-red-500/30 flex items-center justify-center">
+                                    <i class="fas fa-star text-xs text-yellow-300"></i>
+                                </div>
+                                <div class="flex space-x-1">
+                                    <div class="w-3 h-3 bg-yellow-400/50 rounded"></div>
+                                    <div class="w-3 h-3 bg-yellow-400/30 rounded"></div>
+                                    <div class="w-3 h-3 bg-yellow-400/20 rounded"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="h-2 w-12 bg-white/20 rounded mb-2"></div>
+                                <div class="h-1.5 w-full bg-white/10 rounded"></div>
+                                <div class="h-1.5 w-4/5 bg-white/10 rounded mt-1"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-medium text-sm mb-1">主题党日活动</h3>
+                                <p class="text-xs text-gray-500">4,521 使用</p>
+                            </div>
+                            <button class="px-3 py-1.5 bg-accent/10 text-accent text-xs rounded-lg hover:bg-accent/20 transition">
+                                使用
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 模板卡片 6 -->
+                <div class="template-card rounded-xl border border-border overflow-hidden card-hover cursor-pointer" onclick="useTemplate('商业计划书')">
+                    <div class="aspect-video bg-gradient-to-br from-indigo-900/50 to-violet-900/50 relative overflow-hidden">
+                        <div class="absolute inset-0 p-4">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+                                    <i class="fas fa-chart-pie text-indigo-300"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="h-2 w-full bg-white/20 rounded mb-2"></div>
+                                    <div class="h-1.5 w-3/4 bg-white/10 rounded"></div>
+                                </div>
+                            </div>
+                            <div class="h-12 bg-white/10 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-chart-bar text-white/30"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-medium text-sm mb-1">商业计划书</h3>
+                                <p class="text-xs text-gray-500">3,876 使用</p>
+                            </div>
+                            <button class="px-3 py-1.5 bg-accent/10 text-accent text-xs rounded-lg hover:bg-accent/20 transition">
+                                使用
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 模板卡片 7 -->
+                <div class="template-card rounded-xl border border-border overflow-hidden card-hover cursor-pointer" onclick="useTemplate('培训课件')">
+                    <div class="aspect-video bg-gradient-to-br from-cyan-900/50 to-blue-900/50 relative overflow-hidden">
+                        <div class="absolute inset-0 p-4">
+                            <div class="grid grid-cols-3 gap-2 mb-3">
+                                <div class="col-span-3 bg-white/10 rounded-lg p-2">
+                                    <div class="h-1.5 bg-white/20 rounded mb-1"></div>
+                                    <div class="h-1 bg-white/10 rounded"></div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-4 gap-2">
+                                <div class="aspect-square bg-white/10 rounded flex items-center justify-center">
+                                    <i class="fas fa-check text-xs text-green-300"></i>
+                                </div>
+                                <div class="aspect-square bg-white/10 rounded flex items-center justify-center">
+                                    <i class="fas fa-check text-xs text-green-300"></i>
+                                </div>
+                                <div class="aspect-square bg-white/10 rounded flex items-center justify-center">
+                                    <i class="fas fa-check text-xs text-green-300"></i>
+                                </div>
+                                <div class="aspect-square bg-white/10 rounded flex items-center justify-center">
+                                    <i class="fas fa-check text-xs text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-medium text-sm mb-1">培训课件</h3>
+                                <p class="text-xs text-gray-500">3,654 使用</p>
+                            </div>
+                            <button class="px-3 py-1.5 bg-accent/10 text-accent text-xs rounded-lg hover:bg-accent/20 transition">
+                                使用
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 模板卡片 8 -->
+                <div class="template-card rounded-xl border border-border overflow-hidden card-hover cursor-pointer" onclick="useTemplate('毕业答辩')">
+                    <div class="aspect-video bg-gradient-to-br from-rose-900/50 to-pink-900/50 relative overflow-hidden">
+                        <div class="absolute inset-0 p-4 flex items-center justify-center">
+                            <div class="text-center">
+                                <div class="w-16 h-16 mx-auto rounded-full bg-white/10 flex items-center justify-center mb-3">
+                                    <i class="fas fa-graduation-cap text-xl text-rose-300"></i>
+                                </div>
+                                <div class="h-2 w-20 bg-white/20 rounded mx-auto mb-2"></div>
+                                <div class="flex justify-center space-x-1">
+                                    <div class="w-2 h-2 bg-white/30 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-white/30 rounded-full"></div>
+                                    <div class="w-2 h-2 bg-white/30 rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-medium text-sm mb-1">毕业答辩</h3>
+                                <p class="text-xs text-gray-500">2,987 使用</p>
+                            </div>
+                            <button class="px-3 py-1.5 bg-accent/10 text-accent text-xs rounded-lg hover:bg-accent/20 transition">
+                                使用
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 分页 -->
+            <div class="flex justify-center items-center space-x-2 mt-10">
+                <button class="w-10 h-10 rounded-lg bg-surface border border-border flex items-center justify-center text-gray-400 hover:border-accent/30 transition">
+                    <i class="fas fa-chevron-left text-sm"></i>
+                </button>
+                <button class="w-10 h-10 rounded-lg bg-accent/20 border border-accent/40 flex items-center justify-center text-accent font-medium">1</button>
+                <button class="w-10 h-10 rounded-lg bg-surface border border-border flex items-center justify-center text-gray-400 hover:border-accent/30 transition">2</button>
+                <button class="w-10 h-10 rounded-lg bg-surface border border-border flex items-center justify-center text-gray-400 hover:border-accent/30 transition">3</button>
+                <span class="text-gray-500 px-2">...</span>
+                <button class="w-10 h-10 rounded-lg bg-surface border border-border flex items-center justify-center text-gray-400 hover:border-accent/30 transition">12</button>
+                <button class="w-10 h-10 rounded-lg bg-surface border border-border flex items-center justify-center text-gray-400 hover:border-accent/30 transition">
+                    <i class="fas fa-chevron-right text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 贡献入口 -->
+    <section class="py-12 px-4 md:px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="bg-gradient-to-r from-accent/10 to-accent2/10 rounded-2xl p-8 border border-white/5 flex flex-col md:flex-row items-center justify-between">
+                <div class="flex items-center space-x-4 mb-6 md:mb-0">
+                    <div class="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center">
+                        <i class="fas fa-cloud-upload-alt text-2xl text-accent"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-1">贡献优质PPT模板</h3>
+                        <p class="text-gray-400">分享你的设计，帮助更多人快速创建专业PPT</p>
+                    </div>
+                </div>
+                <button onclick="location.href='create.html'" class="px-6 py-3 bg-white/10 border border-white/20 rounded-xl text-white font-medium hover:bg-white/20 transition flex items-center space-x-2">
+                    <span>上传模板</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 底部 -->
+    <footer class="border-t border-white/5 py-8 px-4 md:px-6">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center space-x-3 mb-4 md:mb-0">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-accent2 flex items-center justify-center">
+                    <i class="fas fa-layer-group text-white text-xs"></i>
+                </div>
+                <span class="font-bold text-sm">FDeck / 秒演</span>
+            </div>
+            <div class="flex items-center space-x-6 text-sm text-gray-500">
+                <a href="#" class="hover:text-white transition">关于我们</a>
+                <a href="#" class="hover:text-white transition">使用帮助</a>
+                <a href="#" class="hover:text-white transition">隐私政策</a>
+            </div>
+            <p class="text-gray-500 text-sm mt-4 md:mt-0">© 2026 FDeck - AI PPT Generator</p>
+        </div>
+    </footer>
+
+    <script>
+        // 当前选中的平台
+        let currentPlatform = 'ppt';
+        
+        // 平台选择
+        function selectPlatform(btn, platform) {
+            document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentPlatform = platform;
+        }
+        
+        // 分类筛选
+        function filterCategory(btn, category) {
+            document.querySelectorAll('.category-tab').forEach(t => {
+                t.classList.remove('tab-active');
+                t.classList.add('text-gray-400');
+            });
+            btn.classList.add('tab-active');
+            btn.classList.remove('text-gray-400');
+            
+            // TODO: 实现分类筛选逻辑
+            // 目前只是UI切换，实际筛选需要后端或数据支持
+        }
+        
+        // 生成PPT
+        function generatePPT() {
+            const topic = document.getElementById('topicInput').value.trim();
+            if (topic) {
+                localStorage.setItem('pptTopic', topic);
+                localStorage.setItem('pptPlatform', currentPlatform);
+            }
+            location.href = 'create.html';
+        }
+        
+        // 使用模板
+        function useTemplate(templateName) {
+            localStorage.setItem('pptCase', templateName);
+            location.href = 'create.html';
+        }
+        
+        // 回车键快捷生成
+        document.getElementById('topicInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generatePPT();
+            }
+        });
+    </script>
+</body>
+</html>
