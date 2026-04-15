@@ -810,6 +810,31 @@
                     下载PPT文件 (.pptx)
                 </a>
                 
+                <!-- 演讲稿生成（差异化功能） -->
+                <div id="speechScriptSection" class="pt-4 border-t border-white/10 mt-4">
+                    <div class="bg-gradient-to-r from-accent/10 to-accent2/10 rounded-xl p-4 mb-3">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-microphone-alt text-accent mr-2"></i>
+                            <span class="font-medium">差异化功能</span>
+                        </div>
+                        <p class="text-sm text-gray-400 text-left">生成配套演讲稿，口播风格，适合演讲和录制视频</p>
+                    </div>
+                    <button id="generateScriptBtn" onclick="generateSpeechScript()" class="w-full bg-gradient-to-r from-accent to-accent2 text-white py-3 rounded-xl font-medium hover:opacity-90 transition">
+                        <i class="fas fa-file-word mr-2"></i>
+                        生成演讲稿
+                    </button>
+                    <div id="scriptProgress" class="hidden mt-3 text-sm text-gray-400">
+                        <i class="fas fa-spinner fa-spin mr-2"></i>
+                        正在生成演讲稿...
+                    </div>
+                    <div id="scriptResult" class="hidden mt-3">
+                        <a id="downloadScript" href="#" class="block w-full btn-secondary py-3 rounded-xl font-medium transition">
+                            <i class="fas fa-download mr-2"></i>
+                            下载演讲稿 (.doc)
+                        </a>
+                    </div>
+                </div>
+                
                 <!-- 加入案例库 -->
                 <div class="pt-4 border-t border-white/10 mt-4">
                     <label class="flex items-center justify-center cursor-pointer">

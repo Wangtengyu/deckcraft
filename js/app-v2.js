@@ -13,6 +13,7 @@ const PROGRESS_API_URL = 'https://ig8u65l6vm.sealosbja.site/progress';
 const UPLOAD_API_URL = 'https://ig8u65l6vm.sealosbja.site/upload';
 const PARSE_DOC_API_URL = 'https://ig8u65l6vm.sealosbja.site/parse-document';
 const PARSE_URL_API_URL = 'https://ig8u65l6vm.sealosbja.site/parse-url';
+const SPEECH_SCRIPT_API_URL = 'https://ig8u65l6vm.sealosbja.site/generate-speech-script';
 
 // 细分风格配置（与后端 generate-v6.ts 保持一致）
 const SUB_STYLE_CONFIG = {
@@ -96,7 +97,8 @@ let state = {
   contentMode: 'custom',
   outline: null,
   generatedImages: [],
-  addToGallery: false
+  addToGallery: false,
+  pptContent: null  // 保存PPT内容用于演讲稿生成
 };
 
 // 页面加载时初始化
@@ -1090,6 +1092,12 @@ function displayResult(result, card) {
   
   state.generatedImages = result.images || [];
   
+  // 保存PPT内容用于演讲稿生成（V9新增）
+  if (result.pptContent) {
+    state.pptContent = result.pptContent;
+    console.log('[演讲稿] 已保存PPT内容:', state.pptContent);
+  }
+  
   const styleName = SUB_STYLE_CONFIG[result.style]?.name || result.style;
   const subStyleName = result.subStyle && SUB_STYLE_CONFIG[result.style]?.subStyles[result.subStyle]?.name;
   const pageCount = result.images?.length || result.pages?.length || 0;
@@ -1240,4 +1248,69 @@ function showToast(message, type = 'info') {
     toast.style.opacity = '0';
     setTimeout(() => toast.remove(), 300);
   }, 3000);
+}
+
+/**
+ * 生成演讲稿（差异化功能）
+ */
+async function generateSpeechScript() {
+  // 检查是否有PPT内容
+  if (!state.pptContent) {
+    showToast('PPT内容未保存，请重新生成PPT', 'error');
+    return;
+  }
+  
+  // 显示进度
+  const progressEl = document.getElementById('scriptProgress');
+  const resultEl = document.getElementById('scriptResult');
+  const btnEl = document.getElementById('generateScriptBtn');
+  
+  if (progressEl) progressEl.classList.remove('hidden');
+  if (btnEl) btnEl.disabled = true;
+  if (btnEl) btnEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>生成中...';
+  
+  try {
+    console.log('[演讲稿] 开始生成...');
+    
+    const response = await fetch(SPEECH_SCRIPT_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pptContent: state.pptContent,
+        style: 'storytelling'
+      })
+    });
+    
+    const result = await response.json();
+    console.log('[演讲稿] 生成结果:', result);
+    
+    if (result.success) {
+      // 隐藏进度，显示结果
+      if (progressEl) progressEl.classList.add('hidden');
+      if (resultEl) resultEl.classList.remove('hidden');
+      if (btnEl) btnEl.innerHTML = '<i class="fas fa-check mr-2"></i>已生成';
+      
+      // 设置下载链接
+      const downloadBtn = document.getElementById('downloadScript');
+      if (downloadBtn && result.wordHtml) {
+        // 创建Blob并设置下载链接
+        const blob = new Blob([result.wordHtml], { type: 'application/msword' });
+        const url = URL.createObjectURL(blob);
+        downloadBtn.href = url;
+        downloadBtn.download = `${result.title}.doc`;
+        
+        showToast(`演讲稿生成成功，共${result.wordCount}字`, 'success');
+      }
+    } else {
+      throw new Error(result.error || '生成失败');
+    }
+  } catch (error) {
+    console.error('[演讲稿] 生成错误:', error);
+    if (progressEl) progressEl.classList.add('hidden');
+    if (btnEl) {
+      btnEl.disabled = false;
+      btnEl.innerHTML = '<i class="fas fa-file-word mr-2"></i>生成演讲稿';
+    }
+    showToast('演讲稿生成失败: ' + error.message, 'error');
+  }
 }
