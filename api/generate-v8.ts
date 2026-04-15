@@ -17,7 +17,7 @@ const cloud = require('@lafjs/cloud')
 // ============ 火山方舟API配置 ============
 const ARK_IMAGE_API = 'https://ark.cn-beijing.volces.com/api/v3/images/generations'
 const ARK_CHAT_API = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions'
-const ARK_IMAGE_MODEL = 'doubao-seedream-4-5-251228'
+const ARK_IMAGE_MODEL = 'doubao-seedream-4-5-251128'
 const ARK_CHAT_MODEL = 'doubao-seed-1-8-251228'
 const ARK_API_KEY = process.env.ARK_API_KEY || '53316440-45a1-4b3d-bf07-c5a8a9d195ed'
 
