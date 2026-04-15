@@ -1,11 +1,11 @@
 // ============================================
-// 人生躺平计算器 - 核心应用逻辑
+// 人生躺平计算器 - 核心应用逻辑 (优化版)
 // ============================================
 
 // 应用状态
 let appState = {
     user: {
-        name: '躺平追梦人',
+        name: '财务追梦人',
         currentSavings: 0,
         registrationDate: null
     },
@@ -36,7 +36,9 @@ let appState = {
             medical: 0
         },
         plan: null,
-        monthlyRecords: []
+        monthlyRecords: [],
+        children: null,
+        hasPartner: false
     },
     ui: {
         currentPage: 'home',
@@ -47,6 +49,38 @@ let appState = {
 
 // 复利图表实例
 let compoundChart = null;
+
+// ============================================
+// 人性化文案配置
+// ============================================
+const CARING_MESSAGES = {
+    // 单人用户
+    single: {
+        icon: '💪',
+        texts: [
+            '一个人在外打拼，挣钱重要，身体更重要',
+            '记得给自己留点时间休息，健康是最大的财富'
+        ]
+    },
+    // 双人用户（有伴侣）
+    couple: {
+        icon: '💕',
+        texts: [
+            '婚姻需要双方共同维护',
+            '互相想着彼此，比财富更重要',
+            '一起努力，未来会更好'
+        ]
+    },
+    // 有孩子的用户
+    parent: {
+        icon: '👨‍👩‍👧',
+        texts: [
+            '孩子是最好的投资',
+            '陪伴成长比物质更重要',
+            '教育基金是为了更好的未来'
+        ]
+    }
+};
 
 // ============================================
 // 页面导航
@@ -74,18 +108,40 @@ function showPage(pageId) {
         updateProfile();
     } else if (pageId === 'share') {
         updateShareCard();
+    } else if (pageId === 'onboarding') {
+        // 引导流程
+        if (!appState.profile.city) {
+            showPage('city');
+        } else if (Object.values(appState.profile.income).every(v => !v)) {
+            showPage('income');
+        } else {
+            showPage('expense');
+        }
     }
+    
+    // 滚动到顶部
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function updateBottomNav() {
     const nav = document.getElementById('bottom-nav');
-    const showNavPages = ['result', 'profile'];
+    const showNavPages = ['result', 'profile', 'share'];
     
     if (showNavPages.includes(appState.ui.currentPage)) {
         nav.classList.remove('hidden');
     } else {
         nav.classList.add('hidden');
     }
+    
+    // 更新导航高亮
+    document.querySelectorAll('.nav-item').forEach(item => {
+        const page = item.dataset.page;
+        if (page === appState.ui.currentPage) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
 }
 
 // ============================================
@@ -96,10 +152,10 @@ function showToast(message, type = 'info') {
     const toast = document.createElement('div');
     
     const colors = {
-        success: 'bg-green-500',
+        success: 'bg-emerald-500',
         error: 'bg-red-500',
-        info: 'bg-indigo-500',
-        warning: 'bg-yellow-500'
+        info: 'bg-sky-600',
+        warning: 'bg-amber-500'
     };
     
     toast.className = `toast ${colors[type]} text-white`;
@@ -109,6 +165,8 @@ function showToast(message, type = 'info') {
     
     setTimeout(() => {
         toast.style.opacity = '0';
+        toast.style.transform = 'translate(-50%, -20px)';
+        toast.style.transition = 'all 0.3s ease';
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
@@ -147,8 +205,9 @@ function initCitySelector() {
         const city = CITY_DATA[key];
         return `
             <button onclick="selectCity('${key}')" 
-                class="glass-card p-3 text-center hover:border-indigo-500 transition" id="hot-${key}">
-                <div class="font-bold">${city.name}</div>
+                class="glass-card p-3 text-center hover:border-sky-500 transition text-sm"
+                id="hot-${key}">
+                <div class="font-semibold">${city.name}</div>
                 <div class="text-xs text-slate-400">${city.level === 1 ? '一线' : '新一线'}</div>
             </button>
         `;
@@ -159,14 +218,14 @@ function initCitySelector() {
     const levelNames = { 1: '一线城市', 2: '新一线', 3: '二线', 4: '三线', 5: '四线及以下' };
     
     cityListContainer.innerHTML = Object.entries(citiesByLevel)
-        .filter(([level]) => level <= 4) // 只显示到三线城市
+        .filter(([level]) => level <= 4)
         .map(([level, cities]) => `
             <div class="mb-4">
                 <div class="text-sm text-slate-400 mb-2">${levelNames[level]}</div>
                 <div class="grid grid-cols-3 md:grid-cols-4 gap-2">
                     ${cities.map(city => `
                         <button onclick="selectCity('${city.key}')" 
-                            class="city-item p-2 rounded-lg hover:bg-indigo-500/20 transition text-sm"
+                            class="city-item p-2 rounded-lg hover:bg-sky-500/20 transition text-sm"
                             id="city-${city.key}">
                             ${city.name}
                         </button>
@@ -197,7 +256,7 @@ function filterCities() {
             <div class="grid grid-cols-3 md:grid-cols-4 gap-2">
                 ${cities.map(city => `
                     <button onclick="selectCity('${city.key}')" 
-                        class="city-item p-2 rounded-lg hover:bg-indigo-500/20 transition text-sm"
+                        class="city-item p-2 rounded-lg hover:bg-sky-500/20 transition text-sm"
                         id="city-${city.key}">
                         ${city.name}
                         <span class="text-xs text-slate-500 block">${['一线', '新一线', '二线', '三线', '四线'][city.level - 1]}</span>
@@ -220,14 +279,14 @@ function selectCity(cityKey, autoNext = true) {
     document.getElementById('city-next-btn').disabled = false;
     
     // 高亮选中城市
-    document.querySelectorAll('.city-item').forEach(el => el.classList.remove('bg-indigo-500/30', 'border', 'border-indigo-500'));
-    document.querySelectorAll(`[id^="hot-"]`).forEach(el => el.classList.remove('bg-indigo-500/30', 'border', 'border-indigo-500'));
+    document.querySelectorAll('.city-item').forEach(el => el.classList.remove('selected'));
+    document.querySelectorAll(`[id^="hot-"]`).forEach(el => el.classList.remove('selected'));
     
     const hotBtn = document.getElementById(`hot-${cityKey}`);
     const cityBtn = document.getElementById(`city-${cityKey}`);
     
-    if (hotBtn) hotBtn.classList.add('bg-indigo-500/30', 'border', 'border-indigo-500');
-    if (cityBtn) cityBtn.classList.add('bg-indigo-500/30', 'border', 'border-indigo-500');
+    if (hotBtn) hotBtn.classList.add('selected');
+    if (cityBtn) cityBtn.classList.add('selected');
     
     // 显示城市数据预览
     document.getElementById('city-data-preview').classList.remove('hidden');
@@ -245,8 +304,8 @@ function clearCity() {
     document.getElementById('city-next-btn').disabled = true;
     document.getElementById('city-data-preview').classList.add('hidden');
     
-    document.querySelectorAll('.city-item').forEach(el => el.classList.remove('bg-indigo-500/30', 'border', 'border-indigo-500'));
-    document.querySelectorAll(`[id^="hot-"]`).forEach(el => el.classList.remove('bg-indigo-500/30', 'border', 'border-indigo-500'));
+    document.querySelectorAll('.city-item').forEach(el => el.classList.remove('selected'));
+    document.querySelectorAll(`[id^="hot-"]`).forEach(el => el.classList.remove('selected'));
     
     saveState();
 }
@@ -264,6 +323,8 @@ function goNextFromCity() {
 // ============================================
 document.getElementById('has-partner')?.addEventListener('change', function() {
     const partnerSection = document.getElementById('partner-income');
+    appState.profile.hasPartner = this.checked;
+    
     if (this.checked) {
         partnerSection.classList.remove('hidden');
     } else {
@@ -299,6 +360,7 @@ function calculateIncome() {
     
     // 保存到状态
     appState.profile.income = income;
+    appState.profile.hasPartner = document.getElementById('has-partner')?.checked || false;
     saveState();
 }
 
@@ -325,7 +387,6 @@ function toggleChildrenSection(show) {
         updateAgeHint();
     } else {
         section.classList.add('hidden');
-        // 清空养娃相关输入
         document.getElementById('expense-children').value = '';
         document.getElementById('include-education-fund').checked = true;
     }
@@ -341,11 +402,13 @@ function updateAgeHint() {
         '0-3': '💡 婴幼儿期：奶粉、尿不湿、疫苗、早教等，约 3000-5000 元/月',
         '3-6': '💡 幼儿园期：学费、兴趣班、托管等，约 2000-4000 元/月',
         '6-12': '💡 小学期：学费、培训班、兴趣班等，约 2000-5000 元/月',
-        '12-18': '💡 中学期：补习班、特长培训、中考高考等，约 3000-8000 元/月',
+        '12-18': '💡 中学期：补习班、特长培训等，约 3000-8000 元/月',
         '18+': '💡 大学/已独立：生活费、学费支持等，约 2000-5000 元/月'
     };
     
-    ageHint.textContent = hints[ageSelect.value] || '';
+    if (ageHint) {
+        ageHint.textContent = hints[ageSelect.value] || '';
+    }
 }
 
 // ============================================
@@ -427,30 +490,50 @@ function goNextFromExpense() {
 function calculateEducationFund(children, cityMultiplier) {
     if (!children || !children.includeEducationFund) return 0;
     
-    const cityCost = cityMultiplier;
-    
-    // 根据孩子数量和教育阶段计算未来教育支出
     const baseEducationCost = {
-        '0-3': 0,      // 已过阶段
-        '3-6': 150000, // 幼儿园+小学（假设已上幼儿园）
-        '6-12': 200000, // 小学+初中
-        '12-18': 300000, // 初中+高中+大学
-        '18+': 100000   // 大学剩余+研究生
+        '0-3': 0,
+        '3-6': 150000,
+        '6-12': 200000,
+        '12-18': 300000,
+        '18+': 100000
     };
     
-    const marriageFund = 200000; // 结婚基金（按需）
+    const marriageFund = 200000;
     
     const baseCost = baseEducationCost[children.age] || 150000;
     const childCount = children.count || 1;
     
-    // 计算总教育基金需求
     let totalFund = (baseCost + marriageFund) * childCount;
     
-    // 考虑通胀折现到当前价值（假设18年平均通胀2.5%）
-    const inflationDiscount = Math.pow(1 / 1.025, 10); // 折现10年平均
+    // 考虑通胀折现到当前价值
+    const inflationDiscount = Math.pow(1 / 1.025, 10);
     totalFund = totalFund * inflationDiscount;
     
     return totalFund;
+}
+
+// ============================================
+// 人性化文案更新
+// ============================================
+function updateCaringMessage() {
+    const container = document.getElementById('caring-message');
+    const iconEl = container?.querySelector('.icon');
+    const textEl = container?.querySelector('.text');
+    
+    if (!container || !iconEl || !textEl) return;
+    
+    // 判断用户类型
+    let messageType = 'single'; // 默认单人
+    
+    if (appState.profile.children) {
+        messageType = 'parent'; // 有孩子
+    } else if (appState.profile.hasPartner || appState.profile.income.partner > 0) {
+        messageType = 'couple'; // 有伴侣
+    }
+    
+    const message = CARING_MESSAGES[messageType];
+    iconEl.textContent = message.icon;
+    textEl.innerHTML = message.texts.join('<br>');
 }
 
 function calculateResults() {
@@ -470,7 +553,7 @@ function calculateResults() {
     const monthlySavings = monthlyIncome - monthlyExpense;
     
     // 年支出（考虑通胀）
-    const inflationRate = 0.025; // 中国通胀率 2.5%
+    const inflationRate = 0.025;
     let annualExpense = monthlyExpense * 12;
     
     // 城市生活成本调整
@@ -491,14 +574,14 @@ function calculateResults() {
         childrenInfo = ` | 👶 ${children.count}个孩子(${ageNames[children.age] || ''}) | 教育基金 ¥${Math.round(educationFund).toLocaleString()}`;
     }
     
-    // 三种方案计算（考虑城市生活成本和教育基金）
+    // 三种方案计算
     const plans = {
-        minimal: Math.round(60000 * 25 * cityMultiplier),      // 年支出6万
-        comfortable: Math.round(120000 * 25 * cityMultiplier), // 年支出12万
-        rich: Math.round(240000 * 25 * cityMultiplier)        // 年支出24万
+        minimal: Math.round(60000 * 25 * cityMultiplier),
+        comfortable: Math.round(120000 * 25 * cityMultiplier),
+        rich: Math.round(240000 * 25 * cityMultiplier)
     };
     
-    // 当前实际年支出对应的躺平本金（加上教育基金）
+    // 当前实际年支出对应的躺平本金
     const targetAmount = Math.round(annualExpense * 25 * cityMultiplier + educationFund);
     
     // 更新UI - 核心数据
@@ -515,7 +598,7 @@ function calculateResults() {
         Math.min(100, Math.round(appState.user.currentSavings / targetAmount * 100)) : 0;
     document.getElementById('analysis-progress').textContent = progress + '%';
     
-    // 击败同龄人（简化计算）
+    // 击败同龄人
     const beatPercent = calculateBeatPercent(monthlySavings, monthlyIncome);
     document.getElementById('analysis-beat').textContent = beatPercent + '%';
     
@@ -537,6 +620,9 @@ function calculateResults() {
     // 更新养娃信息显示
     updateChildrenInfoDisplay(children, educationFund);
     
+    // 更新人性化文案
+    updateCaringMessage();
+    
     // 计算达成年限
     calculateYearsToGoal(targetAmount);
     
@@ -557,13 +643,13 @@ function updateChildrenInfoDisplay(children, educationFund) {
     
     if (!children) {
         section.classList.add('hidden');
-        fundNote.classList.add('hidden');
+        if (fundNote) fundNote.classList.add('hidden');
         resultDesc.textContent = '基于 4% 法则 = 年支出 × 25';
         return;
     }
     
     section.classList.remove('hidden');
-    fundNote.classList.remove('hidden');
+    if (fundNote) fundNote.classList.remove('hidden');
     resultDesc.textContent = '基于 4% 法则 = 年支出 × 25 + 教育基金';
     
     // 更新孩子数量
@@ -592,12 +678,6 @@ function calculateBeatPercent(monthlySavings, monthlyIncome) {
     
     const savingsRate = monthlySavings / monthlyIncome;
     
-    // 基于储蓄率估算击败比例
-    // 10%储蓄率 ≈ 20%
-    // 30%储蓄率 ≈ 50%
-    // 50%储蓄率 ≈ 75%
-    // 70%储蓄率 ≈ 90%
-    
     if (savingsRate >= 0.7) return 90 + Math.round((savingsRate - 0.7) * 30);
     if (savingsRate >= 0.5) return 75 + Math.round((savingsRate - 0.5) * 75);
     if (savingsRate >= 0.3) return 50 + Math.round((savingsRate - 0.3) * 125);
@@ -606,7 +686,7 @@ function calculateBeatPercent(monthlySavings, monthlyIncome) {
 }
 
 function calculateYearsToGoal(targetAmount) {
-    const { monthlySavings, progress } = appState.profile.plan || {};
+    const { monthlySavings } = appState.profile.plan || {};
     const currentSavings = appState.user.currentSavings;
     const returnRate = appState.ui.returnRate;
     
@@ -615,7 +695,6 @@ function calculateYearsToGoal(targetAmount) {
         return null;
     }
     
-    // 考虑当前存款和复利
     let years = 0;
     let current = currentSavings;
     const monthlyRate = returnRate / 12;
@@ -631,7 +710,7 @@ function calculateYearsToGoal(targetAmount) {
 }
 
 // ============================================
-// 复利曲线
+// 复利曲线 - 优化版（显示三条线）
 // ============================================
 function setReturnRate(rate) {
     appState.ui.returnRate = rate;
@@ -666,28 +745,32 @@ function drawCompoundChart() {
         if (compoundChart) {
             compoundChart.destroy();
         }
-        ctx.parentElement.innerHTML = '<div class="flex items-center justify-center h-full text-slate-400">请填写收支数据</div>';
+        ctx.parentElement.innerHTML = '<div class="flex items-center justify-center h-full text-slate-400 text-sm">请填写收支数据后查看曲线</div>';
         return;
     }
     
-    // 生成数据
-    const labels = [];
-    const dataNoInvest = [];  // 无投资增长
-    const dataWithInvest = []; // 有复利增长
+    // 计算年份范围
     const years = Math.min(50, Math.ceil((targetAmount - currentSavings) / monthlySavings / 12) + 10);
     
-    let current = currentSavings;
+    // 生成三条曲线数据
+    const labels = [];
+    const dataConservative = [];  // 保守 3%
+    const dataStable = [];        // 稳健 6%
+    const dataAggressive = [];    // 进取 9%
+    
+    const rates = [0.03, 0.06, 0.09];
+    const datasets = [dataConservative, dataStable, dataAggressive];
     
     for (let i = 0; i <= years; i++) {
-        labels.push(`第${i}年`);
-        dataNoInvest.push(current + monthlySavings * 12 * i);
+        labels.push(i === 0 ? '现在' : `第${i}年`);
         
-        // 计算复利
-        let withCompound = currentSavings;
-        for (let m = 0; m < i * 12; m++) {
-            withCompound = withCompound * (1 + returnRate / 12) + monthlySavings;
-        }
-        dataWithInvest.push(Math.round(withCompound));
+        rates.forEach((rate, idx) => {
+            let value = currentSavings;
+            for (let m = 0; m < i * 12; m++) {
+                value = value * (1 + rate / 12) + monthlySavings;
+            }
+            datasets[idx].push(Math.round(value));
+        });
     }
     
     // 目标线
@@ -697,72 +780,136 @@ function drawCompoundChart() {
         compoundChart.destroy();
     }
     
+    // 获取当前主题颜色
+    const isLight = document.body.classList.contains('light-theme');
+    const textColor = isLight ? '#475569' : '#94a3b8';
+    const gridColor = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(148, 163, 184, 0.1)';
+    
     compoundChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels,
             datasets: [
                 {
-                    label: '无投资增长',
-                    data: dataNoInvest,
-                    borderColor: 'rgba(148, 163, 184, 0.5)',
-                    borderDash: [5, 5],
+                    label: '保守 3%',
+                    data: dataConservative,
+                    borderColor: '#64748b',
+                    backgroundColor: 'rgba(100, 116, 139, 0.1)',
+                    borderWidth: 2,
                     fill: false,
-                    tension: 0.1
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: '#64748b'
                 },
                 {
-                    label: `复利增长(${returnRate * 100}%)`,
-                    data: dataWithInvest,
-                    borderColor: '#6366f1',
-                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    label: '稳健 6%',
+                    data: dataStable,
+                    borderColor: '#0891b2',
+                    backgroundColor: 'rgba(8, 145, 178, 0.15)',
+                    borderWidth: 3,
                     fill: true,
-                    tension: 0.4
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: '#0891b2'
                 },
                 {
-                    label: '目标',
-                    data: targetData,
-                    borderColor: '#10b981',
-                    borderDash: [10, 5],
+                    label: '进取 9%',
+                    data: dataAggressive,
+                    borderColor: '#059669',
+                    backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                    borderWidth: 2,
                     fill: false,
-                    pointRadius: 0
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: '#059669'
+                },
+                {
+                    label: '目标金额',
+                    data: targetData,
+                    borderColor: '#f59e0b',
+                    borderDash: [8, 4],
+                    borderWidth: 2,
+                    fill: false,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    pointHoverBackgroundColor: '#f59e0b'
                 }
             ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
             plugins: {
                 legend: {
-                    position: 'top',
-                    labels: {
-                        color: '#94a3b8',
-                        usePointStyle: true
-                    }
+                    display: false // 使用自定义图例
                 },
                 tooltip: {
+                    backgroundColor: isLight ? 'rgba(255,255,255,0.95)' : 'rgba(30,41,59,0.95)',
+                    titleColor: textColor,
+                    bodyColor: textColor,
+                    borderColor: isLight ? '#e2e8f0' : '#334155',
+                    borderWidth: 1,
+                    padding: 12,
+                    cornerRadius: 8,
+                    displayColors: true,
                     callbacks: {
+                        title: function(context) {
+                            return context[0].label;
+                        },
                         label: function(context) {
-                            return context.dataset.label + ': ¥' + context.raw.toLocaleString();
+                            const value = context.raw;
+                            let prefix = '';
+                            if (context.datasetIndex === 3) {
+                                prefix = '🎯 ';
+                            }
+                            return `${prefix}${context.dataset.label}: ¥${value.toLocaleString()}`;
+                        },
+                        afterBody: function(context) {
+                            // 显示距离目标的差距
+                            const currentRateIdx = context.length - 2; // 稳健曲线索引
+                            if (context[currentRateIdx]) {
+                                const diff = targetAmount - context[currentRateIdx].raw;
+                                if (diff > 0) {
+                                    return [`\n距离目标还差 ¥${diff.toLocaleString()}`];
+                                } else if (diff <= 0) {
+                                    return ['\n🎉 已达成目标！'];
+                                }
+                            }
+                            return [];
                         }
                     }
                 }
             },
             scales: {
                 x: {
-                    ticks: { color: '#64748b' },
-                    grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                    ticks: {
+                        color: textColor,
+                        maxTicksLimit: 10
+                    },
+                    grid: {
+                        color: gridColor
+                    }
                 },
                 y: {
                     ticks: {
-                        color: '#64748b',
-                        callback: value => '¥' + (value / 10000).toFixed(0) + '万'
+                        color: textColor,
+                        callback: value => {
+                            if (value >= 100000000) return (value / 100000000).toFixed(1) + '亿';
+                            if (value >= 10000) return (value / 10000).toFixed(0) + '万';
+                            return '¥' + value;
+                        }
                     },
-                    grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                    grid: {
+                        color: gridColor
+                    }
                 }
-            },
-            interaction: {
-                intersect: false,
-                mode: 'index'
             }
         }
     });
@@ -788,48 +935,50 @@ function generateRoadmap(targetAmount, monthlySavings) {
             years: Math.min(2, years),
             phase: 'phase1',
             title: '建立基础',
+            emoji: '📚',
             progress: Math.min(100, currentSavings / 100000 * 100)
         },
         {
             years: Math.min(5, years),
             phase: 'phase2',
             title: '复利加速',
+            emoji: '⚡',
             progress: Math.min(100, currentSavings / (targetAmount * 0.25) * 100)
         },
         {
             years: Math.min(10, years),
             phase: 'phase3',
             title: '被动收入构建',
+            emoji: '💵',
             progress: Math.min(100, currentSavings / (targetAmount * 0.5) * 100)
         },
         {
             years: years,
             phase: 'phase4',
-            title: '躺平达成',
+            title: '财务自由达成',
+            emoji: '🎉',
             progress: Math.min(100, currentSavings / targetAmount * 100)
         }
     ];
     
     container.innerHTML = milestones.map((m, i) => {
-        const phase = PHASES[m.phase];
         const isActive = m.phase === currentPhase;
-        const isCompleted = i < milestones.findIndex(x => x.phase === currentPhase) || 
-                           (i === milestones.findIndex(x => x.phase === currentPhase) && appState.profile.plan?.progress >= 50);
+        const completedIdx = milestones.findIndex(x => x.phase === currentPhase);
+        const isCompleted = i < completedIdx || (i === completedIdx && appState.profile.plan?.progress >= 50);
         
         return `
-            <div class="relative pl-10 ${isCompleted ? 'opacity-60' : ''}">
-                <div class="absolute left-2 w-5 h-5 rounded-full ${isActive ? 'bg-indigo-500 pulse-glow' : isCompleted ? 'bg-green-500' : 'bg-slate-600'}"></div>
-                <div class="glass-card p-4 ${isActive ? 'border-indigo-500' : ''}">
+            <div class="roadmap-item ${isCompleted ? 'completed' : ''}">
+                <div class="roadmap-dot ${isActive ? 'ring-2 ring-sky-400 ring-offset-2 ring-offset-slate-900' : ''}"></div>
+                <div class="glass-card p-4 ${isActive ? 'border-sky-500/50' : ''}">
                     <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <span class="text-xl mr-2">${phase.emoji}</span>
-                            <span class="font-bold">${m.title}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">${m.emoji}</span>
+                            <span class="font-semibold">${m.title}</span>
                         </div>
                         <span class="text-sm text-slate-400">${m.years}年内</span>
                     </div>
-                    <div class="text-sm text-slate-400 mb-2">${phase.tips[0]}</div>
-                    <div class="h-2 bg-slate-700 rounded-full overflow-hidden">
-                        <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all" style="width: ${Math.min(100, m.progress)}%"></div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" style="width: ${Math.min(100, m.progress)}%"></div>
                     </div>
                 </div>
             </div>
@@ -853,7 +1002,7 @@ function updateProfile() {
         // 更新进度环
         const circle = document.getElementById('progress-circle');
         if (circle) {
-            const circumference = 2 * Math.PI * 70;
+            const circumference = 2 * Math.PI * 64;
             const offset = circumference * (1 - plan.progress / 100);
             circle.style.strokeDashoffset = Math.max(0, offset);
         }
@@ -878,14 +1027,21 @@ function updateMilestones() {
         progress: plan?.progress || 0
     };
     
+    const conditions = {
+        'first10k': data.currentSavings >= 100000,
+        'save50': data.savingsRate >= 50,
+        'passive1k': data.monthlyPassiveIncome >= 1000,
+        'halfway': data.progress >= 50
+    };
+    
     document.querySelectorAll('.milestone-item').forEach(item => {
-        const milestoneKey = item.dataset.milestone;
-        const milestone = MILESTONES[milestoneKey];
+        const key = item.dataset.milestone;
+        const isCompleted = conditions[key];
         
-        if (milestone && milestone.condition(data)) {
+        if (isCompleted) {
             item.classList.remove('opacity-50');
-            item.classList.add('pulse-glow');
-            item.querySelector('.text-slate-400').textContent = '✓ 已达成';
+            item.classList.add('border-emerald-500/50');
+            item.querySelector('.text-slate-500').textContent = '✓ 已达成';
         }
     });
 }
@@ -896,9 +1052,9 @@ function updateMonthlyRecords() {
     
     if (!records || records.length === 0) {
         container.innerHTML = `
-            <div class="text-center text-slate-400 py-8">
+            <div class="text-center text-slate-400 py-8 text-sm">
                 暂无月度记录<br>
-                <span class="text-sm">开始记录你的财务成长吧</span>
+                <span class="text-xs">开始记录你的财务成长吧</span>
             </div>
         `;
         return;
@@ -907,10 +1063,10 @@ function updateMonthlyRecords() {
     container.innerHTML = records.slice().reverse().slice(0, 6).map(record => `
         <div class="glass-card p-4 flex justify-between items-center">
             <div>
-                <div class="font-bold">${record.month}</div>
+                <div class="font-semibold">${record.month}</div>
                 <div class="text-sm text-slate-400">${record.note || ''}</div>
             </div>
-            <div class="text-green-400 font-bold">+¥${record.savings.toLocaleString()}</div>
+            <div class="text-emerald-400 font-bold">+¥${record.savings.toLocaleString()}</div>
         </div>
     `).join('');
 }
@@ -922,7 +1078,6 @@ function showAddMonthModal() {
     const modal = document.getElementById('add-month-modal');
     modal.classList.remove('hidden');
     
-    // 设置默认月份为当前月份
     const now = new Date();
     const month = now.toISOString().slice(0, 7);
     document.getElementById('record-month').value = month;
@@ -942,7 +1097,6 @@ function saveMonthRecord() {
         return;
     }
     
-    // 添加记录
     appState.profile.monthlyRecords.push({
         month,
         savings,
@@ -950,7 +1104,6 @@ function saveMonthRecord() {
         date: new Date().toISOString()
     });
     
-    // 更新总存款
     appState.user.currentSavings += savings;
     
     closeAddMonthModal();
@@ -959,7 +1112,6 @@ function saveMonthRecord() {
     
     showToast('记录已保存 🎉', 'success');
     
-    // 检查里程碑
     if (appState.user.currentSavings >= 100000) {
         showToast('🎉 达成里程碑：首个10万！', 'success');
     }
@@ -977,18 +1129,15 @@ function generateShareCard() {
         return;
     }
     
-    // 更新分享卡片数据
     document.getElementById('share-city').textContent = city ? CITY_DATA[city].name : '未知城市';
     document.getElementById('share-target').textContent = plan.targetAmount.toLocaleString();
     document.getElementById('share-progress').textContent = plan.progress + '%';
     document.getElementById('share-years').textContent = document.getElementById('years-to-goal').textContent + '年';
     document.getElementById('share-monthly').textContent = '¥' + Math.round(plan.monthlySavings).toLocaleString();
     
-    // 成就
     document.getElementById('share-achievement').textContent = 
         `储蓄率击败${plan.beatPercent}%的年轻人`;
     
-    // 进度条
     document.getElementById('share-progress-bar').textContent = plan.progress + '%';
     document.getElementById('share-progress-fill').style.width = plan.progress + '%';
     
@@ -1008,7 +1157,7 @@ function downloadShareCard() {
         useCORS: true
     }).then(canvas => {
         const link = document.createElement('a');
-        link.download = '躺平报告_' + new Date().toISOString().slice(0, 10) + '.png';
+        link.download = '财务报告_' + new Date().toISOString().slice(0, 10) + '.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
         
@@ -1027,7 +1176,7 @@ function exportData() {
     const url = URL.createObjectURL(blob);
     
     const link = document.createElement('a');
-    link.download = '躺平计算器数据_' + new Date().toISOString().slice(0, 10) + '.json';
+    link.download = '财务自由计算器数据_' + new Date().toISOString().slice(0, 10) + '.json';
     link.href = url;
     link.click();
     
@@ -1048,15 +1197,12 @@ function handleImport(event) {
         try {
             const imported = JSON.parse(e.target.result);
             
-            // 验证数据格式
             if (!imported.profile || !imported.user) {
                 throw new Error('Invalid data format');
             }
             
             appState = imported;
             saveState();
-            
-            // 恢复UI状态
             restoreUIState();
             
             showToast('数据导入成功 🎉', 'success');
@@ -1068,12 +1214,11 @@ function handleImport(event) {
     };
     reader.readAsText(file);
     
-    // 清空input
     event.target.value = '';
 }
 
 function restoreUIState() {
-    const { income, expense, city } = appState.profile;
+    const { income, expense, city, hasPartner } = appState.profile;
     
     // 恢复收入
     if (income) {
@@ -1085,7 +1230,7 @@ function restoreUIState() {
         document.getElementById('income-invest').value = income.invest || '';
         document.getElementById('income-side').value = income.side || '';
         
-        if (income.partner > 0) {
+        if (hasPartner || income.partner > 0) {
             document.getElementById('has-partner').checked = true;
             document.getElementById('partner-income').classList.remove('hidden');
         }
@@ -1141,7 +1286,6 @@ function loadState() {
         if (saved) {
             const parsed = JSON.parse(saved);
             
-            // 合并状态，保留新版本的默认值
             appState = {
                 ...appState,
                 ...parsed,
@@ -1167,80 +1311,23 @@ function loadState() {
 // 初始化
 // ============================================
 function init() {
-    // 加载保存的状态
     const hasData = loadState();
     
-    // 初始化城市选择器
     initCitySelector();
     
-    // 恢复UI状态
     if (hasData) {
         restoreUIState();
-        
-        // 如果有保存的计划，显示结果页
-        if (appState.profile.plan) {
-            // 不自动跳转，等待用户操作
-        }
     }
     
-    // 恢复主题
     if (appState.ui.theme === 'light') {
         document.body.classList.add('light-theme');
         document.getElementById('theme-icon').textContent = '☀️';
     }
     
-    // 更新用户信息
     if (appState.user.name) {
         document.getElementById('user-name').textContent = appState.user.name;
         document.getElementById('profile-name').textContent = appState.user.name;
     }
 }
 
-// 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', init);
-
-// 引导流程快捷入口
-function showPage(pageId) {
-    // 隐藏所有页面
-    document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
-    });
-    
-    // 显示目标页面
-    const targetPage = document.getElementById(`page-${pageId}`);
-    if (targetPage) {
-        targetPage.classList.add('active');
-    }
-    
-    // 更新导航状态
-    appState.ui.currentPage = pageId;
-    updateBottomNav();
-    
-    // 页面特定初始化
-    if (pageId === 'result') {
-        calculateResults();
-    } else if (pageId === 'profile') {
-        updateProfile();
-    } else if (pageId === 'share') {
-        updateShareCard();
-    } else if (pageId === 'onboarding') {
-        // 引导流程
-        if (!appState.profile.city) {
-            showPage('city');
-        } else if (Object.values(appState.profile.income).every(v => !v)) {
-            showPage('income');
-        } else {
-            showPage('expense');
-        }
-    }
-    
-    // 滚动到顶部
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// 新增引导页（复用城市页作为引导入口）
-const onboardingHandler = {
-    execute() {
-        showPage('city');
-    }
-};

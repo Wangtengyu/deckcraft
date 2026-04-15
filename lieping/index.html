@@ -6,147 +6,310 @@
     <title>人生躺平计算器 | 你的财务自由计划</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.2.1/dist/plugins/chartjs-plugin-annotation.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'Noto Sans SC', sans-serif; }
         
+        /* ===== 新配色系统 - 深蓝/青色系 ===== */
         :root {
-            --primary: #6366f1;
-            --secondary: #8b5cf6;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --bg-dark: #0f172a;
-            --bg-card: #1e293b;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
+            /* 上班族友好配色 - 专业、温暖、不过于花哨 */
+            --primary: #0369a1;          /* 深海蓝 - 主色调 */
+            --primary-light: #0ea5e9;   /* 天蓝色 */
+            --primary-dark: #0c4a6e;     /* 深蓝色 */
+            --secondary: #0891b2;        /* 青色 */
+            --accent: #14b8a6;          /* 绿松石色 - 强调 */
+            
+            --success: #059669;         /* 翡翠绿 - 正向指标 */
+            --warning: #d97706;         /* 琥珀色 - 警示 */
+            --danger: #dc2626;          /* 红色 - 负向指标 */
+            
+            --bg-primary: #0f172a;       /* 深蓝黑背景 */
+            --bg-secondary: #1e293b;     /* 卡片背景 */
+            --bg-card: #334155;          /* 卡片次级背景 */
+            
+            --text-primary: #f8fafc;     /* 主要文字 */
+            --text-secondary: #94a3b8;   /* 次要文字 */
+            --text-muted: #64748b;       /* 弱化文字 */
+            
+            /* 图表配色 */
+            --chart-conservative: #64748b;  /* 保守 - 灰色 */
+            --chart-stable: #0891b2;        /* 稳健 - 青色 */
+            --chart-aggressive: #059669;   /* 进取 - 绿色 */
+        }
+        
+        /* ===== 浅色主题 ===== */
+        :root.light-theme {
+            --bg-primary: #f1f5f9;
+            --bg-secondary: #ffffff;
+            --bg-card: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
         }
         
         body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            background: linear-gradient(135deg, var(--bg-primary) 0%, #0c4a6e 50%, var(--bg-primary) 100%);
             min-height: 100vh;
         }
         
+        .light-theme body {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e0f2fe 50%, #f1f5f9 100%);
+        }
+        
+        /* ===== 文字渐变 - 改为蓝青色系 ===== */
         .gradient-text {
-            background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+            background: linear-gradient(135deg, var(--primary-light), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
         
+        /* ===== 玻璃卡片 - 更加专业 ===== */
         .glass-card {
-            background: rgba(30, 41, 59, 0.7);
+            background: rgba(30, 41, 59, 0.8);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(99, 102, 241, 0.2);
-            border-radius: 20px;
+            border: 1px solid rgba(3, 105, 161, 0.2);
+            border-radius: 16px;
         }
         
+        .light-theme .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(3, 105, 161, 0.15);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        /* ===== 按钮样式 - 更加专业 ===== */
         .btn-primary {
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
             transition: all 0.3s ease;
+            border-radius: 12px;
         }
         
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.4);
+            box-shadow: 0 8px 30px rgba(3, 105, 161, 0.4);
         }
         
         .btn-secondary {
-            background: rgba(99, 102, 241, 0.1);
-            border: 1px solid rgba(99, 102, 241, 0.3);
+            background: rgba(3, 105, 161, 0.1);
+            border: 1px solid rgba(3, 105, 161, 0.3);
+            color: var(--text-primary);
             transition: all 0.3s ease;
+            border-radius: 12px;
         }
         
         .btn-secondary:hover {
-            background: rgba(99, 102, 241, 0.2);
-            border-color: rgba(99, 102, 241, 0.5);
+            background: rgba(3, 105, 161, 0.2);
+            border-color: rgba(3, 105, 161, 0.5);
         }
         
+        /* ===== 输入框样式 - 增大、友好 ===== */
         .input-field {
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(99, 102, 241, 0.3);
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(3, 105, 161, 0.3);
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 16px; /* 防止iOS自动缩放 */
             transition: all 0.3s ease;
         }
         
+        .light-theme .input-field {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(3, 105, 161, 0.25);
+        }
+        
         .input-field:focus {
-            border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
             outline: none;
         }
         
+        /* ===== 页面切换动画 ===== */
         .page { display: none; }
-        .page.active { display: block; animation: fadeIn 0.5s ease; }
+        .page.active { display: block; animation: fadeIn 0.4s ease; }
         
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
         
+        /* ===== 浮动动画 - 减少使用，更稳重 ===== */
+        .float-animation { animation: float 6s ease-in-out infinite; }
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
+            50% { transform: translateY(-10px); }
         }
         
-        .float-animation { animation: float 6s ease-in-out infinite; }
-        
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
-            50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.6); }
-        }
-        
-        .pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
-        
+        /* ===== 进度环 ===== */
         .progress-ring {
             transform: rotate(-90deg);
         }
         
+        /* ===== Toast 通知 ===== */
+        .toast {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 14px 28px;
+            border-radius: 12px;
+            z-index: 1000;
+            animation: slideDown 0.3s ease;
+            font-weight: 500;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translate(-50%, -20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+        
+        /* ===== 进度指示器 ===== */
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .step-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            transition: all 0.3s ease;
+        }
+        
+        .step-dot.active {
+            background: var(--primary-light);
+            width: 24px;
+            border-radius: 4px;
+        }
+        
+        .step-dot.completed {
+            background: var(--success);
+        }
+        
+        /* ===== 底部导航 - 优化样式 ===== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(3, 105, 161, 0.2);
+            padding: 8px 0;
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+            z-index: 100;
+        }
+        
+        .light-theme .bottom-nav {
+            background: rgba(255, 255, 255, 0.98);
+            border-top: 1px solid rgba(3, 105, 161, 0.15);
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 12px;
+            min-height: 56px;
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .nav-item:active {
+            transform: scale(0.95);
+        }
+        
+        .nav-item.active {
+            color: var(--primary-light);
+        }
+        
+        .nav-item .nav-icon {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+        
+        .nav-item .nav-label {
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        /* ===== 人性化文案卡片 ===== */
+        .caring-message {
+            background: linear-gradient(135deg, rgba(3, 105, 161, 0.15), rgba(20, 184, 166, 0.1));
+            border: 1px solid rgba(3, 105, 161, 0.25);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            margin: 16px auto;
+            max-width: 600px;
+        }
+        
+        .light-theme .caring-message {
+            background: linear-gradient(135deg, rgba(224, 242, 254, 0.8), rgba(204, 251, 241, 0.6));
+        }
+        
+        .caring-message .icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        
+        .caring-message .text {
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+        
+        /* ===== 复利曲线容器 - 增大尺寸 ===== */
+        .chart-container {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+        
+        /* ===== 里程碑徽章 ===== */
         .milestone-badge {
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            background: linear-gradient(135deg, #f59e0b, #d97706);
         }
         
+        /* ===== 分享卡片 ===== */
         .share-card {
-            background: linear-gradient(135deg, #1e1b4b, #0f172a);
+            background: linear-gradient(135deg, #0f172a, #0c4a6e);
+            border: 1px solid rgba(3, 105, 161, 0.3);
         }
         
+        /* ===== 城市选择器 ===== */
         .city-selector {
-            max-height: 300px;
+            max-height: 400px;
             overflow-y: auto;
         }
         
         .city-item {
             cursor: pointer;
             transition: all 0.2s ease;
+            padding: 12px 16px;
+            border-radius: 10px;
         }
         
         .city-item:hover {
-            background: rgba(99, 102, 241, 0.2);
+            background: rgba(3, 105, 161, 0.2);
         }
         
-        .expense-category {
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .city-item.selected {
+            background: rgba(3, 105, 161, 0.3);
+            border: 1px solid var(--primary-light);
         }
         
-        .expense-category:hover {
-            transform: scale(1.02);
-        }
-        
-        .expense-category.selected {
-            border-color: #6366f1;
-            background: rgba(99, 102, 241, 0.1);
-        }
-        
-        .result-card {
-            transition: all 0.3s ease;
-        }
-        
-        .result-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        /* 自定义滚动条 */
+        /* ===== 自定义滚动条 ===== */
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -156,49 +319,101 @@
         }
         
         ::-webkit-scrollbar-thumb {
-            background: rgba(99, 102, 241, 0.5);
+            background: rgba(3, 105, 161, 0.5);
             border-radius: 3px;
         }
         
-        .toast {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 12px 24px;
-            border-radius: 12px;
-            z-index: 1000;
-            animation: slideDown 0.3s ease;
-        }
-        
-        @keyframes slideDown {
-            from { opacity: 0; transform: translate(-50%, -20px); }
-            to { opacity: 1; transform: translate(-50%, 0); }
-        }
-        
+        /* ===== 主题切换 ===== */
         .theme-toggle {
+            transition: all 0.3s ease;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        
+        .theme-toggle:hover {
+            background: rgba(3, 105, 161, 0.2);
+        }
+        
+        /* ===== 卡片悬停效果 - 更加微妙 ===== */
+        .result-card {
             transition: all 0.3s ease;
         }
         
-        .light-theme {
-            --bg-primary: #f8fafc;
-            --bg-secondary: #ffffff;
-            --text-primary: #0f172a;
-            --text-secondary: #64748b;
+        .result-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary-light);
         }
         
-        .light-theme body {
-            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 50%, #f8fafc 100%);
+        /* ===== 主题切换按钮样式 ===== */
+        .light-theme .btn-secondary {
+            background: rgba(3, 105, 161, 0.08);
+            color: var(--text-primary);
         }
         
-        .light-theme .glass-card {
-            background: rgba(255, 255, 255, 0.9);
+        /* ===== 收入/支出汇总卡片 - 强调色 ===== */
+        .summary-income {
+            background: linear-gradient(135deg, rgba(3, 105, 161, 0.2), rgba(8, 145, 178, 0.15)) !important;
+            border: 1px solid rgba(3, 105, 161, 0.3) !important;
         }
         
-        .confetti {
-            position: fixed;
-            pointer-events: none;
-            z-index: 9999;
+        .summary-expense {
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(217, 119, 6, 0.1)) !important;
+            border: 1px solid rgba(220, 38, 38, 0.25) !important;
+        }
+        
+        /* ===== 进度条 ===== */
+        .progress-bar {
+            height: 8px;
+            background: rgba(3, 105, 161, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        /* ===== 路线图 ===== */
+        .roadmap-item {
+            position: relative;
+            padding-left: 32px;
+        }
+        
+        .roadmap-item::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: rgba(3, 105, 161, 0.3);
+        }
+        
+        .roadmap-item:last-child::before {
+            display: none;
+        }
+        
+        .roadmap-dot {
+            position: absolute;
+            left: 0;
+            top: 4px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+        }
+        
+        .roadmap-item.completed .roadmap-dot {
+            background: var(--success);
+            border-color: var(--success);
+        }
+        
+        .roadmap-item.completed::before {
+            background: var(--success);
         }
     </style>
 </head>
@@ -206,415 +421,427 @@
     <!-- Toast 容器 -->
     <div id="toast-container"></div>
     
-    <!-- 导航栏 -->
+    <!-- 导航栏 - 更加简洁专业 -->
     <nav class="fixed top-0 left-0 right-0 z-50 glass-card px-4 py-3">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-2">
-                <span class="text-2xl">🛋️</span>
-                <span class="font-bold text-lg gradient-text">躺平计算器</span>
+                <span class="text-2xl">📊</span>
+                <span class="font-bold text-lg gradient-text">财务自由计算器</span>
             </div>
-            <div class="flex items-center gap-4">
-                <button id="theme-toggle" class="p-2 rounded-lg hover:bg-slate-700/50 transition">
+            <div class="flex items-center gap-3">
+                <button id="theme-toggle" class="theme-toggle" title="切换主题">
                     <span id="theme-icon">🌙</span>
                 </button>
                 <button id="user-btn" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-700/50 transition">
                     <span>👤</span>
-                    <span id="user-name" class="text-sm">未登录</span>
+                    <span id="user-name" class="text-sm hidden md:inline">未登录</span>
                 </button>
             </div>
         </div>
     </nav>
     
-    <main class="pt-20 pb-24 px-4 max-w-6xl mx-auto">
+    <!-- 主内容区域 -->
+    <main class="pt-20 pb-28 px-4 max-w-4xl mx-auto">
         
-        <!-- 页面1: 首页/落地页 -->
+        <!-- ===== 页面1: 首页 ===== -->
         <section id="page-home" class="page active">
-            <div class="text-center py-12">
+            <div class="text-center py-10">
                 <div class="float-animation mb-6">
-                    <span class="text-8xl">🛋️</span>
+                    <span class="text-7xl">📊</span>
                 </div>
-                <h1 class="text-4xl md:text-5xl font-black mb-4">
-                    <span class="gradient-text">人生躺平</span>
+                <h1 class="text-3xl md:text-4xl font-bold mb-4">
+                    <span class="gradient-text">财务自由</span>
                     <span class="text-white">计算器</span>
                 </h1>
-                <p class="text-slate-400 text-lg mb-8 max-w-xl mx-auto">
-                    科学测算你的躺平所需本金，追踪财务进度，让FIRE生活不再遥远
+                <p class="text-slate-400 text-base md:text-lg mb-8 max-w-lg mx-auto">
+                    上班族友好的财务规划工具，科学测算你的FIRE人生
                 </p>
                 
-                <!-- 特色功能展示 -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
-                    <div class="glass-card p-6">
-                        <div class="text-4xl mb-3">📊</div>
-                        <h3 class="font-bold mb-2">智能测算</h3>
-                        <p class="text-slate-400 text-sm">4%法则 + 中国通胀率，科学的躺平计算模型</p>
+                <!-- 特色功能展示 - 更加简洁 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+                    <div class="glass-card p-5">
+                        <div class="text-3xl mb-3">🎯</div>
+                        <h3 class="font-semibold mb-1">精准测算</h3>
+                        <p class="text-slate-400 text-sm">4%法则 + 中国实际通胀率</p>
                     </div>
-                    <div class="glass-card p-6">
-                        <div class="text-4xl mb-3">📈</div>
-                        <h3 class="font-bold mb-2">进度追踪</h3>
-                        <p class="text-slate-400 text-sm">实时追踪存款进度，里程碑奖励激励</p>
+                    <div class="glass-card p-5">
+                        <div class="text-3xl mb-3">📈</div>
+                        <h3 class="font-semibold mb-1">进度追踪</h3>
+                        <p class="text-slate-400 text-sm">实时显示存款进度</p>
                     </div>
-                    <div class="glass-card p-6">
-                        <div class="text-4xl mb-3">🎨</div>
-                        <h3 class="font-bold mb-2">趣味分享</h3>
-                        <p class="text-slate-400 text-sm">生成专属财务报告，好友对比激发动力</p>
+                    <div class="glass-card p-5">
+                        <div class="text-3xl mb-3">💡</div>
+                        <h3 class="font-semibold mb-1">专属建议</h3>
+                        <p class="text-slate-400 text-sm">根据家庭情况定制化方案</p>
                     </div>
                 </div>
                 
-                <button onclick="showPage('onboarding')" class="btn-primary px-8 py-4 rounded-2xl text-lg font-bold">
-                    开始测算 🔥
+                <button onclick="showPage('onboarding')" class="btn-primary px-10 py-4 rounded-xl text-lg font-semibold">
+                    开始测算 →
                 </button>
                 
-                <!-- 用户评价 -->
-                <div class="mt-16 glass-card p-6 max-w-2xl mx-auto">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-12 h-12 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-xl">
-                            🧑‍💻
+                <!-- 用户评价 - 简洁版 -->
+                <div class="mt-12 glass-card p-5 max-w-xl mx-auto">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-sky-500 to-cyan-500 flex items-center justify-center text-lg">
+                            💼
                         </div>
                         <div>
-                            <div class="font-bold">程序员小王</div>
-                            <div class="text-slate-400 text-sm">已使用 6 个月</div>
+                            <div class="font-semibold text-sm">上班族张先生</div>
+                            <div class="text-slate-400 text-xs">产品经理 · 使用3个月</div>
                         </div>
                     </div>
-                    <p class="text-slate-300">"用了这个计算器才发现，原来按现在的储蓄速度，8年后就能躺平了！比想象的快多了。"</p>
+                    <p class="text-slate-300 text-sm text-left">"用了这个计算器才发现，按现在的储蓄速度，6年后就能实现财务自由了。目标清晰了很多。"</p>
                 </div>
             </div>
         </section>
         
-        <!-- 页面2: 城市选择页 -->
+        <!-- ===== 页面2: 城市选择页 ===== -->
         <section id="page-city" class="page">
-            <div class="py-8">
-                <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold mb-2">选择你所在的城市</h2>
-                    <p class="text-slate-400">不同城市的生活成本差异巨大，精准定位让测算更准确</p>
+            <div class="py-6">
+                <!-- 步骤指示器 -->
+                <div class="step-indicator mb-6">
+                    <div class="step-dot active"></div>
+                    <div class="step-dot"></div>
+                    <div class="step-dot"></div>
+                    <div class="step-dot"></div>
+                </div>
+                
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold mb-2">选择你所在的城市</h2>
+                    <p class="text-slate-400 text-sm">城市的生活成本直接影响躺平目标</p>
                 </div>
                 
                 <!-- 搜索框 -->
-                <div class="max-w-md mx-auto mb-6">
+                <div class="max-w-md mx-auto mb-5">
                     <div class="relative">
                         <input type="text" id="city-search" placeholder="搜索城市..." 
-                            class="input-field w-full px-5 py-4 pl-12 rounded-2xl text-white"
+                            class="input-field w-full pl-12 text-white"
                             oninput="filterCities()">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
                     </div>
                 </div>
                 
                 <!-- 当前选择 -->
-                <div id="current-city" class="max-w-md mx-auto mb-6 hidden">
+                <div id="current-city" class="max-w-md mx-auto mb-5 hidden">
                     <div class="glass-card p-4 flex items-center justify-between">
                         <div>
                             <div class="text-sm text-slate-400">已选择</div>
-                            <div class="font-bold text-lg" id="selected-city-name">-</div>
+                            <div class="font-bold" id="selected-city-name">-</div>
                         </div>
-                        <button onclick="clearCity()" class="text-slate-400 hover:text-white">✕</button>
+                        <button onclick="clearCity()" class="text-slate-400 hover:text-white px-3 py-1">✕</button>
                     </div>
                 </div>
                 
-                <!-- 常用城市 -->
-                <div class="mb-8">
-                    <h3 class="text-lg font-bold mb-4 text-center">热门城市</h3>
-                    <div class="grid grid-cols-4 md:grid-cols-6 gap-3" id="hot-cities">
-                        <!-- 动态生成 -->
-                    </div>
+                <!-- 热门城市 -->
+                <div class="mb-6">
+                    <h3 class="text-base font-semibold mb-3 text-center">热门城市</h3>
+                    <div class="grid grid-cols-4 md:grid-cols-6 gap-2" id="hot-cities"></div>
                 </div>
                 
                 <!-- 城市列表 -->
                 <div class="max-w-2xl mx-auto">
-                    <h3 class="text-lg font-bold mb-4 text-center">所有城市</h3>
-                    <div id="city-list" class="city-selector glass-card p-4 space-y-2">
-                        <!-- 动态生成 -->
-                    </div>
+                    <h3 class="text-base font-semibold mb-3 text-center">所有城市</h3>
+                    <div id="city-list" class="city-selector glass-card p-4 space-y-2"></div>
                 </div>
                 
                 <!-- 城市数据预览 -->
-                <div id="city-data-preview" class="max-w-2xl mx-auto mt-6 hidden">
-                    <div class="glass-card p-6">
-                        <h4 class="font-bold mb-4">📍 <span id="preview-city-name"></span> 生活成本参考</h4>
+                <div id="city-data-preview" class="max-w-2xl mx-auto mt-5 hidden">
+                    <div class="glass-card p-5">
+                        <h4 class="font-semibold mb-3">📍 <span id="preview-city-name"></span> 生活成本参考</h4>
                         <div class="grid grid-cols-3 gap-4 text-center">
                             <div>
-                                <div class="text-2xl font-bold text-indigo-400" id="preview-salary">-</div>
-                                <div class="text-sm text-slate-400">平均工资(元/月)</div>
+                                <div class="text-xl font-bold text-sky-400" id="preview-salary">-</div>
+                                <div class="text-xs text-slate-400">平均月薪(元)</div>
                             </div>
                             <div>
-                                <div class="text-2xl font-bold text-purple-400" id="preview-rent">-</div>
-                                <div class="text-sm text-slate-400">平均房租(元/月)</div>
+                                <div class="text-xl font-bold text-cyan-400" id="preview-rent">-</div>
+                                <div class="text-xs text-slate-400">平均房租(元/月)</div>
                             </div>
                             <div>
-                                <div class="text-2xl font-bold text-pink-400" id="preview-cost">-</div>
-                                <div class="text-sm text-slate-400">物价指数</div>
+                                <div class="text-xl font-bold text-teal-400" id="preview-cost">-</div>
+                                <div class="text-xs text-slate-400">物价指数</div>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="text-center mt-8">
-                    <button onclick="goNextFromCity()" id="city-next-btn" class="btn-primary px-8 py-4 rounded-2xl text-lg font-bold" disabled>
+                <div class="text-center mt-6">
+                    <button onclick="goNextFromCity()" id="city-next-btn" class="btn-primary px-8 py-4 rounded-xl font-semibold text-base" disabled>
                         下一步 →
                     </button>
                 </div>
             </div>
         </section>
         
-        <!-- 页面3: 收入填写页 -->
+        <!-- ===== 页面3: 收入填写页 ===== -->
         <section id="page-income" class="page">
-            <div class="py-8">
-                <div class="text-center mb-8">
-                    <div class="flex items-center justify-center gap-2 mb-2">
-                        <span class="text-sm text-slate-400">进度</span>
-                        <div class="w-32 h-2 bg-slate-700 rounded-full overflow-hidden">
-                            <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 w-1/3 rounded-full"></div>
-                        </div>
-                    </div>
-                    <h2 class="text-3xl font-bold mb-2">填写你的收入</h2>
-                    <p class="text-slate-400">真实的收入数据是科学测算的基础</p>
+            <div class="py-6">
+                <!-- 步骤指示器 -->
+                <div class="step-indicator mb-6">
+                    <div class="step-dot completed"></div>
+                    <div class="step-dot active"></div>
+                    <div class="step-dot"></div>
+                    <div class="step-dot"></div>
+                </div>
+                
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold mb-2">填写你的收入</h2>
+                    <p class="text-slate-400 text-sm">真实数据是准确测算的基础</p>
                 </div>
                 
                 <!-- 收入表单 -->
-                <div class="max-w-xl mx-auto space-y-6">
+                <div class="space-y-5">
                     <!-- 主动收入 -->
-                    <div class="glass-card p-6">
-                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                    <div class="glass-card p-5">
+                        <h3 class="font-semibold mb-4 flex items-center gap-2">
                             <span>💼</span> 主动收入
                         </h3>
                         
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">你的月薪 (元)</label>
-                                <input type="number" id="income-self" placeholder="8000" min="0"
-                                    class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
+                                <input type="number" id="income-self" placeholder="8000" min="0" inputmode="numeric"
+                                    class="input-field w-full text-white text-base"
                                     oninput="calculateIncome()">
                             </div>
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">年终奖 (元)</label>
-                                <input type="number" id="income-bonus" placeholder="20000" min="0"
-                                    class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
+                                <input type="number" id="income-bonus" placeholder="20000" min="0" inputmode="numeric"
+                                    class="input-field w-full text-white text-base"
                                     oninput="calculateIncome()">
                             </div>
-                            <div class="flex items-center gap-3">
-                                <input type="checkbox" id="has-partner" class="w-5 h-5 accent-indigo-500">
-                                <label for="has-partner" class="text-slate-300">我有伴侣一起规划</label>
-                            </div>
-                            <div id="partner-income" class="space-y-4 hidden">
-                                <div>
-                                    <label class="block text-sm text-slate-400 mb-2">伴侣月薪 (元)</label>
-                                    <input type="number" id="income-partner" placeholder="6000" min="0"
-                                        class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
-                                        oninput="calculateIncome()">
-                                </div>
-                                <div>
-                                    <label class="block text-sm text-slate-400 mb-2">伴侣年终奖 (元)</label>
-                                    <input type="number" id="income-partner-bonus" placeholder="10000" min="0"
-                                        class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
-                                        oninput="calculateIncome()">
+                            
+                            <!-- 伴侣选项 -->
+                            <div class="glass-card p-4 bg-slate-800/50 rounded-xl">
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" id="has-partner" class="w-5 h-5 accent-sky-500">
+                                    <span class="text-slate-300">我有伴侣一起规划</span>
+                                </label>
+                                <div id="partner-income" class="space-y-4 mt-4 hidden">
+                                    <div>
+                                        <label class="block text-sm text-slate-400 mb-2">伴侣月薪 (元)</label>
+                                        <input type="number" id="income-partner" placeholder="6000" min="0" inputmode="numeric"
+                                            class="input-field w-full text-white text-base"
+                                            oninput="calculateIncome()">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-slate-400 mb-2">伴侣年终奖 (元)</label>
+                                        <input type="number" id="income-partner-bonus" placeholder="10000" min="0" inputmode="numeric"
+                                            class="input-field w-full text-white text-base"
+                                            oninput="calculateIncome()">
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
                     <!-- 被动收入 -->
-                    <div class="glass-card p-6">
-                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-                            <span>💰</span> 被动收入 (可选)
+                    <div class="glass-card p-5">
+                        <h3 class="font-semibold mb-4 flex items-center gap-2">
+                            <span>💰</span> 被动收入 <span class="text-xs text-slate-500 font-normal">(可选)</span>
                         </h3>
                         
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">房租收入 (元/月)</label>
-                                <input type="number" id="income-rent" placeholder="0" min="0"
-                                    class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
+                                <input type="number" id="income-rent" placeholder="0" min="0" inputmode="numeric"
+                                    class="input-field w-full text-white text-base"
                                     oninput="calculateIncome()">
                             </div>
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">理财/投资收入 (元/月)</label>
-                                <input type="number" id="income-invest" placeholder="0" min="0"
-                                    class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
+                                <input type="number" id="income-invest" placeholder="0" min="0" inputmode="numeric"
+                                    class="input-field w-full text-white text-base"
                                     oninput="calculateIncome()">
                             </div>
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">副业收入 (元/月)</label>
-                                <input type="number" id="income-side" placeholder="0" min="0"
-                                    class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
+                                <input type="number" id="income-side" placeholder="0" min="0" inputmode="numeric"
+                                    class="input-field w-full text-white text-base"
                                     oninput="calculateIncome()">
                             </div>
                         </div>
                     </div>
                     
                     <!-- 收入汇总 -->
-                    <div class="glass-card p-6 bg-gradient-to-r from-indigo-900/50 to-purple-900/50">
+                    <div class="glass-card p-6 summary-income">
                         <div class="text-center">
                             <div class="text-slate-400 mb-2">每月总收入</div>
-                            <div class="text-5xl font-black gradient-text mb-2">
+                            <div class="text-4xl font-black gradient-text mb-2">
                                 ¥<span id="total-monthly-income">0</span>
                             </div>
-                            <div class="text-slate-400">
+                            <div class="text-slate-400 text-sm">
                                 年收入约 ¥<span id="total-yearly-income">0</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="flex justify-center gap-4 mt-8">
-                    <button onclick="showPage('city')" class="btn-secondary px-6 py-3 rounded-xl font-bold">
+                <div class="flex justify-center gap-4 mt-6">
+                    <button onclick="showPage('city')" class="btn-secondary px-6 py-3 rounded-xl font-semibold">
                         ← 返回
                     </button>
-                    <button onclick="goNextFromIncome()" class="btn-primary px-8 py-3 rounded-xl font-bold">
+                    <button onclick="goNextFromIncome()" class="btn-primary px-8 py-3 rounded-xl font-semibold">
                         下一步 →
                     </button>
                 </div>
             </div>
         </section>
         
-        <!-- 页面4: 支出填写页 -->
+        <!-- ===== 页面4: 支出填写页 ===== -->
         <section id="page-expense" class="page">
-            <div class="py-8">
-                <div class="text-center mb-8">
-                    <div class="flex items-center justify-center gap-2 mb-2">
-                        <span class="text-sm text-slate-400">进度</span>
-                        <div class="w-32 h-2 bg-slate-700 rounded-full overflow-hidden">
-                            <div class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 w-2/3 rounded-full"></div>
-                        </div>
-                    </div>
-                    <h2 class="text-3xl font-bold mb-2">填写你的支出</h2>
-                    <p class="text-slate-400">越详细的数据，越准确的测算结果</p>
+            <div class="py-6">
+                <!-- 步骤指示器 -->
+                <div class="step-indicator mb-6">
+                    <div class="step-dot completed"></div>
+                    <div class="step-dot completed"></div>
+                    <div class="step-dot active"></div>
+                    <div class="step-dot"></div>
                 </div>
                 
-                <div class="max-w-xl mx-auto space-y-6">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold mb-2">填写你的支出</h2>
+                    <p class="text-slate-400 text-sm">越详细，结果越准确</p>
+                </div>
+                
+                <div class="space-y-5">
                     <!-- 固定支出 -->
-                    <div class="glass-card p-6">
-                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-                            <span>🏠</span> 固定支出 <span class="text-sm text-slate-400 font-normal">每月必交</span>
+                    <div class="glass-card p-5">
+                        <h3 class="font-semibold mb-4 flex items-center gap-2">
+                            <span>🏠</span> 固定支出 <span class="text-xs text-slate-500 font-normal">每月必交</span>
                         </h3>
                         
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">房贷/房租</label>
-                                <input type="number" id="expense-mortgage" placeholder="3000" min="0"
-                                    class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
+                                <input type="number" id="expense-mortgage" placeholder="3000" min="0" inputmode="numeric"
+                                    class="input-field w-full text-white text-base"
                                     oninput="calculateExpense()">
                             </div>
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">车贷/车险</label>
-                                <input type="number" id="expense-car" placeholder="2000" min="0"
-                                    class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
+                                <input type="number" id="expense-car" placeholder="2000" min="0" inputmode="numeric"
+                                    class="input-field w-full text-white text-base"
                                     oninput="calculateExpense()">
                             </div>
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">保险</label>
-                                <input type="number" id="expense-insurance" placeholder="500" min="0"
-                                    class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
+                                <input type="number" id="expense-insurance" placeholder="500" min="0" inputmode="numeric"
+                                    class="input-field w-full text-white text-base"
                                     oninput="calculateExpense()">
                             </div>
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">物业费/水电燃气</label>
-                                <input type="number" id="expense-utility" placeholder="400" min="0"
-                                    class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
+                                <input type="number" id="expense-utility" placeholder="400" min="0" inputmode="numeric"
+                                    class="input-field w-full text-white text-base"
                                     oninput="calculateExpense()">
                             </div>
                         </div>
                     </div>
                     
                     <!-- 日常支出 -->
-                    <div class="glass-card p-6">
-                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-                            <span>🛒</span> 日常支出 <span class="text-sm text-slate-400 font-normal">每月常规</span>
+                    <div class="glass-card p-5">
+                        <h3 class="font-semibold mb-4 flex items-center gap-2">
+                            <span>🛒</span> 日常支出 <span class="text-xs text-slate-500 font-normal">每月常规</span>
                         </h3>
                         
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">餐饮/外卖</label>
-                                <input type="number" id="expense-food" placeholder="2000" min="0"
-                                    class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
+                                <input type="number" id="expense-food" placeholder="2000" min="0" inputmode="numeric"
+                                    class="input-field w-full text-white text-base"
                                     oninput="calculateExpense()">
                             </div>
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">交通出行</label>
-                                <input type="number" id="expense-transport" placeholder="500" min="0"
-                                    class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
+                                <input type="number" id="expense-transport" placeholder="500" min="0" inputmode="numeric"
+                                    class="input-field w-full text-white text-base"
                                     oninput="calculateExpense()">
                             </div>
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">通讯网络</label>
-                                <input type="number" id="expense-communication" placeholder="200" min="0"
-                                    class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
+                                <input type="number" id="expense-communication" placeholder="200" min="0" inputmode="numeric"
+                                    class="input-field w-full text-white text-base"
                                     oninput="calculateExpense()">
                             </div>
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">日用品/护肤</label>
-                                <input type="number" id="expense-daily" placeholder="300" min="0"
-                                    class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
+                                <input type="number" id="expense-daily" placeholder="300" min="0" inputmode="numeric"
+                                    class="input-field w-full text-white text-base"
                                     oninput="calculateExpense()">
                             </div>
                         </div>
                     </div>
                     
                     <!-- 偶尔支出 -->
-                    <div class="glass-card p-6">
-                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-                            <span>🎭</span> 偶尔支出 <span class="text-sm text-slate-400 font-normal">分摊到每月</span>
+                    <div class="glass-card p-5">
+                        <h3 class="font-semibold mb-4 flex items-center gap-2">
+                            <span>🎭</span> 偶尔支出 <span class="text-xs text-slate-500 font-normal">分摊到每月</span>
                         </h3>
                         
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">应酬人情</label>
-                                <input type="number" id="expense-social" placeholder="500" min="0"
-                                    class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
+                                <input type="number" id="expense-social" placeholder="500" min="0" inputmode="numeric"
+                                    class="input-field w-full text-white text-base"
                                     oninput="calculateExpense()">
                             </div>
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">衣服购物</label>
-                                <input type="number" id="expense-shopping" placeholder="400" min="0"
-                                    class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
+                                <input type="number" id="expense-shopping" placeholder="400" min="0" inputmode="numeric"
+                                    class="input-field w-full text-white text-base"
                                     oninput="calculateExpense()">
                             </div>
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">娱乐休闲</label>
-                                <input type="number" id="expense-entertainment" placeholder="300" min="0"
-                                    class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
+                                <input type="number" id="expense-entertainment" placeholder="300" min="0" inputmode="numeric"
+                                    class="input-field w-full text-white text-base"
                                     oninput="calculateExpense()">
                             </div>
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">旅游 (分摊)</label>
-                                <input type="number" id="expense-travel" placeholder="400" min="0"
-                                    class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
+                                <input type="number" id="expense-travel" placeholder="400" min="0" inputmode="numeric"
+                                    class="input-field w-full text-white text-base"
                                     oninput="calculateExpense()">
                             </div>
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">医疗保健 (分摊)</label>
-                                <input type="number" id="expense-medical" placeholder="200" min="0"
-                                    class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
+                                <input type="number" id="expense-medical" placeholder="200" min="0" inputmode="numeric"
+                                    class="input-field w-full text-white text-base"
                                     oninput="calculateExpense()">
                             </div>
                         </div>
                     </div>
                     
                     <!-- 养娃支出 -->
-                    <div class="glass-card p-6">
-                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-                            <span>👶</span> 养娃支出 <span class="text-sm text-slate-400 font-normal">可选</span>
+                    <div class="glass-card p-5">
+                        <h3 class="font-semibold mb-4 flex items-center gap-2">
+                            <span>👶</span> 养娃支出 <span class="text-xs text-slate-500 font-normal">(可选)</span>
                         </h3>
                         
                         <!-- 是否有孩子选择 -->
                         <div class="mb-4">
                             <label class="block text-sm text-slate-400 mb-2">是否有孩子</label>
-                            <div class="flex gap-4">
+                            <div class="flex gap-6">
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <input type="radio" name="has-children" value="no" checked 
-                                        class="w-5 h-5 accent-indigo-500" onchange="toggleChildrenSection(false)">
+                                        class="w-5 h-5 accent-sky-500" onchange="toggleChildrenSection(false)">
                                     <span>暂无孩子</span>
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <input type="radio" name="has-children" value="yes" 
-                                        class="w-5 h-5 accent-indigo-500" onchange="toggleChildrenSection(true)">
+                                        class="w-5 h-5 accent-sky-500" onchange="toggleChildrenSection(true)">
                                     <span>有孩子</span>
                                 </label>
                             </div>
                         </div>
                         
-                        <!-- 养娃详情（默认隐藏） -->
+                        <!-- 养娃详情 -->
                         <div id="children-section" class="space-y-4 hidden">
-                            <!-- 孩子数量 -->
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">孩子数量</label>
-                                <select id="children-count" class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
+                                <select id="children-count" class="input-field w-full text-white text-base"
                                     onchange="calculateExpense()">
                                     <option value="1">1个</option>
                                     <option value="2">2个</option>
@@ -622,385 +849,378 @@
                                 </select>
                             </div>
                             
-                            <!-- 孩子年龄段 -->
                             <div>
                                 <label class="block text-sm text-slate-400 mb-2">主要孩子年龄段</label>
-                                <select id="children-age" class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
+                                <select id="children-age" class="input-field w-full text-white text-base"
                                     onchange="calculateExpense()">
                                     <option value="0-3">0-3岁（婴幼儿）</option>
                                     <option value="3-6">3-6岁（幼儿园）</option>
                                     <option value="6-12">6-12岁（小学）</option>
                                     <option value="12-18">12-18岁（中学）</option>
-                                    <option value="18+">18岁以上（大学/已独立）</option>
+                                    <option value="18+">18岁以上</option>
                                 </select>
                                 <div id="age-hint" class="text-xs text-slate-500 mt-1"></div>
                             </div>
                             
-                            <!-- 月均养娃支出 -->
                             <div>
-                                <label class="block text-sm text-slate-400 mb-2">月均养娃支出（包含奶粉/尿不湿/学费/培训班/兴趣班等）</label>
-                                <input type="number" id="expense-children" placeholder="请输入" min="0"
-                                    class="input-field w-full px-4 py-3 rounded-xl text-white text-lg"
+                                <label class="block text-sm text-slate-400 mb-2">月均养娃支出</label>
+                                <input type="number" id="expense-children" placeholder="请输入" min="0" inputmode="numeric"
+                                    class="input-field w-full text-white text-base"
                                     oninput="calculateExpense()">
-                                <div class="text-xs text-slate-500 mt-1">参考：0-3岁约3000-5000元/月，3-6岁约2000-4000元/月，6-12岁约2000-5000元/月，12-18岁约3000-8000元/月</div>
+                                <div class="text-xs text-slate-500 mt-1">包含奶粉/学费/培训班等</div>
                             </div>
                             
-                            <!-- 是否考虑未来教育基金 -->
-                            <div>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <input type="checkbox" id="include-education-fund" checked
-                                        class="w-5 h-5 accent-indigo-500" onchange="calculateExpense()">
-                                    <span class="text-sm">考虑未来教育基金（大学/留学/结婚）</span>
-                                </label>
-                            </div>
+                            <label class="flex items-start gap-2 cursor-pointer">
+                                <input type="checkbox" id="include-education-fund" checked
+                                    class="w-5 h-5 accent-sky-500 mt-0.5" onchange="calculateExpense()">
+                                <span class="text-sm">考虑未来教育基金（大学/留学/结婚）</span>
+                            </label>
                         </div>
                     </div>
                     
                     <!-- 支出汇总 -->
-                    <div class="glass-card p-6 bg-gradient-to-r from-rose-900/50 to-orange-900/50">
+                    <div class="glass-card p-6 summary-expense">
                         <div class="text-center">
                             <div class="text-slate-400 mb-2">每月总支出</div>
-                            <div class="text-5xl font-black text-rose-400 mb-2">
+                            <div class="text-4xl font-black text-red-400 mb-2">
                                 ¥<span id="total-monthly-expense">0</span>
                             </div>
-                            <div class="text-slate-400">
-                                储蓄率 <span class="text-green-400 font-bold" id="savings-rate">0</span>%
+                            <div class="text-slate-400 text-sm">
+                                储蓄率 <span class="text-emerald-400 font-bold" id="savings-rate">0</span>%
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="flex justify-center gap-4 mt-8">
-                    <button onclick="showPage('income')" class="btn-secondary px-6 py-3 rounded-xl font-bold">
+                <div class="flex justify-center gap-4 mt-6">
+                    <button onclick="showPage('income')" class="btn-secondary px-6 py-3 rounded-xl font-semibold">
                         ← 返回
                     </button>
-                    <button onclick="goNextFromExpense()" class="btn-primary px-8 py-3 rounded-xl font-bold">
+                    <button onclick="goNextFromExpense()" class="btn-primary px-8 py-3 rounded-xl font-semibold">
                         开始测算 →
                     </button>
                 </div>
             </div>
         </section>
         
-        <!-- 页面5: 躺平测算结果页 -->
+        <!-- ===== 页面5: 躺平测算结果页 ===== -->
         <section id="page-result" class="page">
-            <div class="py-8">
-                <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold mb-2">🎉 你的躺平报告</h2>
-                    <p class="text-slate-400">基于你的财务状况，我们生成了专属测算</p>
+            <div class="py-6">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold mb-2">📊 你的财务报告</h2>
+                    <p class="text-slate-400 text-sm">基于你的实际情况生成的专属方案</p>
+                </div>
+                
+                <!-- ===== 人性化文案区域 ===== -->
+                <div id="caring-message" class="caring-message">
+                    <div class="icon">💪</div>
+                    <div class="text" id="caring-text">一个人在外打拼，挣钱重要，身体更重要<br>记得给自己留点时间休息，健康是最大的财富</div>
                 </div>
                 
                 <!-- 核心数据卡片 -->
-                <div class="max-w-4xl mx-auto mb-8">
-                    <div class="glass-card p-8 text-center relative overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-r from-indigo-600/20 to-purple-600/20"></div>
-                        <div class="relative">
-                            <div class="text-slate-400 mb-2">躺平所需本金</div>
-                            <div class="text-6xl md:text-7xl font-black gradient-text mb-2">
-                                ¥<span id="result-target">0</span>
-                            </div>
-                            <div class="text-slate-400" id="result-description">
-                                基于 4% 法则 = 年支出 × 25
-                            </div>
-                            <div class="text-pink-400 text-sm mt-2 hidden" id="education-fund-note">
-                                💡 已包含教育基金
-                            </div>
+                <div class="glass-card p-8 text-center relative overflow-hidden mb-6">
+                    <div class="absolute inset-0 bg-gradient-to-r from-sky-600/20 to-cyan-600/20"></div>
+                    <div class="relative">
+                        <div class="text-slate-400 mb-2">躺平所需本金</div>
+                        <div class="text-5xl md:text-6xl font-black gradient-text mb-2">
+                            ¥<span id="result-target">0</span>
+                        </div>
+                        <div class="text-slate-400 text-sm" id="result-description">
+                            基于 4% 法则 = 年支出 × 25
+                        </div>
+                        <div class="text-emerald-400 text-sm mt-2 hidden" id="education-fund-note">
+                            💡 已包含教育基金
                         </div>
                     </div>
                 </div>
                 
                 <!-- 三种方案 -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 max-w-4xl mx-auto">
-                    <div class="result-card glass-card p-6 border border-slate-600">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="result-card glass-card p-5 border border-slate-600">
                         <div class="text-center">
-                            <div class="text-3xl mb-2">🏕️</div>
-                            <h3 class="font-bold mb-2">极简躺平</h3>
-                            <div class="text-2xl font-bold text-indigo-400 mb-1">
+                            <div class="text-2xl mb-2">🏕️</div>
+                            <h3 class="font-semibold mb-1">极简躺平</h3>
+                            <div class="text-xl font-bold text-slate-400 mb-1">
                                 ¥<span id="result-minimal">0</span>
                             </div>
-                            <p class="text-sm text-slate-400">控制欲望，精打细算</p>
-                            <div class="text-xs text-slate-500 mt-2">年支出 6 万</div>
+                            <p class="text-xs text-slate-500">控制欲望，精打细算</p>
                         </div>
                     </div>
                     
-                    <div class="result-card glass-card p-6 border-2 border-indigo-500 bg-gradient-to-b from-indigo-900/30">
+                    <div class="result-card glass-card p-5 border-2 border-sky-500 bg-gradient-to-b from-sky-900/30">
+                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-sky-500 text-xs px-3 py-1 rounded-full">
+                            推荐
+                        </div>
                         <div class="text-center">
-                            <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-500 text-xs px-3 py-1 rounded-full">
-                                推荐
-                            </div>
-                            <div class="text-3xl mb-2">🏡</div>
-                            <h3 class="font-bold mb-2">舒适躺平</h3>
-                            <div class="text-2xl font-bold text-purple-400 mb-1">
+                            <div class="text-2xl mb-2">🏡</div>
+                            <h3 class="font-semibold mb-1">舒适躺平</h3>
+                            <div class="text-xl font-bold text-cyan-400 mb-1">
                                 ¥<span id="result-comfortable">0</span>
                             </div>
-                            <p class="text-sm text-slate-400">适度消费，生活体面</p>
-                            <div class="text-xs text-slate-500 mt-2">年支出 12 万</div>
+                            <p class="text-xs text-slate-500">适度消费，生活体面</p>
                         </div>
                     </div>
                     
-                    <div class="result-card glass-card p-6 border border-slate-600">
+                    <div class="result-card glass-card p-5 border border-slate-600">
                         <div class="text-center">
-                            <div class="text-3xl mb-2">🏰</div>
-                            <h3 class="font-bold mb-2">富足躺平</h3>
-                            <div class="text-2xl font-bold text-pink-400 mb-1">
+                            <div class="text-2xl mb-2">🏰</div>
+                            <h3 class="font-semibold mb-1">富足躺平</h3>
+                            <div class="text-xl font-bold text-teal-400 mb-1">
                                 ¥<span id="result-rich">0</span>
                             </div>
-                            <p class="text-sm text-slate-400">品质生活，任性消费</p>
-                            <div class="text-xs text-slate-500 mt-2">年支出 24 万</div>
+                            <p class="text-xs text-slate-500">品质生活，任性消费</p>
                         </div>
                     </div>
                 </div>
                 
-                <!-- 复利曲线 -->
-                <div class="max-w-4xl mx-auto mb-8">
-                    <div class="glass-card p-6">
-                        <h3 class="font-bold text-lg mb-4 text-center">📈 复利增长曲线</h3>
-                        <div class="flex justify-center gap-4 mb-4">
-                            <button onclick="setReturnRate(3)" id="rate-btn-3" class="btn-secondary px-4 py-2 rounded-lg text-sm">
-                                保守 3%
-                            </button>
-                            <button onclick="setReturnRate(6)" id="rate-btn-6" class="btn-primary px-4 py-2 rounded-lg text-sm">
-                                稳健 6%
-                            </button>
-                            <button onclick="setReturnRate(9)" id="rate-btn-9" class="btn-secondary px-4 py-2 rounded-lg text-sm">
-                                进取 9%
-                            </button>
+                <!-- ===== 复利曲线 - 优化版 ===== -->
+                <div class="glass-card p-5 mb-6">
+                    <h3 class="font-semibold text-base mb-4 text-center">📈 复利增长曲线</h3>
+                    
+                    <!-- 收益率切换按钮 -->
+                    <div class="flex justify-center gap-2 mb-4">
+                        <button onclick="setReturnRate(3)" id="rate-btn-3" class="btn-secondary px-4 py-2 rounded-lg text-sm font-medium">
+                            保守 3%
+                        </button>
+                        <button onclick="setReturnRate(6)" id="rate-btn-6" class="btn-primary px-4 py-2 rounded-lg text-sm font-medium">
+                            稳健 6%
+                        </button>
+                        <button onclick="setReturnRate(9)" id="rate-btn-9" class="btn-secondary px-4 py-2 rounded-lg text-sm font-medium">
+                            进取 9%
+                        </button>
+                    </div>
+                    
+                    <!-- 图表容器 -->
+                    <div class="chart-container">
+                        <canvas id="compoundChart"></canvas>
+                    </div>
+                    
+                    <!-- 图例 -->
+                    <div class="flex justify-center gap-6 mt-4 text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-slate-500"></span>
+                            <span class="text-slate-400">保守 3%</span>
                         </div>
-                        <div class="relative" style="height: 300px;">
-                            <canvas id="compoundChart"></canvas>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-cyan-500"></span>
+                            <span class="text-slate-400">稳健 6%</span>
                         </div>
-                        <div class="text-center text-slate-400 mt-4">
-                            预计 <span id="years-to-goal" class="text-indigo-400 font-bold">0</span> 年后达成目标
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                            <span class="text-slate-400">进取 9%</span>
                         </div>
+                    </div>
+                    
+                    <div class="text-center text-slate-400 mt-4">
+                        预计 <span id="years-to-goal" class="text-cyan-400 font-bold">0</span> 年后达成目标
                     </div>
                 </div>
                 
                 <!-- 财务分析 -->
-                <div class="max-w-4xl mx-auto mb-8">
-                    <div class="glass-card p-6">
-                        <h3 class="font-bold text-lg mb-4 text-center">📊 财务健康度</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div class="text-center">
-                                <div class="text-3xl mb-2">💵</div>
-                                <div class="text-sm text-slate-400">当前存款</div>
-                                <div class="font-bold text-lg" id="analysis-savings">¥0</div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-3xl mb-2">📈</div>
-                                <div class="text-sm text-slate-400">月储蓄额</div>
-                                <div class="font-bold text-lg text-green-400" id="analysis-monthly">¥0</div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-3xl mb-2">🎯</div>
-                                <div class="text-sm text-slate-400">达成率</div>
-                                <div class="font-bold text-lg text-indigo-400" id="analysis-progress">0%</div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-3xl mb-2">🏆</div>
-                                <div class="text-sm text-slate-400">击败同龄人</div>
-                                <div class="font-bold text-lg text-yellow-400" id="analysis-beat">0%</div>
-                            </div>
+                <div class="glass-card p-5 mb-6">
+                    <h3 class="font-semibold text-base mb-4 text-center">📊 财务健康度</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center">
+                            <div class="text-2xl mb-1">💵</div>
+                            <div class="text-xs text-slate-400">当前存款</div>
+                            <div class="font-bold" id="analysis-savings">¥0</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl mb-1">📈</div>
+                            <div class="text-xs text-slate-400">月储蓄额</div>
+                            <div class="font-bold text-emerald-400" id="analysis-monthly">¥0</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl mb-1">🎯</div>
+                            <div class="text-xs text-slate-400">达成率</div>
+                            <div class="font-bold text-cyan-400" id="analysis-progress">0%</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl mb-1">🏆</div>
+                            <div class="text-xs text-slate-400">击败同龄人</div>
+                            <div class="font-bold text-amber-400" id="analysis-beat">0%</div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- 养娃信息（如果有孩子） -->
-                <div id="children-info-section" class="max-w-4xl mx-auto mb-8 hidden">
-                    <div class="glass-card p-6 border-2 border-pink-500/30 bg-gradient-to-r from-pink-900/20 to-purple-900/20">
-                        <h3 class="font-bold text-lg mb-4 text-center flex items-center justify-center gap-2">
-                            <span>👶</span> 养娃规划
-                        </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                            <div>
-                                <div class="text-sm text-slate-400">孩子数量</div>
-                                <div class="font-bold text-lg" id="children-count-display">-</div>
-                            </div>
-                            <div>
-                                <div class="text-sm text-slate-400">当前阶段</div>
-                                <div class="font-bold text-lg" id="children-stage-display">-</div>
-                            </div>
-                            <div>
-                                <div class="text-sm text-slate-400">教育基金需求</div>
-                                <div class="font-bold text-lg text-pink-400" id="education-fund-display">¥0</div>
-                                <div class="text-xs text-slate-500">已折算到躺平本金</div>
-                            </div>
+                <!-- 养娃信息 -->
+                <div id="children-info-section" class="glass-card p-5 border border-pink-500/30 mb-6 hidden">
+                    <h3 class="font-semibold text-base mb-4 text-center flex items-center justify-center gap-2">
+                        <span>👶</span> 养娃规划
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                        <div>
+                            <div class="text-xs text-slate-400">孩子数量</div>
+                            <div class="font-bold" id="children-count-display">-</div>
                         </div>
-                        <div class="text-center mt-4 text-sm text-slate-400">
-                            💡 教育基金包括大学/留学费用 + 结婚基金（按需），已考虑通胀折现
+                        <div>
+                            <div class="text-xs text-slate-400">当前阶段</div>
+                            <div class="font-bold" id="children-stage-display">-</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-400">教育基金需求</div>
+                            <div class="font-bold text-pink-400" id="education-fund-display">¥0</div>
+                            <div class="text-xs text-slate-500">已折算到躺平本金</div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- 阶段指导 -->
-                <div class="max-w-4xl mx-auto mb-8">
-                    <div class="glass-card p-6">
-                        <h3 class="font-bold text-lg mb-4 text-center">🗺️ 躺平路线图</h3>
-                        <div class="relative">
-                            <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-slate-700"></div>
-                            <div class="space-y-6" id="roadmap">
-                                <!-- 动态生成 -->
-                            </div>
-                        </div>
-                    </div>
+                <!-- 阶段指导 - 路线图 -->
+                <div class="glass-card p-5 mb-6">
+                    <h3 class="font-semibold text-base mb-4 text-center">🗺️ 躺平路线图</h3>
+                    <div id="roadmap" class="space-y-4"></div>
                 </div>
                 
                 <!-- 操作按钮 -->
-                <div class="flex flex-col items-center gap-4 max-w-xl mx-auto">
+                <div class="flex flex-col items-center gap-4">
                     <div class="flex gap-4">
-                        <button onclick="savePlan()" class="btn-primary px-6 py-3 rounded-xl font-bold">
+                        <button onclick="savePlan()" class="btn-primary px-6 py-3 rounded-xl font-semibold">
                             💾 保存计划
                         </button>
-                        <button onclick="generateShareCard()" class="btn-secondary px-6 py-3 rounded-xl font-bold">
+                        <button onclick="generateShareCard()" class="btn-secondary px-6 py-3 rounded-xl font-semibold">
                             📤 生成分享图
                         </button>
                     </div>
-                    <button onclick="showPage('profile')" class="text-slate-400 hover:text-white transition">
+                    <button onclick="showPage('profile')" class="text-slate-400 hover:text-white transition text-sm">
                         查看更多功能 →
                     </button>
                 </div>
             </div>
         </section>
         
-        <!-- 页面6: 个人中心/进度追踪 -->
+        <!-- ===== 页面6: 个人中心/进度追踪 ===== -->
         <section id="page-profile" class="page">
-            <div class="py-8">
-                <div class="text-center mb-8">
-                    <div class="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-4xl">
-                        🧑‍💻
+            <div class="py-6">
+                <div class="text-center mb-6">
+                    <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-sky-500 to-cyan-500 flex items-center justify-center text-3xl">
+                        💼
                     </div>
-                    <h2 class="text-2xl font-bold mb-2" id="profile-name">躺平追梦人</h2>
-                    <p class="text-slate-400" id="profile-status">正在通往财务自由的道路上...</p>
+                    <h2 class="text-xl font-bold mb-1" id="profile-name">财务追梦人</h2>
+                    <p class="text-slate-400 text-sm" id="profile-status">正在通往财务自由的道路上...</p>
                 </div>
                 
                 <!-- 进度卡片 -->
-                <div class="max-w-4xl mx-auto mb-8">
-                    <div class="glass-card p-6">
-                        <h3 class="font-bold text-lg mb-6 text-center">🎯 躺平进度</h3>
-                        <div class="flex items-center justify-center mb-6">
-                            <div class="relative">
-                                <svg class="progress-ring w-40 h-40">
-                                    <circle cx="80" cy="80" r="70" fill="none" stroke="#334155" stroke-width="12"/>
-                                    <circle id="progress-circle" cx="80" cy="80" r="70" fill="none" 
-                                        stroke="url(#gradient)" stroke-width="12" 
-                                        stroke-dasharray="440" stroke-dashoffset="440"
-                                        stroke-linecap="round"/>
-                                    <defs>
-                                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                            <stop offset="0%" stop-color="#6366f1"/>
-                                            <stop offset="100%" stop-color="#a855f7"/>
-                                        </linearGradient>
-                                    </defs>
-                                </svg>
-                                <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                    <div class="text-3xl font-black gradient-text" id="progress-percent">0%</div>
-                                    <div class="text-xs text-slate-400">完成度</div>
-                                </div>
+                <div class="glass-card p-6 mb-6">
+                    <h3 class="font-semibold text-base mb-4 text-center">🎯 躺平进度</h3>
+                    <div class="flex items-center justify-center mb-4">
+                        <div class="relative">
+                            <svg class="progress-ring w-36 h-36">
+                                <circle cx="72" cy="72" r="64" fill="none" stroke="#334155" stroke-width="10"/>
+                                <circle id="progress-circle" cx="72" cy="72" r="64" fill="none" 
+                                    stroke="url(#gradient)" stroke-width="10" 
+                                    stroke-dasharray="402" stroke-dashoffset="402"
+                                    stroke-linecap="round"/>
+                                <defs>
+                                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#0369a1"/>
+                                        <stop offset="100%" stop-color="#14b8a6"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <div class="text-2xl font-black gradient-text" id="progress-percent">0%</div>
+                                <div class="text-xs text-slate-400">完成度</div>
                             </div>
                         </div>
-                        <div class="text-center">
-                            <div class="text-slate-400">已存 <span class="text-green-400 font-bold" id="progress-saved">¥0</span></div>
-                            <div class="text-slate-400">目标 <span class="text-indigo-400 font-bold" id="progress-target">¥0</span></div>
-                            <div class="text-slate-400 mt-2">还差 <span class="text-rose-400 font-bold" id="progress-remain">¥0</span></div>
-                        </div>
+                    </div>
+                    <div class="text-center space-y-1">
+                        <div class="text-slate-400 text-sm">已存 <span class="text-emerald-400 font-bold" id="progress-saved">¥0</span></div>
+                        <div class="text-slate-400 text-sm">目标 <span class="text-cyan-400 font-bold" id="progress-target">¥0</span></div>
+                        <div class="text-slate-400 text-sm">还差 <span class="text-red-400 font-bold" id="progress-remain">¥0</span></div>
                     </div>
                 </div>
                 
                 <!-- 里程碑 -->
-                <div class="max-w-4xl mx-auto mb-8">
-                    <div class="glass-card p-6">
-                        <h3 class="font-bold text-lg mb-4">🏆 里程碑成就</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="milestones">
-                            <div class="milestone-item glass-card p-4 text-center opacity-50" data-milestone="first10k">
-                                <div class="text-3xl mb-2">🎯</div>
-                                <div class="text-sm font-bold">首个10万</div>
-                                <div class="text-xs text-slate-400">未达成</div>
-                            </div>
-                            <div class="milestone-item glass-card p-4 text-center opacity-50" data-milestone="save50">
-                                <div class="text-3xl mb-2">💰</div>
-                                <div class="text-sm font-bold">储蓄率50%</div>
-                                <div class="text-xs text-slate-400">未达成</div>
-                            </div>
-                            <div class="milestone-item glass-card p-4 text-center opacity-50" data-milestone="passive1k">
-                                <div class="text-3xl mb-2">📈</div>
-                                <div class="text-sm font-bold">被动收入过千</div>
-                                <div class="text-xs text-slate-400">未达成</div>
-                            </div>
-                            <div class="milestone-item glass-card p-4 text-center opacity-50" data-milestone="halfway">
-                                <div class="text-3xl mb-2">🚀</div>
-                                <div class="text-sm font-bold">达成50%</div>
-                                <div class="text-xs text-slate-400">未达成</div>
-                            </div>
+                <div class="glass-card p-5 mb-6">
+                    <h3 class="font-semibold text-base mb-4">🏆 里程碑成就</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="milestones">
+                        <div class="milestone-item glass-card p-3 text-center opacity-50" data-milestone="first10k">
+                            <div class="text-2xl mb-1">🎯</div>
+                            <div class="text-sm font-medium">首个10万</div>
+                            <div class="text-xs text-slate-500">未达成</div>
+                        </div>
+                        <div class="milestone-item glass-card p-3 text-center opacity-50" data-milestone="save50">
+                            <div class="text-2xl mb-1">💰</div>
+                            <div class="text-sm font-medium">储蓄率50%</div>
+                            <div class="text-xs text-slate-500">未达成</div>
+                        </div>
+                        <div class="milestone-item glass-card p-3 text-center opacity-50" data-milestone="passive1k">
+                            <div class="text-2xl mb-1">📈</div>
+                            <div class="text-sm font-medium">被动收入过千</div>
+                            <div class="text-xs text-slate-500">未达成</div>
+                        </div>
+                        <div class="milestone-item glass-card p-3 text-center opacity-50" data-milestone="halfway">
+                            <div class="text-2xl mb-1">🚀</div>
+                            <div class="text-sm font-medium">达成50%</div>
+                            <div class="text-xs text-slate-500">未达成</div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- 月度追踪 -->
-                <div class="max-w-4xl mx-auto mb-8">
-                    <div class="glass-card p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-bold text-lg">📅 月度记录</h3>
-                            <button onclick="showAddMonthModal()" class="btn-primary px-4 py-2 rounded-lg text-sm">
-                                + 添加记录
-                            </button>
-                        </div>
-                        <div id="monthly-records" class="space-y-3">
-                            <div class="text-center text-slate-400 py-8">
-                                暂无月度记录<br>
-                                <span class="text-sm">开始记录你的财务成长吧</span>
-                            </div>
+                <div class="glass-card p-5 mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-semibold text-base">📅 月度记录</h3>
+                        <button onclick="showAddMonthModal()" class="btn-primary px-4 py-2 rounded-lg text-sm font-medium">
+                            + 添加
+                        </button>
+                    </div>
+                    <div id="monthly-records" class="space-y-3">
+                        <div class="text-center text-slate-400 py-8 text-sm">
+                            暂无月度记录<br>
+                            <span class="text-xs">开始记录你的财务成长吧</span>
                         </div>
                     </div>
                 </div>
                 
                 <!-- 功能入口 -->
-                <div class="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <button onclick="showPage('result')" class="glass-card p-4 text-center hover:border-indigo-500 transition">
-                        <div class="text-2xl mb-2">🔄</div>
-                        <div class="text-sm font-bold">重新测算</div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <button onclick="showPage('result')" class="glass-card p-4 text-center hover:border-sky-500 transition">
+                        <div class="text-xl mb-1">🔄</div>
+                        <div class="text-sm font-medium">重新测算</div>
                     </button>
-                    <button onclick="exportData()" class="glass-card p-4 text-center hover:border-indigo-500 transition">
-                        <div class="text-2xl mb-2">📤</div>
-                        <div class="text-sm font-bold">导出数据</div>
+                    <button onclick="exportData()" class="glass-card p-4 text-center hover:border-sky-500 transition">
+                        <div class="text-xl mb-1">📤</div>
+                        <div class="text-sm font-medium">导出数据</div>
                     </button>
-                    <button onclick="importData()" class="glass-card p-4 text-center hover:border-indigo-500 transition">
-                        <div class="text-2xl mb-2">📥</div>
-                        <div class="text-sm font-bold">导入数据</div>
+                    <button onclick="importData()" class="glass-card p-4 text-center hover:border-sky-500 transition">
+                        <div class="text-xl mb-1">📥</div>
+                        <div class="text-sm font-medium">导入数据</div>
                     </button>
-                    <button onclick="resetData()" class="glass-card p-4 text-center hover:border-rose-500 transition">
-                        <div class="text-2xl mb-2">🗑️</div>
-                        <div class="text-sm font-bold">重置数据</div>
+                    <button onclick="resetData()" class="glass-card p-4 text-center hover:border-red-500 transition">
+                        <div class="text-xl mb-1">🗑️</div>
+                        <div class="text-sm font-medium">重置数据</div>
                     </button>
                 </div>
             </div>
         </section>
         
-        <!-- 页面7: 分享图预览 -->
+        <!-- ===== 页面7: 分享图预览 ===== -->
         <section id="page-share" class="page">
-            <div class="py-8">
-                <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold mb-2">📤 专属分享图</h2>
-                    <p class="text-slate-400">保存图片分享到社交媒体，展示你的躺平进度</p>
+            <div class="py-6">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold mb-2">📤 专属分享图</h2>
+                    <p class="text-slate-400 text-sm">保存图片分享到社交媒体</p>
                 </div>
                 
-                <div class="max-w-md mx-auto">
-                    <!-- 分享卡片容器 -->
+                <div class="max-sm mx-auto">
+                    <!-- 分享卡片 -->
                     <div id="share-card" class="share-card rounded-3xl p-6 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/30 to-purple-500/30 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-                        <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-pink-500/20 to-rose-500/20 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+                        <div class="absolute top-0 right-0 w-28 h-28 bg-gradient-to-br from-sky-500/30 to-cyan-500/30 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                        <div class="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-teal-500/20 to-emerald-500/20 rounded-full translate-y-1/2 -translate-x-1/2"></div>
                         
                         <div class="relative">
-                            <!-- 头部 -->
-                            <div class="text-center mb-6">
-                                <div class="inline-block px-4 py-1 bg-indigo-500/20 rounded-full text-sm text-indigo-300 mb-3">
-                                    🛋️ 躺平计算器
+                            <div class="text-center mb-5">
+                                <div class="inline-block px-4 py-1 bg-sky-500/20 rounded-full text-sm text-sky-300 mb-2">
+                                    📊 财务自由计算器
                                 </div>
-                                <h3 class="text-2xl font-black">我的财务体检报告</h3>
+                                <h3 class="text-xl font-bold">我的财务体检报告</h3>
                             </div>
                             
-                            <!-- 核心数据 -->
                             <div class="bg-white/10 rounded-2xl p-5 mb-4">
                                 <div class="text-center mb-4">
                                     <div class="text-sm text-slate-400 mb-1">在 <span id="share-city" class="text-white">XX</span> 躺平需要</div>
-                                    <div class="text-4xl font-black gradient-text">
+                                    <div class="text-3xl font-black gradient-text">
                                         ¥<span id="share-target">0</span>
                                     </div>
                                 </div>
@@ -1015,42 +1235,39 @@
                                     </div>
                                     <div>
                                         <div class="text-slate-400">月储蓄</div>
-                                        <div class="font-bold text-green-400" id="share-monthly">¥0</div>
+                                        <div class="font-bold text-emerald-400" id="share-monthly">¥0</div>
                                     </div>
                                 </div>
                             </div>
                             
-                            <!-- 对比数据 -->
-                            <div class="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl p-5 mb-4">
+                            <div class="bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-2xl p-4 mb-4">
                                 <div class="text-center">
-                                    <div class="text-sm text-slate-400 mb-2">🎉 成就解锁</div>
-                                    <div class="text-lg font-bold" id="share-achievement">储蓄率击败80%的年轻人</div>
+                                    <div class="text-sm text-slate-400 mb-1">🎉 成就解锁</div>
+                                    <div class="font-semibold" id="share-achievement">储蓄率击败80%的年轻人</div>
                                 </div>
                             </div>
                             
-                            <!-- 进度条 -->
                             <div class="mb-4">
-                                <div class="flex justify-between text-sm mb-2">
+                                <div class="flex justify-between text-sm mb-1">
                                     <span>躺平进度</span>
                                     <span id="share-progress-bar">0%</span>
                                 </div>
-                                <div class="h-3 bg-slate-700 rounded-full overflow-hidden">
-                                    <div id="share-progress-fill" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all" style="width: 0%"></div>
+                                <div class="h-2.5 bg-slate-700 rounded-full overflow-hidden">
+                                    <div id="share-progress-fill" class="h-full bg-gradient-to-r from-sky-500 to-cyan-500 rounded-full transition-all" style="width: 0%"></div>
                                 </div>
                             </div>
                             
-                            <!-- 底部 -->
                             <div class="text-center text-slate-400 text-xs">
-                                用「躺平计算器」测算你的FIRE人生 🚀
+                                用「财务自由计算器」测算你的FIRE人生 🚀
                             </div>
                         </div>
                     </div>
                     
                     <div class="flex justify-center gap-4 mt-6">
-                        <button onclick="downloadShareCard()" class="btn-primary px-6 py-3 rounded-xl font-bold">
+                        <button onclick="downloadShareCard()" class="btn-primary px-6 py-3 rounded-xl font-semibold">
                             📥 下载图片
                         </button>
-                        <button onclick="showPage('profile')" class="btn-secondary px-6 py-3 rounded-xl font-bold">
+                        <button onclick="showPage('profile')" class="btn-secondary px-6 py-3 rounded-xl font-semibold">
                             ← 返回
                         </button>
                     </div>
@@ -1059,49 +1276,53 @@
         </section>
     </main>
     
-    <!-- 底部导航 (结果页和profile页显示) -->
-    <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 glass-card px-4 py-3 hidden">
-        <div class="max-w-xl mx-auto flex justify-around">
-            <button onclick="showPage('home')" class="flex flex-col items-center gap-1 text-slate-400">
-                <span class="text-xl">🏠</span>
-                <span class="text-xs">首页</span>
+    <!-- ===== 底部导航 - 优化版 ===== -->
+    <nav id="bottom-nav" class="bottom-nav hidden">
+        <div class="max-w-lg mx-auto flex justify-around">
+            <button onclick="showPage('home')" class="nav-item" data-page="home">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">首页</span>
             </button>
-            <button onclick="showPage('result')" class="flex flex-col items-center gap-1 text-indigo-400">
-                <span class="text-xl">📊</span>
-                <span class="text-xs">测算</span>
+            <button onclick="showPage('result')" class="nav-item" data-page="result">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">财务报告</span>
             </button>
-            <button onclick="showPage('profile')" class="flex flex-col items-center gap-1 text-slate-400">
-                <span class="text-xl">👤</span>
-                <span class="text-xs">我的</span>
+            <button onclick="showPage('profile')" class="nav-item" data-page="profile">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">我的进度</span>
+            </button>
+            <button onclick="showPage('share')" class="nav-item" data-page="share">
+                <span class="nav-icon">📤</span>
+                <span class="nav-label">分享</span>
             </button>
         </div>
     </nav>
     
     <!-- 添加月度记录弹窗 -->
-    <div id="add-month-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-        <div class="glass-card p-6 max-w-md w-full">
-            <h3 class="font-bold text-lg mb-4">添加月度记录</h3>
+    <div id="add-month-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card p-6 max-w-sm w-full">
+            <h3 class="font-semibold text-lg mb-4">添加月度记录</h3>
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm text-slate-400 mb-2">月份</label>
-                    <input type="month" id="record-month" class="input-field w-full px-4 py-3 rounded-xl text-white">
+                    <input type="month" id="record-month" class="input-field w-full text-white">
                 </div>
                 <div>
                     <label class="block text-sm text-slate-400 mb-2">当月存款 (元)</label>
-                    <input type="number" id="record-savings" placeholder="5000" min="0"
-                        class="input-field w-full px-4 py-3 rounded-xl text-white">
+                    <input type="number" id="record-savings" placeholder="5000" min="0" inputmode="numeric"
+                        class="input-field w-full text-white">
                 </div>
                 <div>
                     <label class="block text-sm text-slate-400 mb-2">备注 (可选)</label>
                     <input type="text" id="record-note" placeholder="年终奖"
-                        class="input-field w-full px-4 py-3 rounded-xl text-white">
+                        class="input-field w-full text-white">
                 </div>
             </div>
-            <div class="flex gap-4 mt-6">
-                <button onclick="closeAddMonthModal()" class="flex-1 btn-secondary px-4 py-3 rounded-xl font-bold">
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeAddMonthModal()" class="flex-1 btn-secondary px-4 py-3 rounded-xl font-medium">
                     取消
                 </button>
-                <button onclick="saveMonthRecord()" class="flex-1 btn-primary px-4 py-3 rounded-xl font-bold">
+                <button onclick="saveMonthRecord()" class="flex-1 btn-primary px-4 py-3 rounded-xl font-medium">
                     保存
                 </button>
             </div>
