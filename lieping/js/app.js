@@ -1158,8 +1158,8 @@ function updateShareCard() {
 // 财富金字塔页面
 // ============================================
 function updatePyramidPage() {
-    // 计算复利威力对比
-    const monthlySavings = appState.profile.plan?.monthlySavings || 3000;
+    // 使用固定演示数据：每月3000，让用户理解复利威力
+    const monthlySavings = 3000;
     const years = 10;
     const principal = monthlySavings * 12 * years; // 36万本金
     
