@@ -539,6 +539,7 @@
                 }
             } catch (error) {
                 console.error('解析失败:', error)
+                showToast(`解析失败: ${error.message}，使用本地解析`, 'warning')
                 // 降级为模拟解析
                 displayMockResult(file)
             }
@@ -792,10 +793,27 @@
                 }
             } catch (error) {
                 console.error('上传失败:', error)
-                // 模拟成功
-                showToast('模板已提交（离线模式）', 'success')
-                cancelUpload()
-                loadTemplateList()
+                // 显示真实错误，而不是假装成功
+                showToast(`上传失败: ${error.message}`, 'error')
+                // 如果用户想继续，可以选择离线模式
+                if (confirm('API调用失败，是否保存到本地缓存？\n\n错误信息: ' + error.message)) {
+                    // 保存到本地模拟成功
+                    const mockTemplate = {
+                        id: 'local_' + Date.now(),
+                        name: name,
+                        category: category || 'party',
+                        use_count: 0,
+                        status: 'local',
+                        created_at: new Date()
+                    }
+                    let localTemplates = JSON.parse(localStorage.getItem('local_templates') || '[]')
+                    localTemplates.push(mockTemplate)
+                    localStorage.setItem('local_templates', JSON.stringify(localTemplates))
+                    
+                    showToast('已保存到本地缓存', 'success')
+                    cancelUpload()
+                    loadTemplateList()
+                }
             } finally {
                 btn.disabled = false
                 btn.innerHTML = '<i class="fas fa-check mr-2"></i>确认入库'
