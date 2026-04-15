@@ -396,6 +396,104 @@ async function matchImageFromLibrary(db, params) {
   }
 }
 
+// ============ 参考素材合并函数（V9.1新增）============
+/**
+ * 合并参考文档和链接内容
+ * @param {string|null} refDocument - 参考文档内容
+ * @param {string|null} refUrlContent - 参考链接内容
+ * @returns {string|null} 合并后的内容
+ */
+function mergeRefContent(refDocument, refUrlContent) {
+  const parts = []
+  
+  if (refDocument && refDocument.trim()) {
+    parts.push(`【参考文档内容】\n${refDocument.trim()}`)
+  }
+  
+  if (refUrlContent && refUrlContent.trim()) {
+    parts.push(`【参考链接内容】\n${refUrlContent.trim()}`)
+  }
+  
+  if (parts.length === 0) {
+    return null
+  }
+  
+  return parts.join('\n\n')
+}
+
+// ============ 获取模板图片（V9.1新增）============
+/**
+ * 获取模板对应的图片库图片
+ * @param {object} db - 数据库实例
+ * @param {string} templateId - 模板ID
+ * @returns {Promise<Array>} 模板图片列表
+ */
+async function getTemplateImages(db, templateId) {
+  try {
+    const collection = db.collection('image_library')
+    
+    // 根据模板ID查找对应的模板图片
+    const templateMap = {
+      'tpl_guobao_001': ['party_red', 'classical'],
+      'tpl_tech_001': ['tech_blue', 'business'],
+      'tpl_warm_001': ['warm', 'nature']
+    }
+    
+    const targetStyles = templateMap[templateId] || [styleKey]
+    
+    const result = await collection
+      .where({
+        style: db.command.in(targetStyles),
+        quality_score: db.command.gte(3.0)
+      })
+      .limit(20)
+      .get()
+    
+    console.log(`[模板] ${templateId} 匹配到 ${result.data?.length || 0} 张图片`)
+    return result.data || []
+    
+  } catch (error) {
+    console.error('[模板] 获取模板图片失败:', error.message)
+    return []
+  }
+}
+
+// ============ 参考图嵌入处理（V9.1新增）============
+/**
+ * 处理参考图嵌入到内容页
+ * @param {Array} pages - 页面列表
+ * @param {Array} refImages - 参考图列表
+ * @param {string} refImageMode - 参考图模式
+ * @returns {Array} 处理后的页面列表
+ */
+function processRefImageEmbedding(pages, refImages, refImageMode) {
+  if (!refImages || refImages.length === 0 || refImageMode === 'style_ref') {
+    return pages
+  }
+  
+  // 在内容页中嵌入参考图
+  const contentPages = pages.filter(p => p.type === 'content')
+  const usedImages = new Set()
+  
+  contentPages.forEach((page, idx) => {
+    // 尝试为每个内容页分配一张参考图
+    if (idx < refImages.length) {
+      const img = refImages[idx]
+      if (!usedImages.has(img.url)) {
+        usedImages.add(img.url)
+        page.refImage = {
+          url: img.url,
+          description: img.description || '',
+          mode: refImageMode
+        }
+      }
+    }
+  })
+  
+  console.log(`[参考图] 嵌入 ${usedImages.size} 张参考图到内容页`)
+  return pages
+}
+
 /**
  * 火山方舟图片生成API（带3次重试）
  */
@@ -455,9 +553,15 @@ async function generateImageWithArk(prompt, platform, retryCount = 3) {
 }
 
 /**
- * 火山方舟内容生成API
+ * 火山方舟内容生成API（V9.1增加参考素材支持）
+ * @param {string} topic - PPT主题
+ * @param {string} section - 当前章节
+ * @param {number} count - 要点数量
+ * @param {string} scene - 场景
+ * @param {object} style - 风格配置
+ * @param {string|null} refContent - 参考素材内容（文档/链接内容）
  */
-async function generateContentWithArk(topic, section, count, scene, style) {
+async function generateContentWithArk(topic, section, count, scene, style, refContent = null) {
   const sceneContext = {
     report: '工作汇报场景',
     proposal: '项目方案场景',
@@ -466,7 +570,7 @@ async function generateContentWithArk(topic, section, count, scene, style) {
     other: '通用内容场景'
   }[scene] || '通用内容场景'
   
-  const prompt = `你是一位专业的PPT内容策划专家。请为"${topic}"主题的"${section}"章节生成${count}个高质量要点。
+  let prompt = `你是一位专业的PPT内容策划专家。请为"${topic}"主题的"${section}"章节生成${count}个高质量要点。
 
 场景：${sceneContext}
 风格：${style?.name || '商务'}
@@ -475,7 +579,21 @@ async function generateContentWithArk(topic, section, count, scene, style) {
 1. 每个要点必须具体、有洞察力，避免空泛表述
 2. 要点之间逻辑清晰，层次分明
 3. 语言简洁有力，适合PPT展示
-4. 直接输出要点，每行一个，不要序号、不要任何前缀符号
+4. 直接输出要点，每行一个，不要序号、不要任何前缀符号`
+
+  // 如果有参考素材，融入生成（V9.1新增）
+  if (refContent) {
+    // 限制参考素材长度，避免token超限
+    const truncatedRef = refContent.length > 1500 ? refContent.substring(0, 1500) + '...' : refContent
+    prompt += `
+
+**参考素材：**
+${truncatedRef}
+
+请基于参考素材提炼核心要点，用自己的语言表达，但保持内容的准确性。参考素材中的关键数据和案例可以适当引用。`
+  }
+
+  prompt += `
 
 示例格式（仅供参考风格，实际内容要贴合主题）：
 通过数据驱动决策，提升运营效率30%以上
@@ -510,7 +628,7 @@ async function generateContentWithArk(topic, section, count, scene, style) {
         .filter(l => l.length > 0 && !l.match(/^[0-9\.\-\*\d]+/))
         .slice(0, count)
       
-      console.log(`[内容生成] 成功生成${lines.length}个要点`)
+      console.log(`[内容生成] 成功生成${lines.length}个要点${refContent ? '（含参考素材）' : ''}`)
       return lines
     }
     
@@ -1355,11 +1473,22 @@ export default async function (ctx) {
   const taskId = ctx.body?.taskId || `task_${Date.now()}`
   const topic = ctx.body?.topic || ctx.body?.userContent || '测试主题'
   const platform = ctx.body?.platform || 'ppt'
-  const style = ctx.body?.style || 'auto'
   const scene = ctx.body?.scene || 'other'
   const pageCount = parseInt(ctx.body?.pageCount) || 5
   const userOutline = ctx.body?.outline
   const subtitle = ctx.body?.subtitle || ''
+  
+  // ========== 新增参数接收（V9.1）============
+  const createMode = ctx.body?.createMode || 'create'  // create / template
+  const templateId = ctx.body?.templateId || null       // 模板ID
+  const subStyle = ctx.body?.subStyle || null           // 细分风格（优先使用）
+  const audience = ctx.body?.audience || 'adult'        // 受众
+  const refDocument = ctx.body?.refDocument || null     // 参考文档
+  const refUrlContent = ctx.body?.refUrlContent || null // 参考链接内容
+  const refImageMode = ctx.body?.refImageMode || 'embed' // 参考图模式
+  
+  console.log(`[模式] createMode=${createMode}, templateId=${templateId}`)
+  console.log(`[参考素材] 文档=${!!refDocument}, 链接=${!!refUrlContent}, 参考图=${ctx.body?.refImages?.length || 0}张`)
   
   // 内容参数
   const contentDensity = ctx.body?.contentDensity || 'medium'
@@ -1377,10 +1506,31 @@ export default async function (ctx) {
   // 获取平台尺寸
   const platformSize = PLATFORM_SIZES[platform] || PLATFORM_SIZES.ppt
   
-  // 自动匹配风格
-  const { key: styleKey, config: styleConfig } = style === 'auto' 
-    ? matchStyle(topic, scene)
-    : { key: style, config: GAMMA_STYLES[style] || GAMMA_STYLES.business }
+  // ========== 风格匹配逻辑（优先使用subStyle）============
+  const style = ctx.body?.style || 'auto'
+  let styleKey, styleConfig
+  
+  if (subStyle && GAMMA_STYLES[subStyle]) {
+    // 优先使用用户选择的细分风格
+    styleKey = subStyle
+    styleConfig = GAMMA_STYLES[subStyle]
+    console.log(`[风格] 使用细分风格: ${styleKey}`)
+  } else if (style === 'auto') {
+    // 自动匹配
+    const matched = matchStyle(topic, scene)
+    styleKey = matched.key
+    styleConfig = matched.config
+    console.log(`[风格] 自动匹配: ${styleKey}`)
+  } else if (GAMMA_STYLES[style]) {
+    styleKey = style
+    styleConfig = GAMMA_STYLES[style]
+    console.log(`[风格] 使用主风格: ${styleKey}`)
+  } else {
+    // 默认商务风格
+    styleKey = 'business'
+    styleConfig = GAMMA_STYLES.business
+    console.log(`[风格] 默认商务风格`)
+  }
   
   console.log(`[配置] 风格: ${styleConfig.name}, 场景: ${scene}, 页数: ${pageCount}`)
   
@@ -1433,10 +1583,14 @@ export default async function (ctx) {
       })
       pages = filteredPages.slice(0, pageCount)
       
-      // AI生成内容要点
+      // 合并参考素材（V9.1新增）
+      const mergedRefContent = mergeRefContent(refDocument, refUrlContent)
+      console.log(`[参考素材] 合并后长度: ${mergedRefContent?.length || 0}`)
+      
+      // AI生成内容要点（传入参考素材）
       const contentPages = pages.filter(p => p.type === 'content')
       for (const page of contentPages) {
-        const aiPoints = await generateContentWithArk(topic, page.section, pointsPerSection, scene, styleConfig)
+        const aiPoints = await generateContentWithArk(topic, page.section, pointsPerSection, scene, styleConfig, mergedRefContent)
         if (aiPoints && aiPoints.length > 0) {
           page.points = aiPoints
         } else {
@@ -1453,42 +1607,75 @@ export default async function (ctx) {
       message: `正在生成${pages.length}页背景...`
     })
     
+    // ========== 模板模式处理（V9.1新增）============
+    let templateImages = []
+    if (createMode === 'template' && templateId) {
+      console.log(`[模板模式] 正在获取模板 ${templateId} 的图片...`)
+      templateImages = await getTemplateImages(db, templateId)
+      console.log(`[模板模式] 获取到 ${templateImages.length} 张模板图片`)
+    }
+    
     const images = []
     let libraryCount = 0  // 图片库使用次数统计
     let aiCount = 0       // AI生图次数统计
+    let templateCount = 0 // 模板图使用次数统计
     
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i]
-      
-      // V9优化：优先从图片库匹配
-      const matchResult = await matchImageFromLibrary(cloud.database(), {
-        type: page.type,
-        style: styleKey,
-        topic: topic,
-        mood: styleConfig.mood
-      })
-      
       let imageUrl = ''
       let imageError = null
       let imageSource = 'none'
+      let matchResult = { score: 0 }
       
-      if (!matchResult.needAI && matchResult.image) {
-        // 使用图片库图片
-        imageUrl = matchResult.image.url || matchResult.image.path
-        imageSource = 'library'
-        libraryCount++
-        console.log(`[图片 ${i + 1}/${pages.length}] 使用库图，分数=${matchResult.score}`)
-      } else {
-        // AI生成图片
-        const prompt = generateImagePrompt(page, styleConfig, platform, i, pages.length)
-        console.log(`\n[Prompt ${i + 1}/${pages.length}]:\n${prompt.substring(0, 200)}...\n`)
+      // ========== 图片来源优先级（V9.1调整）============
+      // 1. 模板模式：优先使用模板图片
+      if (createMode === 'template' && templateImages.length > 0) {
+        const templateIdx = i % templateImages.length
+        const templateImg = templateImages[templateIdx]
+        if (templateImg) {
+          imageUrl = templateImg.url || templateImg.path
+          imageSource = 'template'
+          templateCount++
+          console.log(`[图片 ${i + 1}/${pages.length}] 使用模板图`)
+        }
+      }
+      // 2. 参考图模式（严格/内容参考）：使用参考图
+      else if (refImages.length > 0 && (refImageMode === 'strict' || refImageMode === 'content_ref')) {
+        const refIdx = i % refImages.length
+        const refImg = refImages[refIdx]
+        if (refImg) {
+          imageUrl = refImg.url
+          imageSource = 'reference'
+          console.log(`[图片 ${i + 1}/${pages.length}] 使用参考图`)
+        }
+      }
+      // 3. 优先从图片库匹配
+      else {
+        matchResult = await matchImageFromLibrary(db, {
+          type: page.type,
+          style: styleKey,
+          topic: topic,
+          mood: styleConfig.mood
+        })
         
-        const result = await generateImageWithArk(prompt, platform)
-        imageUrl = result.url
-        imageError = result.error
-        imageSource = result.url ? 'ai' : 'none'
-        aiCount++
-        console.log(`[图片 ${i + 1}/${pages.length}] AI生图${result.url ? '成功' : '失败'}`)
+        if (!matchResult.needAI && matchResult.image) {
+          // 使用图片库图片
+          imageUrl = matchResult.image.url || matchResult.image.path
+          imageSource = 'library'
+          libraryCount++
+          console.log(`[图片 ${i + 1}/${pages.length}] 使用库图，分数=${matchResult.score}`)
+        } else {
+          // AI生成图片
+          const prompt = generateImagePrompt(page, styleConfig, platform, i, pages.length)
+          console.log(`\n[Prompt ${i + 1}/${pages.length}]:\n${prompt.substring(0, 200)}...\n`)
+          
+          const result = await generateImageWithArk(prompt, platform)
+          imageUrl = result.url
+          imageError = result.error
+          imageSource = result.url ? 'ai' : 'none'
+          aiCount++
+          console.log(`[图片 ${i + 1}/${pages.length}] AI生图${result.url ? '成功' : '失败'}`)
+        }
       }
       
       images.push({
@@ -1496,8 +1683,9 @@ export default async function (ctx) {
         type: page.type,
         url: imageUrl,
         error: imageError,
-        source: imageSource,  // V9新增：图片来源标记
-        matchScore: matchResult.score  // V9新增：匹配分数
+        source: imageSource,
+        matchScore: matchResult.score || 0,
+        templateId: createMode === 'template' ? templateId : null  // V9.1新增
       })
       
       // 更新进度
@@ -1507,9 +1695,14 @@ export default async function (ctx) {
       })
     }
     
-    console.log(`[图片统计] 库图=${libraryCount}, AI生图=${aiCount}, 总计=${images.length}`)
-    console.log(`[成本节省] ${Math.round(libraryCount / images.length * 100)}%`)
+    console.log(`[图片统计] 模板图=${templateCount}, 库图=${libraryCount}, AI生图=${aiCount}, 总计=${images.length}`)
+    console.log(`[成本节省] ${Math.round((templateCount + libraryCount) / images.length * 100)}%`)
     
+    // ========== 参考图嵌入处理（V9.1新增）============
+    // 对于 embed 模式的参考图，需要嵌入到内容页中
+    if (refImages.length > 0 && refImageMode === 'embed') {
+      pages = processRefImageEmbedding(pages, refImages, refImageMode)
+    }
     
     // ========== 生成PPTX ==========
     await updateProgress(taskId, {
@@ -1540,12 +1733,15 @@ export default async function (ctx) {
         images: images,
         pptx: pptxResult,
         progress: finalProgress,
-        // V9新增：图片库统计
+        // V9.1新增：图片库统计（包含模板图）
         stats: {
           totalPages: pages.length,
+          createMode: createMode,
+          templateId: templateId,
+          templateImages: templateCount || 0,
           libraryImages: libraryCount,
           aiImages: aiCount,
-          costSaving: Math.round(libraryCount / images.length * 100) + '%'
+          costSaving: Math.round((templateCount + libraryCount) / images.length * 100) + '%'
         },
         // V9新增：演讲稿询问
         askSpeechScript: true,  // 前端收到此字段后询问用户

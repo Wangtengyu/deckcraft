@@ -1245,47 +1245,63 @@ async function startGeneration() {
       `;
     }
     
-    // 构建请求数据
+    // 构建请求数据（V9.1完善所有参数传递）
     const requestData = {
       taskId: taskId,
+      
+      // 创建模式（V9.1新增）
+      createMode: state.createMode,
+      templateId: state.templateId,
+      
+      // 风格参数（V9.1新增subStyle传递）
       style: state.style,
       subStyle: state.subStyle,
+      
+      // 基本参数
       topic: state.topic,
       platform: state.platform,
       scene: state.scene,
       pageCount: state.pageCount,
       contentDensity: state.contentDensity,
-      audience: state.audience,
-      userContent: state.userContent,
-      smartTitle: state.smartTitle,
+      audience: state.audience,  // V9.1新增
+      
       // 页面结构选项
       hasCover: state.hasCover,
       hasCatalog: state.hasCatalog,
       hasContent: state.hasContent,
       hasEnding: state.hasEnding,
+      
+      // 大纲
       outline: state.outline,
-      refImages: [],
-      refImageMode: state.refImageFiles.length > 0 ? state.refImageMode : null,
-      refImageDescriptions: state.refImageDescriptions,
       subtitle: state.outline?.subtitle || '',
-      // 参考素材（传递到generate用于生成具体内容）
+      
+      // 参考素材（V9.1完善）
       refDocument: state.refDocument,
-      refUrlContent: state.refUrl ? state.refUrl.content : null
+      refUrlContent: state.refUrl ? state.refUrl.content : null,
+      refImageMode: state.refImageMode,  // V9.1新增
+      refImageDescriptions: state.refImageDescriptions
     };
     
     // 直接使用 Base64 图片（不需要上传到云存储）
     if (state.refImages && state.refImages.length > 0) {
       requestData.refImages = state.refImages;
-      requestData.refImageMode = state.refImageMode;
-      requestData.refImageDescriptions = state.refImageDescriptions;
-      console.log('参考图(Base64):', state.refImages.length, '张');
+      console.log('参考图(Base64):', state.refImages.length, '张, 模式:', state.refImageMode);
+    } else {
+      requestData.refImages = [];
     }
     
     // 调试：确认大纲是否传递
     console.log('=== 发送到后端的数据 ===');
+    console.log('创建模式:', state.createMode, '| 模板ID:', state.templateId);
+    console.log('细分风格:', state.subStyle, '| 受众:', state.audience);
     console.log('主题:', state.topic);
     console.log('大纲存在:', !!state.outline);
-    console.log('大纲内容:', state.outline ? JSON.stringify(state.outline, null, 2).substring(0, 500) : '无');
+    console.log('参考素材:', {
+      document: !!state.refDocument,
+      url: !!state.refUrl,
+      images: state.refImages?.length || 0,
+      mode: state.refImageMode
+    });
     
     // 启动进度轮询
     startProgressPolling(taskId, card);
