@@ -417,8 +417,9 @@
         const templateConfig = {
             'guobao-display': {
                 imageDir: 'templates-assets/images/tpl_guobao_001',
+                thumbDir: 'templates-assets/images/tpl_guobao_001/thumbs',
                 templateId: 'tpl_guobao_001',
-                totalPages: 8
+                totalPages: 10
             }
         }
         
@@ -434,10 +435,10 @@
             totalPages = config.totalPages
             currentPage = 1
             
-            // 构建图片数组
+            // 构建图片数组（使用压缩缩略图）
             currentImages = []
             for (let i = 1; i <= totalPages; i++) {
-                currentImages.push(`${config.imageDir}/image${i}.png`)
+                currentImages.push(`${config.thumbDir}/image${i}.jpg`)
             }
             
             // 更新标题
@@ -447,10 +448,13 @@
             // 生成缩略图导航
             const thumbnailNav = document.getElementById('thumbnailNav')
             thumbnailNav.innerHTML = currentImages.map((img, idx) => `
-                <button onclick="goToPage(${idx + 1})" class="shrink-0 w-16 h-10 rounded border-2 ${idx === 0 ? 'border-accent' : 'border-border'} overflow-hidden hover:border-accent/50 transition" id="thumb-${idx + 1}">
-                    <img src="${img}" alt="第${idx + 1}页" class="w-full h-full object-cover">
+                <button onclick="goToPage(${idx + 1})" class="shrink-0 w-16 h-10 rounded border-2 ${idx === 0 ? 'border-accent' : 'border-border'} overflow-hidden hover:border-accent/50 transition bg-gray-800" id="thumb-${idx + 1}">
+                    <img src="${img}" alt="第${idx + 1}页" class="w-full h-full object-cover" loading="lazy">
                 </button>
             `).join('')
+            
+            // 预加载前3张
+            preloadImages([1, 2, 3])
             
             // 加载第一页
             loadPage(1)
@@ -464,6 +468,16 @@
             
             // 绑定键盘事件
             document.addEventListener('keydown', handleKeyNav)
+        }
+        
+        // 预加载图片
+        function preloadImages(pages) {
+            pages.forEach(page => {
+                if (page >= 1 && page <= totalPages) {
+                    const img = new Image()
+                    img.src = currentImages[page - 1]
+                }
+            })
         }
         
         // 加载指定页面
@@ -497,11 +511,28 @@
             if (currentThumb) {
                 currentThumb.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
             }
+            
+            // 预加载后续页面
+            setTimeout(() => {
+                const nextPages = [page + 1, page + 2].filter(p => p <= totalPages)
+                preloadImages(nextPages)
+            }, 200)
         }
         
         // 图片加载完成后隐藏loading
         document.getElementById('previewImage').onload = function() {
             document.getElementById('previewLoading').classList.add('hidden')
+            this.classList.remove('opacity-0')
+        }
+        
+        // 图片加载失败处理
+        document.getElementById('previewImage').onerror = function() {
+            document.getElementById('previewLoading').innerHTML = `
+                <div class="text-center">
+                    <i class="fas fa-image text-3xl text-gray-600 mb-2"></i>
+                    <p class="text-gray-500 text-sm">图片加载失败</p>
+                </div>
+            `
         }
         
         // 上一页
