@@ -1193,17 +1193,21 @@
                 </div>
                 
                 <!-- 功能入口 -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <button onclick="generateShareCard()" class="glass-card p-4 text-center hover:border-sky-500 transition">
+                        <div class="text-xl mb-1">📤</div>
+                        <div class="text-sm font-medium">分享</div>
+                    </button>
                     <button onclick="showPage('result')" class="glass-card p-4 text-center hover:border-sky-500 transition">
                         <div class="text-xl mb-1">🔄</div>
                         <div class="text-sm font-medium">重新测算</div>
                     </button>
                     <button onclick="exportData()" class="glass-card p-4 text-center hover:border-sky-500 transition">
-                        <div class="text-xl mb-1">📤</div>
+                        <div class="text-xl mb-1">📥</div>
                         <div class="text-sm font-medium">导出数据</div>
                     </button>
                     <button onclick="importData()" class="glass-card p-4 text-center hover:border-sky-500 transition">
-                        <div class="text-xl mb-1">📥</div>
+                        <div class="text-xl mb-1">📂</div>
                         <div class="text-sm font-medium">导入数据</div>
                     </button>
                     <button onclick="resetData()" class="glass-card p-4 text-center hover:border-red-500 transition">
