@@ -229,6 +229,62 @@ const CITY_DATA = {
         costIndex: 0.82,
         salaryGrowth: 6.5
     },
+    huhehaote: {
+        name: "呼和浩特",
+        level: 3,
+        avgSalary: 7000,
+        avgRent: 1400,
+        costIndex: 0.85,
+        salaryGrowth: 7
+    },
+    baotou: {
+        name: "包头",
+        level: 3,
+        avgSalary: 6800,
+        avgRent: 1200,
+        costIndex: 0.82,
+        salaryGrowth: 6.5
+    },
+    lhasa: {
+        name: "拉萨",
+        level: 3,
+        avgSalary: 7500,
+        avgRent: 1800,
+        costIndex: 0.95,
+        salaryGrowth: 7
+    },
+    urumqi: {
+        name: "乌鲁木齐",
+        level: 3,
+        avgSalary: 7200,
+        avgRent: 1500,
+        costIndex: 0.88,
+        salaryGrowth: 6.5
+    },
+    yinchuan: {
+        name: "银川",
+        level: 3,
+        avgSalary: 6500,
+        avgRent: 1300,
+        costIndex: 0.82,
+        salaryGrowth: 6.5
+    },
+    xining: {
+        name: "西宁",
+        level: 3,
+        avgSalary: 6200,
+        avgRent: 1200,
+        costIndex: 0.80,
+        salaryGrowth: 6
+    },
+    lanzhou: {
+        name: "兰州",
+        level: 3,
+        avgSalary: 6500,
+        avgRent: 1300,
+        costIndex: 0.82,
+        salaryGrowth: 6.5
+    },
     
     // 三线城市
     foshan: {
