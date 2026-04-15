@@ -198,8 +198,8 @@
                         <i class="fas fa-cloud-upload-alt text-3xl text-accent"></i>
                     </div>
                     <p class="text-lg font-medium mb-2">拖拽上传或点击选择</p>
-                    <p class="text-gray-500 text-sm">支持格式：.pptx</p>
-                    <p class="text-gray-600 text-xs mt-2">最大支持50MB文件</p>
+                    <p class="text-gray-500 text-sm">支持格式：.pptx（最大5MB）</p>
+                    <p class="text-gray-600 text-xs mt-2">PDF格式暂不支持，请先转换为PPTX</p>
                 </div>
             </div>
             
@@ -458,9 +458,16 @@
         function handleFileSelect(event) {
             const file = event.target.files[0]
             if (file) {
-                // 检查文件大小
-                if (file.size > 50 * 1024 * 1024) {
-                    showToast('文件大小不能超过50MB', 'error')
+                // 检查文件大小（限制5MB）
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('文件大小不能超过5MB，请压缩后再试', 'error')
+                    document.getElementById('fileInput').value = ''
+                    return
+                }
+                // 检查文件格式
+                if (!file.name.toLowerCase().endsWith('.pptx')) {
+                    showToast('目前仅支持PPTX格式，PDF暂不支持', 'error')
+                    document.getElementById('fileInput').value = ''
                     return
                 }
                 processFile(file)
@@ -513,14 +520,6 @@
             `
             
             try {
-                // 大文件：直接使用本地解析（不走API）
-                if (file.size > 5 * 1024 * 1024) {
-                    console.log('文件较大，使用本地解析')
-                    showToast('文件较大，使用本地快速解析', 'info')
-                    displayMockResult(file)
-                    return
-                }
-                
                 // 读取文件为base64
                 const fileBase64 = await fileToBase64(file)
                 currentFileData = fileBase64
@@ -766,34 +765,9 @@
                 const token = localStorage.getItem('auth_token')
                 const userId = localStorage.getItem('user_id')
                 
-                // 判断文件大小
-                const isLargeFile = currentFile && currentFile.size > 5 * 1024 * 1024
-                
-                let requestBody
-                
-                if (isLargeFile) {
-                    // 大文件：只发送元数据，不发送文件内容
-                    console.log('大文件模式：只发送元数据')
-                    requestBody = {
-                        name: name,
-                        category: category || 'party',
-                        userId: userId || 'anonymous',
-                        fileSize: currentFile.size,
-                        fileName: currentFile.name,
-                        fileType: 'pptx',
-                        mode: 'metadata'  // 标记为元数据模式
-                    }
-                } else {
-                    // 小文件：发送完整数据
-                    if (!currentFileData) {
-                        currentFileData = await fileToBase64(currentFile)
-                    }
-                    requestBody = {
-                        file: currentFileData,
-                        name: name,
-                        category: category || 'party',
-                        userId: userId || 'anonymous'
-                    }
+                // 确保有文件数据
+                if (!currentFileData) {
+                    currentFileData = await fileToBase64(currentFile)
                 }
                 
                 const response = await fetch(`${API_BASE}/template-upload`, {
@@ -802,17 +776,18 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token || ''}`
                     },
-                    body: JSON.stringify(requestBody)
+                    body: JSON.stringify({
+                        file: currentFileData,
+                        name: name,
+                        category: category || 'party',
+                        userId: userId || 'anonymous'
+                    })
                 })
                 
                 const result = await response.json()
                 
                 if (result.success) {
-                    if (isLargeFile) {
-                        showToast('模板信息已提交！大文件暂存，待后续处理。', 'success')
-                    } else {
-                        showToast('模板投喂成功！', 'success')
-                    }
+                    showToast('模板投喂成功！', 'success')
                     cancelUpload()
                     loadTemplateList()
                 } else {
@@ -820,10 +795,8 @@
                 }
             } catch (error) {
                 console.error('上传失败:', error)
-                // 显示真实错误
                 showToast(`上传失败: ${error.message}`, 'error')
                 
-                // 如果用户想继续，可以选择保存到本地
                 if (confirm('API调用失败，是否保存到本地缓存？\n\n错误信息: ' + error.message)) {
                     const mockTemplate = {
                         id: 'local_' + Date.now(),
