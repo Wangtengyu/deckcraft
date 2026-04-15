@@ -580,15 +580,15 @@ function calculateResults() {
         childrenInfo = ` | 👶 ${children.count}个孩子(${ageNames[children.age] || ''}) | 教育基金 ¥${Math.round(educationFund).toLocaleString()}`;
     }
     
-    // 三种方案计算
+    // 三种方案计算 - 城市系数调整购买力
     const plans = {
         minimal: Math.round(60000 * 25 * cityMultiplier),
         comfortable: Math.round(120000 * 25 * cityMultiplier),
         rich: Math.round(240000 * 25 * cityMultiplier)
     };
     
-    // 当前实际年支出对应的躺平本金
-    const targetAmount = Math.round(annualExpense * 25 * cityMultiplier + educationFund);
+    // 当前实际年支出对应的躺平本金（用户支出已反映城市成本，不再乘系数）
+    const targetAmount = Math.round(annualExpense * 25 + educationFund);
     
     // 更新UI - 核心数据
     document.getElementById('result-target').textContent = targetAmount.toLocaleString();
