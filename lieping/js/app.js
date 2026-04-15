@@ -108,6 +108,12 @@ function showPage(pageId) {
         updateProfile();
     } else if (pageId === 'share') {
         updateShareCard();
+    } else if (pageId === 'pyramid') {
+        updatePyramidPage();
+    } else if (pageId === 'savings') {
+        updateSavingsPage();
+    } else if (pageId === 'goals') {
+        updateGoalsPage();
     } else if (pageId === 'onboarding') {
         // 引导流程
         if (!appState.profile.city) {
@@ -1146,6 +1152,233 @@ function generateShareCard() {
 
 function updateShareCard() {
     generateShareCard();
+}
+
+// ============================================
+// 财富金字塔页面
+// ============================================
+function updatePyramidPage() {
+    // 计算复利威力对比
+    const monthlySavings = appState.profile.plan?.monthlySavings || 3000;
+    const years = 10;
+    const principal = monthlySavings * 12 * years; // 36万本金
+    
+    // 场景A: 立即复利，年化6%，每月定投
+    let totalA = 0;
+    for (let i = 0; i < years * 12; i++) {
+        totalA = (totalA + monthlySavings) * (1 + 0.06 / 12);
+    }
+    const gainA = totalA - principal;
+    
+    // 场景B: 延迟3年，前3年只存不投，后7年才复利
+    let totalB = 0;
+    // 前3年只存钱不投资
+    for (let i = 0; i < 3 * 12; i++) {
+        totalB += monthlySavings;
+    }
+    // 后7年复利
+    for (let i = 0; i < 7 * 12; i++) {
+        totalB = (totalB + monthlySavings) * (1 + 0.06 / 12);
+    }
+    const gainB = totalB - principal;
+    
+    // 更新显示
+    document.getElementById('scene-a-result').textContent = '¥' + Math.round(totalA).toLocaleString();
+    document.getElementById('scene-a-gain').textContent = '¥' + Math.round(gainA).toLocaleString();
+    document.getElementById('scene-b-result').textContent = '¥' + Math.round(totalB).toLocaleString();
+    document.getElementById('scene-b-gain').textContent = '¥' + Math.round(gainB).toLocaleString();
+    document.getElementById('compound-loss').textContent = '¥' + Math.round(gainA - gainB).toLocaleString();
+    
+    // 渲染存款里程碑科普
+    renderSavingsMilestones();
+    
+    // 渲染财富金字塔
+    renderWealthPyramid();
+}
+
+function renderSavingsMilestones() {
+    const container = document.getElementById('milestones-container');
+    if (!container || typeof SAVINGS_MILESTONES === 'undefined') return;
+    
+    const currentSavings = appState.user.currentSavings || 0;
+    
+    container.innerHTML = SAVINGS_MILESTONES.map((m, i) => {
+        const isReached = currentSavings >= m.amount;
+        const isClose = currentSavings >= m.amount * 0.7;
+        
+        return `
+            <div class="milestone-item flex items-center gap-4 p-4 mb-3 rounded-xl ${isReached ? 'bg-emerald-500/10 border border-emerald-500/30' : isClose ? 'bg-amber-500/10 border border-amber-500/30' : 'bg-slate-700/30'}">
+                <div class="text-3xl">${m.emoji}</div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="font-bold text-lg">${m.title}</span>
+                        ${isReached ? '<span class="text-xs text-emerald-400 bg-emerald-500/20 px-2 py-1 rounded">已达成</span>' : ''}
+                    </div>
+                    <div class="text-sm text-amber-400 mb-1">⚠️ ${m.warning}</div>
+                    <div class="text-xs text-slate-400">${m.advice}</div>
+                    <div class="text-xs text-red-400 mt-1">💸 ${m.loss}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderWealthPyramid() {
+    const container = document.getElementById('wealth-pyramid');
+    if (!container) return;
+    
+    const pyramidData = [
+        { level: '躺平期', emoji: '🛋️', desc: '被动收入覆盖支出', width: 'w-40' },
+        { level: '配置期', emoji: '📊', desc: '多元资产配置', width: 'w-52' },
+        { level: '复利期', emoji: '📈', desc: '投资收益加速', width: 'w-64' },
+        { level: '储蓄期', emoji: '💰', desc: '积累本金阶段', width: 'w-72' },
+        { level: '收入期', emoji: '💼', desc: '主动收入为主', width: 'w-80' }
+    ];
+    
+    container.innerHTML = pyramidData.map((item, i) => `
+        <div class="pyramid-level ${item.width} py-4 rounded-xl text-center ${i === 0 ? 'bg-gradient-to-r from-emerald-600 to-teal-600' : i === 4 ? 'bg-gradient-to-r from-indigo-600 to-purple-600' : 'bg-gradient-to-r from-cyan-700 to-blue-700'}">
+            <div class="text-2xl mb-1">${item.emoji}</div>
+            <div class="font-bold">${item.level}</div>
+            <div class="text-xs opacity-80">${item.desc}</div>
+        </div>
+    `).join('');
+}
+
+// ============================================
+// 省钱攻略页面
+// ============================================
+function updateSavingsPage() {
+    renderSavingsTips();
+}
+
+function renderSavingsTips() {
+    const container = document.getElementById('savings-suggestions');
+    if (!container) return;
+    
+    // 基于用户支出给出建议
+    const expense = appState.profile.expense;
+    const tips = [];
+    
+    if (expense.food > 2000) {
+        tips.push({ icon: '🍜', title: '餐饮支出偏高', tip: '考虑自己做饭，每月可节省¥' + Math.round((expense.food - 1500) * 0.6), color: 'bg-orange-500/20' });
+    }
+    if (expense.shopping > 1000) {
+        tips.push({ icon: '👗', title: '购物支出较高', tip: '区分需要与想要，设置购物冷静期', color: 'bg-pink-500/20' });
+    }
+    if (expense.entertainment > 500) {
+        tips.push({ icon: '🎮', title: '娱乐支出可优化', tip: '寻找免费替代方案，如图书馆、公园活动', color: 'bg-purple-500/20' });
+    }
+    if (expense.transport > 800) {
+        tips.push({ icon: '🚌', title: '交通支出较多', tip: '优先公共交通，考虑办月卡', color: 'bg-blue-500/20' });
+    }
+    
+    // 如果没有特定建议，给出通用建议
+    if (tips.length === 0) {
+        tips.push({ icon: '✨', title: '支出结构良好', tip: '继续保持良好的消费习惯', color: 'bg-green-500/20' });
+    }
+    
+    // 添加消费对比警醒
+    if (typeof SAVING_COMPARISONS !== 'undefined') {
+        const comparison = SAVING_COMPARISONS[Math.floor(Math.random() * SAVING_COMPARISONS.length)];
+        tips.push({ 
+            icon: comparison.icon, 
+            title: comparison.title, 
+            tip: `<div class="text-red-400">❌ ${comparison.bad}</div><div class="text-green-400 mt-1">✅ ${comparison.good}</div><div class="text-yellow-400 mt-1">💡 ${comparison.difference}</div>`,
+            color: 'bg-slate-600/30',
+            isComparison: true
+        });
+    }
+    
+    container.innerHTML = tips.map(tip => `
+        <div class="glass-card p-5 mb-4">
+            <div class="flex items-start gap-4">
+                <div class="text-3xl">${tip.icon}</div>
+                <div class="flex-1">
+                    <h4 class="font-bold mb-2">${tip.title}</h4>
+                    <p class="text-sm text-slate-300 ${tip.isComparison ? '' : 'leading-relaxed'}">${tip.tip}</p>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ============================================
+// 目标规划页面
+// ============================================
+function updateGoalsPage() {
+    renderGoalsPlan();
+}
+
+function renderGoalsPlan() {
+    const container = document.getElementById('goal-timeline');
+    if (!container) return;
+    
+    const plan = appState.profile.plan;
+    if (!plan) {
+        container.innerHTML = '<div class="text-center text-slate-400 py-10">请先完成财务测算</div>';
+        return;
+    }
+    
+    const currentSavings = appState.user.currentSavings || 0;
+    const targetAmount = plan.targetAmount;
+    const monthlySavings = plan.monthlySavings;
+    
+    // 计算短期、中期、长期目标
+    const shortTerm = Math.min(100000, targetAmount * 0.1);
+    const midTerm = targetAmount * 0.5;
+    
+    const monthsToShortTerm = shortTerm > currentSavings ? Math.ceil((shortTerm - currentSavings) / monthlySavings) : 0;
+    const monthsToMidTerm = midTerm > currentSavings ? Math.ceil((midTerm - currentSavings) / monthlySavings) : 0;
+    const monthsToLongTerm = targetAmount > currentSavings ? Math.ceil((targetAmount - currentSavings) / monthlySavings) : 0;
+    
+    container.innerHTML = `
+        <div class="space-y-6">
+            <!-- 短期目标 -->
+            <div class="glass-card p-5">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="font-bold">🎯 短期目标</h4>
+                    <span class="text-xs text-emerald-400">${currentSavings >= shortTerm ? '已达成' : monthsToShortTerm + '个月后'}</span>
+                </div>
+                <div class="text-2xl font-bold text-emerald-400 mb-2">¥${shortTerm.toLocaleString()}</div>
+                <p class="text-sm text-slate-400">建立应急基金，覆盖3-6个月支出</p>
+                <div class="mt-3 h-2 bg-slate-700 rounded-full overflow-hidden">
+                    <div class="h-full bg-emerald-500 rounded-full" style="width: ${Math.min(100, currentSavings / shortTerm * 100)}%"></div>
+                </div>
+            </div>
+            
+            <!-- 中期目标 -->
+            <div class="glass-card p-5">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="font-bold">🚀 中期目标</h4>
+                    <span class="text-xs text-amber-400">${currentSavings >= midTerm ? '已达成' : Math.floor(monthsToMidTerm / 12) + '年后'}</span>
+                </div>
+                <div class="text-2xl font-bold text-amber-400 mb-2">¥${midTerm.toLocaleString()}</div>
+                <p class="text-sm text-slate-400">达成50%躺平目标，被动收入初具规模</p>
+                <div class="mt-3 h-2 bg-slate-700 rounded-full overflow-hidden">
+                    <div class="h-full bg-amber-500 rounded-full" style="width: ${Math.min(100, currentSavings / midTerm * 100)}%"></div>
+                </div>
+            </div>
+            
+            <!-- 长期目标 -->
+            <div class="glass-card p-5">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="font-bold">🏆 长期目标</h4>
+                    <span class="text-xs text-sky-400">${currentSavings >= targetAmount ? '已达成' : Math.floor(monthsToLongTerm / 12) + '年后'}</span>
+                </div>
+                <div class="text-2xl font-bold text-sky-400 mb-2">¥${targetAmount.toLocaleString()}</div>
+                <p class="text-sm text-slate-400">实现财务自由，开启躺平人生</p>
+                <div class="mt-3 h-2 bg-slate-700 rounded-full overflow-hidden">
+                    <div class="h-full bg-sky-500 rounded-full" style="width: ${Math.min(100, currentSavings / targetAmount * 100)}%"></div>
+                </div>
+            </div>
+            
+            <!-- 核心理念金句 -->
+            <div class="glass-card p-5 text-center">
+                <div class="text-4xl mb-3">💡</div>
+                <p class="text-lg font-medium text-yellow-400">${typeof CORE_MESSAGES !== 'undefined' ? CORE_MESSAGES[Math.floor(Math.random() * CORE_MESSAGES.length)] : '不要为欲望买单，要为自由储蓄'}</p>
+            </div>
+        </div>
+    `;
 }
 
 function downloadShareCard() {

@@ -607,3 +607,160 @@ const MILESTONES = {
         condition: (data) => data.progress >= 100
     }
 };
+
+
+// 存款里程碑科普 - 每个阶段要忍住的消费
+const SAVINGS_MILESTONES = [
+    {
+        amount: 10000,
+        title: '1万',
+        emoji: '🌱',
+        warning: '忍住换新款手机',
+        advice: '这个阶段最重要的目标是存下第一桶金',
+        loss: '新手机一年贬值50%'
+    },
+    {
+        amount: 30000,
+        title: '3万',
+        emoji: '🌿',
+        warning: '忍住买奢侈品包包',
+        advice: '建立应急基金，覆盖3-6个月支出',
+        loss: '奢侈品二手价只有原价30%'
+    },
+    {
+        amount: 50000,
+        title: '5万',
+        emoji: '🌲',
+        warning: '忍住频繁旅游',
+        advice: '开始学习投资理财知识',
+        loss: '一次旅游花掉半年积蓄'
+    },
+    {
+        amount: 100000,
+        title: '10万',
+        emoji: '🌳',
+        warning: '忍住换新车',
+        advice: '开始指数基金定投',
+        loss: '新车落地贬值20%'
+    },
+    {
+        amount: 200000,
+        title: '20万',
+        emoji: '🏔️',
+        warning: '忍住买名牌手表',
+        advice: '资产配置优化，提升年化收益',
+        loss: '手表变现困难且折价大'
+    },
+    {
+        amount: 300000,
+        title: '30万',
+        emoji: '⛰️',
+        warning: '忍住换豪车',
+        advice: '建立被动收入渠道',
+        loss: '30万买车5年后只剩15万，储蓄却能变40万'
+    },
+    {
+        amount: 500000,
+        title: '50万',
+        emoji: '🗻',
+        warning: '忍住买投资性房产',
+        advice: '被动收入覆盖30%支出',
+        loss: '房产流动性差，且可能下跌'
+    },
+    {
+        amount: 1000000,
+        title: '100万',
+        emoji: '🏆',
+        warning: '忍住冲动消费',
+        advice: '进入躺平倒计时',
+        loss: '100万本金年化6%可产生6万被动收入'
+    },
+    {
+        amount: 2000000,
+        title: '200万',
+        emoji: '👑',
+        warning: '忍住加杠杆投资',
+        advice: '稳健配置，守住胜利果实',
+        loss: '杠杆可能让你一夜归零'
+    },
+    {
+        amount: 5000000,
+        title: '500万',
+        emoji: '🌟',
+        warning: '忍住奢侈生活',
+        advice: '考虑躺平方式，享受生活',
+        loss: '500万是很多城市的躺平及格线'
+    }
+];
+
+// 消费对比警醒文案
+const SAVING_COMPARISONS = [
+    {
+        icon: '🚗',
+        title: '买车 vs 储蓄',
+        bad: '30万买车，5年后价值15万',
+        good: '30万储蓄，5年后价值40万（年化6%）',
+        difference: '差距25万'
+    },
+    {
+        icon: '🍜',
+        title: '外卖 vs 带饭',
+        bad: '每天50元外卖，5年花费9万',
+        good: '带饭每天15元，5年花费2.7万',
+        difference: '节省6.3万'
+    },
+    {
+        icon: '🧋',
+        title: '奶茶 vs 白水',
+        bad: '每天25元奶茶，5年花费4.5万',
+        good: '喝白水，0支出',
+        difference: '节省4.5万'
+    },
+    {
+        icon: '👗',
+        title: '快时尚 vs 经典款',
+        bad: '每月买快时尚，5年花费6万',
+        good: '买经典款，5年花费1.5万',
+        difference: '节省4.5万'
+    },
+    {
+        icon: '🎮',
+        title: '游戏氪金 vs 学习投资',
+        bad: '每月游戏氪金500，5年花费3万',
+        good: '投资学习提升技能，收入提升50%',
+        difference: '一个花钱，一个赚钱'
+    },
+    {
+        icon: '📱',
+        title: '年年换手机 vs 3年一换',
+        bad: '年年换旗舰机，5年花费4万',
+        good: '3年换一次中端机，5年花费1万',
+        difference: '节省3万'
+    },
+    {
+        icon: '🚬',
+        title: '抽烟 vs 戒烟',
+        bad: '每天1包烟，5年花费3.6万',
+        good: '戒烟，身体健康+存款增长',
+        difference: '节省3.6万+健康无价'
+    },
+    {
+        icon: '🎬',
+        title: '电影会员 vs 图书馆',
+        bad: '每月视频会员100，5年花费6000',
+        good: '图书馆免费，还能提升认知',
+        difference: '节省6000+认知提升'
+    }
+];
+
+// 核心理念金句
+const CORE_MESSAGES = [
+    '不要为欲望买单，要为自由储蓄',
+    '不要为懒惰买单，要为未来投资',
+    '每一笔消费都是向躺平告别',
+    '复利是世界第八大奇迹',
+    '时间是复利最好的朋友',
+    '延迟满足是最高级的自律',
+    '存钱不是目的，自由才是',
+    '财务自由从拒绝消费主义开始'
+];
