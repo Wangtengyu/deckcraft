@@ -42,7 +42,7 @@ let appState = {
     },
     ui: {
         currentPage: 'home',
-        returnRate: 0.06,
+        returnRate: 0.05,  // 默认5%，更保守稳健
         theme: 'dark'
     }
 };
