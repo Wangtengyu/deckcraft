@@ -90,13 +90,15 @@
     <nav class="fixed top-0 left-0 right-0 z-50 bg-dark/90 backdrop-blur-md border-b border-white/5">
         <div class="max-w-6xl mx-auto px-4 md:px-6 py-4 flex justify-between items-center">
             <!-- Logo -->
-            <a href="index.html" class="flex items-center space-x-2">
-                <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-accent to-accent2 flex items-center justify-center">
-                    <i class="fas fa-layer-group text-white text-sm"></i>
+            <a href="index.html" class="flex items-center space-x-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent via-purple-500 to-accent2 flex items-center justify-center shadow-lg shadow-accent/20 group-hover:shadow-accent/40 transition-all duration-300">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                    </svg>
                 </div>
-                <div class="flex items-baseline">
-                    <span class="text-lg font-bold">FDeck</span>
-                    <span class="text-xs text-gray-500 ml-1.5 hidden sm:inline">/ 秒演</span>
+                <div class="flex flex-col">
+                    <span class="text-xl font-bold bg-gradient-to-r from-accent via-purple-400 to-accent2 bg-clip-text text-transparent">FDeck</span>
+                    <span class="text-[10px] text-gray-400 -mt-0.5 tracking-widest">秒演</span>
                 </div>
             </a>
             
@@ -223,18 +225,22 @@
             
             <!-- 模板卡片网格 -->
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6" id="templateGrid">
-                <!-- 党政红金模板01 -->
-                <div class="feature-card rounded-xl border border-border overflow-hidden card-hover cursor-pointer group" onclick="previewTemplate('tpl_guobao_001', '国宝文化展示01')">
+                <!-- 国宝文化展示模板 -->
+                <div class="feature-card rounded-xl border border-border overflow-hidden card-hover cursor-pointer group" onclick="previewTemplate('guobao-display', '国宝文化展示')">
                     <div class="aspect-video relative overflow-hidden">
-                        <img src="templates-assets/images/tpl_guobao_001/image1.png" alt="国宝文化展示01" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition flex items-end justify-center pb-3">
-                            <span class="text-white text-sm font-medium">点击预览</span>
+                        <img src="templates/life/guobao-display-preview.jpeg" alt="国宝文化展示" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-white/20 backdrop-blur text-white text-xs px-3 py-1.5 rounded-full">
+                                    <i class="fas fa-eye mr-1"></i>预览PPT
+                                </span>
+                            </div>
                         </div>
                     </div>
                     <div class="p-3">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h3 class="font-medium text-sm mb-1">国宝文化展示01</h3>
+                                <h3 class="font-medium text-sm mb-1">国宝文化展示</h3>
                                 <p class="text-xs text-gray-500">党政红金 · 8页</p>
                             </div>
                             <button onclick="event.stopPropagation(); useTemplate('tpl_guobao_001')" class="px-3 py-1.5 bg-accent/10 text-accent text-xs rounded-lg hover:bg-accent/20 transition">
@@ -300,11 +306,13 @@
     <!-- 底部 -->
     <footer class="py-8 px-4 md:px-6 border-t border-border">
         <div class="max-w-6xl mx-auto text-center">
-            <div class="flex items-center justify-center space-x-2 mb-4">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-accent2 flex items-center justify-center">
-                    <i class="fas fa-layer-group text-white text-xs"></i>
+            <div class="flex items-center justify-center space-x-3 mb-4">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-accent via-purple-500 to-accent2 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                    </svg>
                 </div>
-                <span class="font-bold">FDeck</span>
+                <span class="font-bold bg-gradient-to-r from-accent to-accent2 bg-clip-text text-transparent">FDeck</span>
                 <span class="text-gray-500">/</span>
                 <span class="text-gray-400">秒演</span>
             </div>
@@ -316,26 +324,34 @@
 
     <!-- 模板预览弹窗 -->
     <div id="previewModal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="max-w-4xl w-full max-h-[90vh] overflow-auto">
-            <div class="bg-surface rounded-2xl border border-border overflow-hidden">
+        <div class="max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="bg-surface rounded-2xl border border-border overflow-hidden flex flex-col h-full">
                 <!-- 弹窗头部 -->
-                <div class="flex items-center justify-between p-4 border-b border-border">
-                    <h3 id="previewTitle" class="text-lg font-bold">模板预览</h3>
-                    <button onclick="closePreviewModal()" class="text-gray-400 hover:text-white transition">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
+                <div class="flex items-center justify-between p-4 border-b border-border shrink-0">
+                    <div>
+                        <h3 id="previewTitle" class="text-lg font-bold">模板预览</h3>
+                        <p class="text-xs text-gray-500 mt-0.5">在线预览PPT文件</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <a id="downloadTemplateBtn" href="#" download class="px-4 py-2 bg-accent/10 text-accent text-sm rounded-lg hover:bg-accent/20 transition flex items-center">
+                            <i class="fas fa-download mr-2"></i>下载PPT
+                        </a>
+                        <button onclick="closePreviewModal()" class="text-gray-400 hover:text-white transition p-2">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
                 </div>
                 
-                <!-- 预览图片列表 -->
-                <div class="p-4 space-y-4" id="previewImages">
-                    <!-- 动态插入预览图片 -->
+                <!-- PPT预览区域 -->
+                <div class="flex-1 min-h-0 bg-gray-900">
+                    <iframe id="pptPreviewFrame" class="w-full h-full" frameborder="0"></iframe>
                 </div>
                 
                 <!-- 底部操作 -->
-                <div class="flex items-center justify-between p-4 border-t border-border">
+                <div class="flex items-center justify-between p-4 border-t border-border shrink-0">
                     <p class="text-sm text-gray-400">点击"使用此模板"将套用模板生成PPT</p>
                     <button id="useTemplateBtn" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
-                        使用此模板
+                        <i class="fas fa-magic mr-2"></i>使用此模板
                     </button>
                 </div>
             </div>
@@ -380,26 +396,41 @@
             location.href = 'create.html'
         }
         
-        // 预览模板
-        function previewTemplate(templateId, templateName) {
-            currentTemplateId = templateId
-            document.getElementById('previewTitle').textContent = templateName + ' - 模板预览'
-            
-            // 加载模板图片（假设每个模板8张图）
-            const imagesContainer = document.getElementById('previewImages')
-            imagesContainer.innerHTML = ''
-            
-            for (let i = 1; i <= 8; i++) {
-                imagesContainer.innerHTML += `
-                    <div class="rounded-lg overflow-hidden">
-                        <img src="templates-assets/images/${templateId}/image${i}.png" alt="第${i}页" class="w-full">
-                    </div>
-                `
+        // 模板配置
+        const templateConfig = {
+            'guobao-display': {
+                pptxPath: 'templates/life/guobao-display.pptx',
+                templateId: 'tpl_guobao_001'
             }
+        }
+        
+        // 预览模板（使用Office Online预览PPT）
+        function previewTemplate(templateKey, templateName) {
+            const config = templateConfig[templateKey]
+            if (!config) {
+                alert('模板配置错误')
+                return
+            }
+            
+            currentTemplateId = config.templateId
+            document.getElementById('previewTitle').textContent = templateName
+            
+            // PPT文件完整URL
+            const pptxUrl = `https://wangtengyu.github.io/deckcraft/${config.pptxPath}`
+            
+            // Office Online预览URL
+            const previewUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(pptxUrl)}`
+            
+            // 设置iframe预览
+            const iframe = document.getElementById('pptPreviewFrame')
+            iframe.src = previewUrl
+            
+            // 设置下载按钮
+            document.getElementById('downloadTemplateBtn').href = pptxUrl
             
             // 设置使用按钮
             document.getElementById('useTemplateBtn').onclick = () => {
-                useTemplate(templateId)
+                useTemplate(config.templateId)
             }
             
             document.getElementById('previewModal').classList.remove('hidden')
@@ -407,6 +438,7 @@
         
         function closePreviewModal() {
             document.getElementById('previewModal').classList.add('hidden')
+            document.getElementById('pptPreviewFrame').src = ''
         }
         
         // 回车键快捷生成
