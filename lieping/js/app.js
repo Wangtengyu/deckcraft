@@ -1248,7 +1248,40 @@ function renderWealthPyramid() {
 // 省钱攻略页面
 // ============================================
 function updateSavingsPage() {
+    // 计算节省潜力
+    calculateSavingsPotential();
+    // 渲染建议
     renderSavingsTips();
+}
+
+function calculateSavingsPotential() {
+    const expense = appState.profile.expense;
+    let monthlyPotential = 0;
+    
+    // 根据各项支出计算可节省金额
+    if (expense.food > 1500) {
+        monthlyPotential += Math.round((expense.food - 1500) * 0.5); // 餐饮可省50%
+    }
+    if (expense.shopping > 800) {
+        monthlyPotential += Math.round((expense.shopping - 800) * 0.6); // 购物可省60%
+    }
+    if (expense.entertainment > 400) {
+        monthlyPotential += Math.round((expense.entertainment - 400) * 0.7); // 娱乐可省70%
+    }
+    if (expense.transport > 600) {
+        monthlyPotential += Math.round((expense.transport - 600) * 0.4); // 交通可省40%
+    }
+    if (expense.social > 500) {
+        monthlyPotential += Math.round((expense.social - 500) * 0.5); // 社交可省50%
+    }
+    
+    const yearlyPotential = monthlyPotential * 12;
+    const decadePotential = yearlyPotential * 10;
+    
+    // 更新显示
+    document.getElementById('total-savings-potential').textContent = monthlyPotential.toLocaleString();
+    document.getElementById('yearly-savings-potential').textContent = '¥' + yearlyPotential.toLocaleString();
+    document.getElementById('decade-savings-potential').textContent = '¥' + decadePotential.toLocaleString();
 }
 
 function renderSavingsTips() {
@@ -1307,6 +1340,124 @@ function renderSavingsTips() {
 // ============================================
 function updateGoalsPage() {
     renderGoalsPlan();
+    renderUserTags();
+    renderAchievements();
+}
+
+function renderUserTags() {
+    const plan = appState.profile.plan;
+    if (!plan) return;
+    
+    const savingsRate = plan.savingsRate || 0;
+    const progress = plan.progress || 0;
+    
+    // 确定用户标签
+    let mainTag = '攒钱新手';
+    if (savingsRate >= 60) mainTag = '储蓄大师';
+    else if (savingsRate >= 40) mainTag = '攒钱达人';
+    else if (savingsRate >= 20) mainTag = '理财小能手';
+    
+    document.getElementById('user-tag').textContent = mainTag;
+    
+    // 生成标签列表
+    const tags = [];
+    if (savingsRate >= 50) tags.push({ emoji: '💰', text: '储蓄率超50%' });
+    if (progress >= 10) tags.push({ emoji: '🎯', text: '进度10%+' });
+    if (plan.monthlySavings >= 5000) tags.push({ emoji: '📈', text: '月存5000+' });
+    if (plan.monthlySavings >= 10000) tags.push({ emoji: '🚀', text: '月存过万' });
+    if (progress >= 50) tags.push({ emoji: '🏆', text: '半程达成' });
+    
+    // 如果标签太少，添加基础标签
+    if (tags.length < 3) {
+        tags.push({ emoji: '💪', text: '坚持储蓄中' });
+        tags.push({ emoji: '🌟', text: '潜力股' });
+    }
+    
+    const container = document.getElementById('user-tags-list');
+    if (container) {
+        container.innerHTML = tags.map(tag => `
+            <span class="px-3 py-1 bg-sky-500/20 rounded-full text-sm text-sky-300">
+                ${tag.emoji} ${tag.text}
+            </span>
+        `).join('');
+    }
+}
+
+function renderAchievements() {
+    const plan = appState.profile.plan;
+    const container = document.getElementById('achievements-grid');
+    if (!container) return;
+    
+    const currentSavings = appState.user.currentSavings || 0;
+    const savingsRate = plan?.savingsRate || 0;
+    const progress = plan?.progress || 0;
+    
+    const achievements = [
+        { 
+            id: 'first-10k',
+            emoji: '🎯',
+            name: '首金',
+            desc: '存下第一个10万',
+            unlocked: currentSavings >= 100000
+        },
+        { 
+            id: 'save-50',
+            emoji: '💎',
+            name: '半壁',
+            desc: '储蓄率达50%',
+            unlocked: savingsRate >= 50
+        },
+        { 
+            id: 'progress-25',
+            emoji: '🌟',
+            name: '启程',
+            desc: '进度达25%',
+            unlocked: progress >= 25
+        },
+        { 
+            id: 'progress-50',
+            emoji: '🏆',
+            name: '半程',
+            desc: '进度达50%',
+            unlocked: progress >= 50
+        },
+        { 
+            id: 'progress-75',
+            emoji: '🚀',
+            name: '冲刺',
+            desc: '进度达75%',
+            unlocked: progress >= 75
+        },
+        { 
+            id: 'fire',
+            emoji: '🛋️',
+            name: '躺平',
+            desc: '达成目标',
+            unlocked: progress >= 100
+        },
+        { 
+            id: 'monthly-5k',
+            emoji: '💰',
+            name: '勤俭',
+            desc: '月存5000+',
+            unlocked: (plan?.monthlySavings || 0) >= 5000
+        },
+        { 
+            id: 'monthly-10k',
+            emoji: '💵',
+            name: '致富',
+            desc: '月存过万',
+            unlocked: (plan?.monthlySavings || 0) >= 10000
+        }
+    ];
+    
+    container.innerHTML = achievements.map(a => `
+        <div class="text-center p-3 rounded-xl ${a.unlocked ? 'bg-emerald-500/20 border border-emerald-500/30' : 'bg-slate-700/30 opacity-50'}">
+            <div class="text-3xl mb-1">${a.emoji}</div>
+            <div class="font-bold text-sm">${a.name}</div>
+            <div class="text-xs text-slate-400">${a.desc}</div>
+        </div>
+    `).join('');
 }
 
 function renderGoalsPlan() {
