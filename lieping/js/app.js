@@ -1127,7 +1127,7 @@ function saveMonthRecord() {
 // ============================================
 // 分享卡片
 // ============================================
-function generateShareCard() {
+async function generateShareCard() {
     const plan = appState.profile.plan;
     const city = appState.profile.city;
     
@@ -1148,7 +1148,53 @@ function generateShareCard() {
     document.getElementById('share-progress-bar').textContent = plan.progress + '%';
     document.getElementById('share-progress-fill').style.width = plan.progress + '%';
     
+    // 生成AI建议
+    await generateAIAdvice(plan);
+    
     showPage('share');
+}
+
+// AI生成个性化建议
+async function generateAIAdvice(plan) {
+    const adviceEl = document.getElementById('share-advice');
+    if (!adviceEl) return;
+    
+    const years = document.getElementById('years-to-goal').textContent;
+    const monthlySavings = Math.round(plan.monthlySavings);
+    const targetAmount = plan.targetAmount;
+    const savingsRate = Math.round(plan.monthlySavings / plan.monthlyIncome * 100);
+    
+    // 默认建议（API失败时显示）
+    const defaultAdvice = '坚持储蓄，复利会是你最好的朋友。每月多存一点，离躺平就近一步。';
+    
+    try {
+        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer sk-eb51213b7bec4a5589536985e0d7a06e'
+            },
+            body: JSON.stringify({
+                model: 'deepseek-chat',
+                messages: [{
+                    role: 'user',
+                    content: `你是一个财务顾问。用户情况：月存${monthlySavings}元，储蓄率${savingsRate}%，目标${targetAmount}元，年化5%，预计${years}年达成。请给出一句50字以内的鼓励建议，要具体、有温度、有行动指导。只输出建议，不要其他内容。`
+                }],
+                max_tokens: 100,
+                temperature: 0.8
+            })
+        });
+        
+        const data = await response.json();
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+            adviceEl.textContent = data.choices[0].message.content.trim();
+        } else {
+            adviceEl.textContent = defaultAdvice;
+        }
+    } catch (error) {
+        console.error('AI建议生成失败:', error);
+        adviceEl.textContent = defaultAdvice;
+    }
 }
 
 function updateShareCard() {
