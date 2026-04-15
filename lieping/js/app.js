@@ -693,24 +693,25 @@ function calculateBeatPercent(monthlySavings, monthlyIncome) {
 
 function calculateYearsToGoal(targetAmount) {
     const { monthlySavings } = appState.profile.plan || {};
-    const currentSavings = appState.user.currentSavings;
-    const returnRate = appState.ui.returnRate;
+    const currentSavings = appState.user.currentSavings || 0;
+    const returnRate = appState.ui.returnRate || 0.06;
     
-    if (monthlySavings <= 0) {
+    if (!monthlySavings || monthlySavings <= 0) {
         document.getElementById('years-to-goal').textContent = '∞';
         return null;
     }
     
     let years = 0;
     let current = currentSavings;
-    const monthlyRate = returnRate / 12;
+    const annualSavings = monthlySavings * 12;
     
+    // 按年计算复利
     while (current < targetAmount && years < 100) {
-        current = current * (1 + monthlyRate) + monthlySavings * 12;
+        current = current * (1 + returnRate) + annualSavings;
         years++;
     }
     
-    document.getElementById('years-to-goal').textContent = years >= 100 ? '50+' : years;
+    document.getElementById('years-to-goal').textContent = years >= 100 ? '100+' : years;
     
     return years;
 }
