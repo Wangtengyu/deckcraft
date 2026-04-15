@@ -1081,9 +1081,28 @@
                             📤 生成分享图
                         </button>
                     </div>
-                    <button onclick="showPage('profile')" class="text-slate-400 hover:text-white transition text-sm">
-                        查看更多功能 →
-                    </button>
+                </div>
+                
+                <!-- 深入了解 - 功能入口 -->
+                <div class="glass-card p-5 mt-6">
+                    <h3 class="font-semibold text-base mb-4 text-center">💡 深入了解</h3>
+                    <div class="grid grid-cols-3 gap-3">
+                        <button onclick="showPage('pyramid')" class="glass-card p-4 text-center hover:border-cyan-500 transition rounded-xl">
+                            <div class="text-3xl mb-2">🏛️</div>
+                            <div class="text-sm font-medium">财富金字塔</div>
+                            <div class="text-xs text-slate-500 mt-1">底层逻辑</div>
+                        </button>
+                        <button onclick="showPage('savings')" class="glass-card p-4 text-center hover:border-cyan-500 transition rounded-xl">
+                            <div class="text-3xl mb-2">💡</div>
+                            <div class="text-sm font-medium">省钱攻略</div>
+                            <div class="text-xs text-slate-500 mt-1">支出优化</div>
+                        </button>
+                        <button onclick="showPage('goals')" class="glass-card p-4 text-center hover:border-cyan-500 transition rounded-xl">
+                            <div class="text-3xl mb-2">🎯</div>
+                            <div class="text-sm font-medium">目标规划</div>
+                            <div class="text-xs text-slate-500 mt-1">阶段目标</div>
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1195,7 +1214,175 @@
             </div>
         </section>
         
-        <!-- ===== 页面7: 分享图预览 ===== -->
+        <!-- ===== 页面7: 财富金字塔 ===== -->
+        <section id="page-pyramid" class="page">
+            <div class="py-8">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold mb-2">🏛️ 财富金字塔</h2>
+                    <p class="text-slate-400">了解财富积累的底层逻辑</p>
+                </div>
+                
+                <!-- 金字塔展示 -->
+                <div class="max-w-2xl mx-auto mb-8">
+                    <div class="pyramid-container flex flex-col items-center gap-2" id="wealth-pyramid">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+                
+                <!-- 复利威力对比 -->
+                <div class="max-w-4xl mx-auto mb-8">
+                    <div class="glass-card p-6">
+                        <h3 class="font-bold text-lg mb-4 text-center">⚡ 复利的威力</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div class="bg-gradient-to-br from-indigo-900/50 to-purple-900/50 rounded-xl p-5">
+                                <div class="text-center mb-4">
+                                    <div class="text-4xl mb-2">📈</div>
+                                    <h4 class="font-bold text-lg">场景A：立即复利</h4>
+                                    <p class="text-sm text-slate-400">每月存3000，年化6%，10年</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-3xl font-black text-green-400" id="scene-a-result">¥0</div>
+                                    <div class="text-sm text-slate-400 mt-2">本金 36万 → 收益 <span class="text-yellow-400" id="scene-a-gain">¥0</span></div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gradient-to-br from-rose-900/50 to-orange-900/50 rounded-xl p-5">
+                                <div class="text-center mb-4">
+                                    <div class="text-4xl mb-2">⏰</div>
+                                    <h4 class="font-bold text-lg">场景B：延迟3年</h4>
+                                    <p class="text-sm text-slate-400">前3年只存不投，后7年才复利</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-3xl font-black text-rose-400" id="scene-b-result">¥0</div>
+                                    <div class="text-sm text-slate-400 mt-2">本金 36万 → 收益 <span class="text-yellow-400" id="scene-b-gain">¥0</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center p-4 bg-yellow-500/10 rounded-xl">
+                            <div class="text-sm text-slate-400 mb-1">晚3年开始，你将少赚</div>
+                            <div class="text-2xl font-black text-yellow-400" id="compound-loss">¥0</div>
+                            <div class="text-xs text-slate-500 mt-1">这就是"时间就是金钱"的真正含义</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 存款里程碑科普 -->
+                <div class="max-w-4xl mx-auto mb-8">
+                    <div class="glass-card p-6">
+                        <h3 class="font-bold text-lg mb-2 text-center">🚧 存款里程碑：每个阶段要忍住的消费</h3>
+                        <p class="text-sm text-slate-400 text-center mb-6">认识这些消费陷阱，守住你的财富</p>
+                        <div id="milestones-container">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center gap-4 mt-6">
+                    <button onclick="showPage('result')" class="btn-secondary px-6 py-3 rounded-xl font-bold">
+                        ← 返回报告
+                    </button>
+                    <button onclick="showPage('savings')" class="btn-primary px-6 py-3 rounded-xl font-bold">
+                        省钱攻略 →
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- ===== 页面8: 省钱攻略 ===== -->
+        <section id="page-savings" class="page">
+            <div class="py-8">
+                <div class="text-center mb-8">
+                    <div class="text-6xl mb-4">💡</div>
+                    <h2 class="text-3xl font-bold mb-2">省钱攻略</h2>
+                    <p class="text-slate-400">基于你的支出，给你定制省钱建议</p>
+                </div>
+                
+                <!-- 节省潜力总览 -->
+                <div class="max-w-4xl mx-auto mb-8">
+                    <div class="glass-card p-6 bg-gradient-to-r from-green-900/50 to-emerald-900/50">
+                        <div class="text-center">
+                            <div class="text-slate-400 mb-2">每月可节省</div>
+                            <div class="text-5xl font-black text-green-400 mb-2">
+                                ¥<span id="total-savings-potential">0</span>
+                            </div>
+                            <div class="text-slate-400">
+                                年省 <span class="text-green-400 font-bold" id="yearly-savings-potential">¥0</span> 
+                                = 10年多存 <span class="text-yellow-400 font-bold" id="decade-savings-potential">¥0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 详细建议列表 -->
+                <div class="max-w-4xl mx-auto space-y-4" id="savings-suggestions">
+                    <!-- 动态生成 -->
+                </div>
+                
+                <div class="flex justify-center gap-4 mt-6">
+                    <button onclick="showPage('pyramid')" class="btn-secondary px-6 py-3 rounded-xl font-bold">
+                        ← 财富金字塔
+                    </button>
+                    <button onclick="showPage('goals')" class="btn-primary px-6 py-3 rounded-xl font-bold">
+                        目标规划 →
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- ===== 页面9: 目标规划 ===== -->
+        <section id="page-goals" class="page">
+            <div class="py-8">
+                <div class="text-center mb-8">
+                    <div class="text-6xl mb-4 inline-block">🛋️</div>
+                    <h2 class="text-3xl font-bold mb-2">躺平路线图</h2>
+                    <p class="text-slate-400">从现在到躺平的每一步</p>
+                </div>
+                
+                <!-- 用户标签 -->
+                <div class="max-w-4xl mx-auto mb-8">
+                    <div class="glass-card p-6 text-center">
+                        <div class="flex items-center justify-center gap-4 flex-wrap">
+                            <div class="text-4xl">😴</div>
+                            <div>
+                                <div class="text-sm text-slate-400 mb-1">你的专属标签</div>
+                                <div class="text-2xl font-black gradient-text" id="user-tag">攒钱小能手</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-center gap-2 flex-wrap" id="user-tags-list">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 三阶段目标 -->
+                <div class="max-w-4xl mx-auto mb-8" id="goal-timeline">
+                    <!-- 动态生成 -->
+                </div>
+                
+                <!-- 成就系统 -->
+                <div class="max-w-4xl mx-auto mb-8">
+                    <div class="glass-card p-6">
+                        <h3 class="font-bold text-lg mb-4 text-center">🏆 成就系统</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="achievements-grid">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center gap-4 mt-6">
+                    <button onclick="showPage('savings')" class="btn-secondary px-6 py-3 rounded-xl font-bold">
+                        ← 省钱攻略
+                    </button>
+                    <button onclick="generateShareCard()" class="btn-primary px-6 py-3 rounded-xl font-bold">
+                        生成分享图 →
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- ===== 页面10: 分享图预览 ===== -->
         <section id="page-share" class="page">
             <div class="py-6">
                 <div class="text-center mb-6">
@@ -1276,7 +1463,7 @@
         </section>
     </main>
     
-    <!-- ===== 底部导航 - 优化版 ===== -->
+    <!-- ===== 底部导航 - 简洁版 ===== -->
     <nav id="bottom-nav" class="bottom-nav hidden">
         <div class="max-w-lg mx-auto flex justify-around">
             <button onclick="showPage('home')" class="nav-item" data-page="home">
@@ -1285,15 +1472,11 @@
             </button>
             <button onclick="showPage('result')" class="nav-item" data-page="result">
                 <span class="nav-icon">📊</span>
-                <span class="nav-label">财务报告</span>
+                <span class="nav-label">报告</span>
             </button>
             <button onclick="showPage('profile')" class="nav-item" data-page="profile">
                 <span class="nav-icon">👤</span>
-                <span class="nav-label">我的进度</span>
-            </button>
-            <button onclick="showPage('share')" class="nav-item" data-page="share">
-                <span class="nav-icon">📤</span>
-                <span class="nav-label">分享</span>
+                <span class="nav-label">我的</span>
             </button>
         </div>
     </nav>
