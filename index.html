@@ -143,18 +143,18 @@
             <!-- 特色标签 -->
             <div class="flex flex-wrap justify-center gap-3 text-sm">
                 <div class="flex items-center space-x-2 text-gray-400">
-                    <i class="fas fa-images text-accent"></i>
-                    <span>图片库优先，成本降低90%</span>
+                    <i class="fas fa-magic text-accent"></i>
+                    <span>AI智能生成，秒级产出</span>
                 </div>
                 <div class="text-gray-600">|</div>
                 <div class="flex items-center space-x-2 text-gray-400">
                     <i class="fas fa-microphone-alt text-accent2"></i>
-                    <span>配套演讲稿生成</span>
+                    <span>一键生成配套演讲稿</span>
                 </div>
                 <div class="text-gray-600">|</div>
                 <div class="flex items-center space-x-2 text-gray-400">
-                    <i class="fas fa-cloud-upload-alt text-accent"></i>
-                    <span>模板投喂复用</span>
+                    <i class="fas fa-palette text-accent"></i>
+                    <span>丰富模板，风格统一</span>
                 </div>
             </div>
         </div>
@@ -164,14 +164,14 @@
     <section class="py-12 px-4 md:px-6">
         <div class="max-w-6xl mx-auto">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- 特色1：图片库 -->
+                <!-- 特色1：AI智能 -->
                 <div class="feature-card rounded-2xl border border-border p-6 card-hover">
                     <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4">
-                        <i class="fas fa-images text-2xl text-accent"></i>
+                        <i class="fas fa-brain text-2xl text-accent"></i>
                     </div>
-                    <h3 class="text-lg font-bold mb-2">图片库优先</h3>
+                    <h3 class="text-lg font-bold mb-2">AI智能生成</h3>
                     <p class="text-gray-400 text-sm leading-relaxed">
-                        从投喂PPT自动提取图片入库，智能匹配优先使用，成本降低约90%
+                        基于大语言模型深度理解主题，自动生成结构清晰、内容专业的演示文稿
                     </p>
                 </div>
                 
@@ -180,20 +180,20 @@
                     <div class="w-12 h-12 rounded-xl bg-accent2/10 flex items-center justify-center mb-4">
                         <i class="fas fa-microphone-alt text-2xl text-accent2"></i>
                     </div>
-                    <h3 class="text-lg font-bold mb-2">口播演讲稿</h3>
+                    <h3 class="text-lg font-bold mb-2">配套演讲稿</h3>
                     <p class="text-gray-400 text-sm leading-relaxed">
-                        PPT生成完成后可一键生成配套演讲稿，口播风格，适合演讲和录制视频
+                        一键生成口播风格演讲稿，自然流畅，适合演讲汇报、视频录制
                     </p>
                 </div>
                 
-                <!-- 特色3：模板投喂 -->
+                <!-- 特色3：模板丰富 -->
                 <div class="feature-card rounded-2xl border border-border p-6 card-hover">
                     <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-4">
-                        <i class="fas fa-cloud-upload-alt text-2xl text-purple-400"></i>
+                        <i class="fas fa-layer-group text-2xl text-purple-400"></i>
                     </div>
-                    <h3 class="text-lg font-bold mb-2">模板投喂</h3>
+                    <h3 class="text-lg font-bold mb-2">专业模板库</h3>
                     <p class="text-gray-400 text-sm leading-relaxed">
-                        上传PPT模板，自动解析结构套用，图片入库复用，丰富模板生态
+                        党政、商务、科技、教育多种风格，持续丰富，一键套用
                     </p>
                 </div>
             </div>
@@ -223,29 +223,63 @@
             
             <!-- 模板卡片网格 -->
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6" id="templateGrid">
-                <!-- 党政红金模板 -->
-                <div class="feature-card rounded-xl border border-border overflow-hidden card-hover cursor-pointer" onclick="useTemplate('国宝文化展示')">
-                    <div class="aspect-video bg-gradient-to-br from-red-900/50 to-amber-900/50 relative overflow-hidden">
-                        <div class="absolute inset-0 p-4 flex flex-col justify-between">
-                            <div class="flex items-center justify-between">
-                                <div class="w-8 h-8 rounded bg-red-500/30 flex items-center justify-center">
-                                    <i class="fas fa-flag text-xs text-red-300"></i>
-                                </div>
-                                <div class="h-1 w-12 bg-amber-400/40 rounded"></div>
-                            </div>
-                            <div class="space-y-2">
-                                <div class="h-2 w-full bg-amber-300/30 rounded"></div>
-                                <div class="h-2 w-3/4 bg-amber-300/20 rounded"></div>
-                            </div>
+                <!-- 党政红金模板01 -->
+                <div class="feature-card rounded-xl border border-border overflow-hidden card-hover cursor-pointer group" onclick="previewTemplate('tpl_guobao_001', '国宝文化展示01')">
+                    <div class="aspect-video relative overflow-hidden">
+                        <img src="templates-assets/images/tpl_guobao_001/image1.png" alt="国宝文化展示01" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition flex items-end justify-center pb-3">
+                            <span class="text-white text-sm font-medium">点击预览</span>
                         </div>
                     </div>
                     <div class="p-3">
                         <div class="flex items-center justify-between">
                             <div>
-                                <h3 class="font-medium text-sm mb-1">国宝文化展示</h3>
-                                <p class="text-xs text-gray-500">党政红金 · 20张图片</p>
+                                <h3 class="font-medium text-sm mb-1">国宝文化展示01</h3>
+                                <p class="text-xs text-gray-500">党政红金 · 8页</p>
                             </div>
-                            <button class="px-3 py-1.5 bg-accent/10 text-accent text-xs rounded-lg hover:bg-accent/20 transition">
+                            <button onclick="event.stopPropagation(); useTemplate('tpl_guobao_001')" class="px-3 py-1.5 bg-accent/10 text-accent text-xs rounded-lg hover:bg-accent/20 transition">
+                                使用
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 党政红金模板02 -->
+                <div class="feature-card rounded-xl border border-border overflow-hidden card-hover cursor-pointer group" onclick="previewTemplate('tpl_guobao_002', '国宝文化展示02')">
+                    <div class="aspect-video relative overflow-hidden">
+                        <img src="templates-assets/images/tpl_guobao_001/image2.png" alt="国宝文化展示02" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition flex items-end justify-center pb-3">
+                            <span class="text-white text-sm font-medium">点击预览</span>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-medium text-sm mb-1">国宝文化展示02</h3>
+                                <p class="text-xs text-gray-500">党政红金 · 8页</p>
+                            </div>
+                            <button onclick="event.stopPropagation(); useTemplate('tpl_guobao_002')" class="px-3 py-1.5 bg-accent/10 text-accent text-xs rounded-lg hover:bg-accent/20 transition">
+                                使用
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 党政红金模板03 -->
+                <div class="feature-card rounded-xl border border-border overflow-hidden card-hover cursor-pointer group" onclick="previewTemplate('tpl_guobao_003', '国宝文化展示03')">
+                    <div class="aspect-video relative overflow-hidden">
+                        <img src="templates-assets/images/tpl_guobao_001/image3.png" alt="国宝文化展示03" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition flex items-end justify-center pb-3">
+                            <span class="text-white text-sm font-medium">点击预览</span>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-medium text-sm mb-1">国宝文化展示03</h3>
+                                <p class="text-xs text-gray-500">党政红金 · 8页</p>
+                            </div>
+                            <button onclick="event.stopPropagation(); useTemplate('tpl_guobao_003')" class="px-3 py-1.5 bg-accent/10 text-accent text-xs rounded-lg hover:bg-accent/20 transition">
                                 使用
                             </button>
                         </div>
@@ -253,7 +287,7 @@
                 </div>
                 
                 <!-- 占位模板 -->
-                <div class="feature-card rounded-xl border border-border border-dashed overflow-hidden flex items-center justify-center aspect-video cursor-pointer hover:border-accent/50 transition" onclick="location.href='upload.html'">
+                <div class="feature-card rounded-xl border border-border border-dashed overflow-hidden flex items-center justify-center aspect-[4/3] cursor-pointer hover:border-accent/50 transition" onclick="location.href='upload.html'">
                     <div class="text-center">
                         <i class="fas fa-plus text-3xl text-gray-600 mb-2"></i>
                         <p class="text-sm text-gray-500">投喂新模板</p>
@@ -280,8 +314,37 @@
         </div>
     </footer>
 
+    <!-- 模板预览弹窗 -->
+    <div id="previewModal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="max-w-4xl w-full max-h-[90vh] overflow-auto">
+            <div class="bg-surface rounded-2xl border border-border overflow-hidden">
+                <!-- 弹窗头部 -->
+                <div class="flex items-center justify-between p-4 border-b border-border">
+                    <h3 id="previewTitle" class="text-lg font-bold">模板预览</h3>
+                    <button onclick="closePreviewModal()" class="text-gray-400 hover:text-white transition">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <!-- 预览图片列表 -->
+                <div class="p-4 space-y-4" id="previewImages">
+                    <!-- 动态插入预览图片 -->
+                </div>
+                
+                <!-- 底部操作 -->
+                <div class="flex items-center justify-between p-4 border-t border-border">
+                    <p class="text-sm text-gray-400">点击"使用此模板"将套用模板生成PPT</p>
+                    <button id="useTemplateBtn" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
+                        使用此模板
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentPlatform = 'ppt'
+        let currentTemplateId = null
         
         function selectPlatform(btn, platform) {
             document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'))
@@ -296,21 +359,54 @@
             })
             btn.classList.add('tab-active')
             btn.classList.remove('text-gray-400')
-            // TODO: 实现分类筛选逻辑
         }
         
+        // 快速生成（无模板）
         function generatePPT() {
             const topic = document.getElementById('topicInput').value.trim()
             if (topic) {
                 localStorage.setItem('pptTopic', topic)
                 localStorage.setItem('pptPlatform', currentPlatform)
+                localStorage.removeItem('pptTemplateId') // 无模板模式
             }
             location.href = 'create.html'
         }
         
-        function useTemplate(templateName) {
-            localStorage.setItem('pptCase', templateName)
+        // 使用模板（模板制作模式）
+        function useTemplate(templateId) {
+            localStorage.setItem('pptTemplateId', templateId)
+            localStorage.setItem('pptPlatform', currentPlatform)
+            localStorage.removeItem('pptTopic') // 模板模式不需要主题
             location.href = 'create.html'
+        }
+        
+        // 预览模板
+        function previewTemplate(templateId, templateName) {
+            currentTemplateId = templateId
+            document.getElementById('previewTitle').textContent = templateName + ' - 模板预览'
+            
+            // 加载模板图片（假设每个模板8张图）
+            const imagesContainer = document.getElementById('previewImages')
+            imagesContainer.innerHTML = ''
+            
+            for (let i = 1; i <= 8; i++) {
+                imagesContainer.innerHTML += `
+                    <div class="rounded-lg overflow-hidden">
+                        <img src="templates-assets/images/${templateId}/image${i}.png" alt="第${i}页" class="w-full">
+                    </div>
+                `
+            }
+            
+            // 设置使用按钮
+            document.getElementById('useTemplateBtn').onclick = () => {
+                useTemplate(templateId)
+            }
+            
+            document.getElementById('previewModal').classList.remove('hidden')
+        }
+        
+        function closePreviewModal() {
+            document.getElementById('previewModal').classList.add('hidden')
         }
         
         // 回车键快捷生成
