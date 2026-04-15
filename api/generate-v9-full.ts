@@ -1059,10 +1059,298 @@ async function generatePPTX(pages, images, title, subtitle, styleConfig) {
   }
 }
 
+// ============ 图片库初始化数据 ============
+const INITIAL_IMAGES = [
+  {
+    "_id": "tpl_guobao_001_cover",
+    "path": "https://wangtengyu.github.io/deckcraft/templates-assets/images/tpl_guobao_001/image1.png",
+    "type": "cover",
+    "style": "party_red",
+    "keywords": ["国宝", "文化", "展示", "高端", "党政"],
+    "colors": ["#C41E3A", "#FFD700", "#8B0000"],
+    "layout": "center",
+    "mood": "庄重大气、华贵典雅",
+    "usage_count": 0,
+    "quality_score": 4.8,
+    "source": "template_tpl_guobao_001"
+  },
+  {
+    "_id": "tpl_guobao_001_content_01",
+    "path": "https://wangtengyu.github.io/deckcraft/templates-assets/images/tpl_guobao_001/image2.png",
+    "type": "content",
+    "style": "party_red",
+    "keywords": ["国宝", "文化", "展示"],
+    "colors": ["#C41E3A", "#FFF8DC"],
+    "layout": "left_title",
+    "mood": "庄重典雅",
+    "usage_count": 0,
+    "quality_score": 4.5,
+    "source": "template_tpl_guobao_001"
+  },
+  {
+    "_id": "tpl_guobao_001_content_02",
+    "path": "https://wangtengyu.github.io/deckcraft/templates-assets/images/tpl_guobao_001/image3.png",
+    "type": "content",
+    "style": "party_red",
+    "keywords": ["国宝", "文化", "展示"],
+    "colors": ["#C41E3A", "#FFD700"],
+    "layout": "right_title",
+    "mood": "庄重典雅",
+    "usage_count": 0,
+    "quality_score": 4.5,
+    "source": "template_tpl_guobao_001"
+  },
+  {
+    "_id": "tpl_guobao_001_content_03",
+    "path": "https://wangtengyu.github.io/deckcraft/templates-assets/images/tpl_guobao_001/image4.png",
+    "type": "content",
+    "style": "party_red",
+    "keywords": ["国宝", "文化", "展示"],
+    "colors": ["#C41E3A", "#FFF8DC"],
+    "layout": "center",
+    "mood": "庄重典雅",
+    "usage_count": 0,
+    "quality_score": 4.5,
+    "source": "template_tpl_guobao_001"
+  },
+  {
+    "_id": "tpl_guobao_001_content_04",
+    "path": "https://wangtengyu.github.io/deckcraft/templates-assets/images/tpl_guobao_001/image5.png",
+    "type": "content",
+    "style": "party_red",
+    "keywords": ["国宝", "文化", "展示"],
+    "colors": ["#C41E3A", "#FFD700"],
+    "layout": "center",
+    "mood": "庄重典雅",
+    "usage_count": 0,
+    "quality_score": 4.5,
+    "source": "template_tpl_guobao_001"
+  },
+  {
+    "_id": "tpl_guobao_001_content_05",
+    "path": "https://wangtengyu.github.io/deckcraft/templates-assets/images/tpl_guobao_001/image6.png",
+    "type": "content",
+    "style": "party_red",
+    "keywords": ["国宝", "文化", "展示"],
+    "colors": ["#C41E3A", "#FFF8DC"],
+    "layout": "center",
+    "mood": "庄重典雅",
+    "usage_count": 0,
+    "quality_score": 4.5,
+    "source": "template_tpl_guobao_001"
+  },
+  {
+    "_id": "tpl_guobao_001_toc",
+    "path": "https://wangtengyu.github.io/deckcraft/templates-assets/images/tpl_guobao_001/image7.png",
+    "type": "toc",
+    "style": "party_red",
+    "keywords": ["国宝", "文化", "展示"],
+    "colors": ["#C41E3A", "#FFD700"],
+    "layout": "center",
+    "mood": "庄重典雅",
+    "usage_count": 0,
+    "quality_score": 4.6,
+    "source": "template_tpl_guobao_001"
+  },
+  {
+    "_id": "tpl_guobao_001_end",
+    "path": "https://wangtengyu.github.io/deckcraft/templates-assets/images/tpl_guobao_001/image8.png",
+    "type": "end",
+    "style": "party_red",
+    "keywords": ["国宝", "文化", "展示"],
+    "colors": ["#C41E3A", "#FFD700"],
+    "layout": "center",
+    "mood": "庄重典雅",
+    "usage_count": 0,
+    "quality_score": 4.6,
+    "source": "template_tpl_guobao_001"
+  },
+  {
+    "_id": "tpl_guobao_002_cover",
+    "path": "https://wangtengyu.github.io/deckcraft/templates-assets/images/tpl_guobao_002/image1.png",
+    "type": "cover",
+    "style": "party_red",
+    "keywords": ["国宝", "文化", "展示", "高端", "党政"],
+    "colors": ["#C41E3A", "#FFD700", "#8B0000"],
+    "layout": "center",
+    "mood": "庄重大气、华贵典雅",
+    "usage_count": 0,
+    "quality_score": 4.8,
+    "source": "template_tpl_guobao_002"
+  },
+  {
+    "_id": "tpl_guobao_002_content_01",
+    "path": "https://wangtengyu.github.io/deckcraft/templates-assets/images/tpl_guobao_002/image2.png",
+    "type": "content",
+    "style": "party_red",
+    "keywords": ["国宝", "文化", "展示"],
+    "colors": ["#C41E3A", "#FFF8DC"],
+    "layout": "left_title",
+    "mood": "庄重典雅",
+    "usage_count": 0,
+    "quality_score": 4.5,
+    "source": "template_tpl_guobao_002"
+  },
+  {
+    "_id": "tpl_guobao_002_content_02",
+    "path": "https://wangtengyu.github.io/deckcraft/templates-assets/images/tpl_guobao_002/image3.png",
+    "type": "content",
+    "style": "party_red",
+    "keywords": ["国宝", "文化", "展示"],
+    "colors": ["#C41E3A", "#FFD700"],
+    "layout": "right_title",
+    "mood": "庄重典雅",
+    "usage_count": 0,
+    "quality_score": 4.5,
+    "source": "template_tpl_guobao_002"
+  },
+  {
+    "_id": "tpl_guobao_002_content_03",
+    "path": "https://wangtengyu.github.io/deckcraft/templates-assets/images/tpl_guobao_002/image4.png",
+    "type": "content",
+    "style": "party_red",
+    "keywords": ["国宝", "文化", "展示"],
+    "colors": ["#C41E3A", "#FFF8DC"],
+    "layout": "center",
+    "mood": "庄重典雅",
+    "usage_count": 0,
+    "quality_score": 4.5,
+    "source": "template_tpl_guobao_002"
+  },
+  {
+    "_id": "tpl_guobao_002_content_04",
+    "path": "https://wangtengyu.github.io/deckcraft/templates-assets/images/tpl_guobao_002/image5.png",
+    "type": "content",
+    "style": "party_red",
+    "keywords": ["国宝", "文化", "展示"],
+    "colors": ["#C41E3A", "#FFD700"],
+    "layout": "center",
+    "mood": "庄重典雅",
+    "usage_count": 0,
+    "quality_score": 4.5,
+    "source": "template_tpl_guobao_002"
+  },
+  {
+    "_id": "tpl_guobao_002_content_05",
+    "path": "https://wangtengyu.github.io/deckcraft/templates-assets/images/tpl_guobao_002/image6.png",
+    "type": "content",
+    "style": "party_red",
+    "keywords": ["国宝", "文化", "展示"],
+    "colors": ["#C41E3A", "#FFF8DC"],
+    "layout": "center",
+    "mood": "庄重典雅",
+    "usage_count": 0,
+    "quality_score": 4.5,
+    "source": "template_tpl_guobao_002"
+  },
+  {
+    "_id": "tpl_guobao_002_toc",
+    "path": "https://wangtengyu.github.io/deckcraft/templates-assets/images/tpl_guobao_002/image7.png",
+    "type": "toc",
+    "style": "party_red",
+    "keywords": ["国宝", "文化", "展示"],
+    "colors": ["#C41E3A", "#FFD700"],
+    "layout": "center",
+    "mood": "庄重典雅",
+    "usage_count": 0,
+    "quality_score": 4.6,
+    "source": "template_tpl_guobao_002"
+  },
+  {
+    "_id": "tpl_guobao_002_end",
+    "path": "https://wangtengyu.github.io/deckcraft/templates-assets/images/tpl_guobao_002/image8.png",
+    "type": "end",
+    "style": "party_red",
+    "keywords": ["国宝", "文化", "展示"],
+    "colors": ["#C41E3A", "#FFD700"],
+    "layout": "center",
+    "mood": "庄重典雅",
+    "usage_count": 0,
+    "quality_score": 4.6,
+    "source": "template_tpl_guobao_002"
+  },
+  {
+    "_id": "tpl_guobao_003_cover",
+    "path": "https://wangtengyu.github.io/deckcraft/templates-assets/images/tpl_guobao_003/image1.png",
+    "type": "cover",
+    "style": "party_red",
+    "keywords": ["国宝", "文化", "展示", "高端", "党政"],
+    "colors": ["#C41E3A", "#FFD700", "#8B0000"],
+    "layout": "center",
+    "mood": "庄重大气、华贵典雅",
+    "usage_count": 0,
+    "quality_score": 4.8,
+    "source": "template_tpl_guobao_003"
+  },
+  {
+    "_id": "tpl_guobao_003_content_01",
+    "path": "https://wangtengyu.github.io/deckcraft/templates-assets/images/tpl_guobao_003/image2.png",
+    "type": "content",
+    "style": "party_red",
+    "keywords": ["国宝", "文化", "展示"],
+    "colors": ["#C41E3A", "#FFF8DC"],
+    "layout": "left_title",
+    "mood": "庄重典雅",
+    "usage_count": 0,
+    "quality_score": 4.5,
+    "source": "template_tpl_guobao_003"
+  },
+  {
+    "_id": "tpl_guobao_003_content_02",
+    "path": "https://wangtengyu.github.io/deckcraft/templates-assets/images/tpl_guobao_003/image3.png",
+    "type": "content",
+    "style": "party_red",
+    "keywords": ["国宝", "文化", "展示"],
+    "colors": ["#C41E3A", "#FFD700"],
+    "layout": "right_title",
+    "mood": "庄重典雅",
+    "usage_count": 0,
+    "quality_score": 4.5,
+    "source": "template_tpl_guobao_003"
+  },
+  {
+    "_id": "tpl_guobao_003_content_03",
+    "path": "https://wangtengyu.github.io/deckcraft/templates-assets/images/tpl_guobao_003/image4.png",
+    "type": "content",
+    "style": "party_red",
+    "keywords": ["国宝", "文化", "展示"],
+    "colors": ["#C41E3A", "#FFF8DC"],
+    "layout": "center",
+    "mood": "庄重典雅",
+    "usage_count": 0,
+    "quality_score": 4.5,
+    "source": "template_tpl_guobao_003"
+  }
+]
+
+/**
+ * 初始化图片库（自动检测并插入初始数据）
+ */
+async function initImageLibrary(db) {
+  try {
+    const collection = db.collection('image_library')
+    const count = await collection.count()
+    
+    if (count.total === 0) {
+      console.log('[图片库] 检测到空库，开始初始化...')
+      await collection.add(INITIAL_IMAGES)
+      console.log(`[图片库] 成功初始化 ${INITIAL_IMAGES.length} 张图片`)
+    } else {
+      console.log(`[图片库] 已有 ${count.total} 张图片，跳过初始化`)
+    }
+  } catch (error) {
+    console.log('[图片库] 初始化跳过:', error.message)
+  }
+}
+
 // ============ 主函数 ============
 export default async function (ctx) {
-  console.log(`=== ${BRAND_CN} V8.0 生成开始 ===`)
+  console.log(`=== ${BRAND_CN} V9.0 生成开始 ===`)
   console.log('请求参数:', JSON.stringify(ctx.body))
+  
+  // 初始化图片库
+  const db = cloud.database()
+  await initImageLibrary(db)
   
   const taskId = ctx.body?.taskId || `task_${Date.now()}`
   const topic = ctx.body?.topic || ctx.body?.userContent || '测试主题'
