@@ -478,11 +478,13 @@
          * 处理上传的文件
          */
         let currentFileData = null  // 保存当前文件数据
+        let currentParseResult = null  // 保存解析结果
 
         async function processFile(file) {
             console.log('处理文件:', file.name, '大小:', (file.size / 1024 / 1024).toFixed(2), 'MB')
             currentFile = file
             currentFileData = null
+            currentParseResult = null  // 重置解析结果
             
             // 显示loading
             document.getElementById('parseResult').classList.remove('hidden')
@@ -540,6 +542,7 @@
                 const result = await response.json()
                 
                 if (result.success) {
+                    currentParseResult = result.data  // 保存解析结果
                     displayParseResult(result.data, file)
                 } else {
                     throw new Error(result.message || '解析失败')
@@ -765,10 +768,17 @@
                 const token = localStorage.getItem('auth_token')
                 const userId = localStorage.getItem('user_id')
                 
-                // 确保有文件数据
-                if (!currentFileData) {
-                    currentFileData = await fileToBase64(currentFile)
+                // 构建提交数据（只发送元数据，不发送完整文件）
+                const submitData = {
+                    name: name,
+                    category: category || 'party',
+                    userId: userId || 'anonymous',
+                    fileName: currentFile?.name,
+                    fileSize: currentFile?.size,
+                    config: currentParseResult || {}
                 }
+                
+                console.log('提交元数据:', submitData)
                 
                 const response = await fetch(`${API_BASE}/template-upload`, {
                     method: 'POST',
@@ -776,12 +786,7 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token || ''}`
                     },
-                    body: JSON.stringify({
-                        file: currentFileData,
-                        name: name,
-                        category: category || 'party',
-                        userId: userId || 'anonymous'
-                    })
+                    body: JSON.stringify(submitData)
                 })
                 
                 const result = await response.json()

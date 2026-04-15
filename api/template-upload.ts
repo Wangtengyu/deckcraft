@@ -1,91 +1,55 @@
 /**
  * 模板上传API - Laf云函数
- * 用于处理模板上传、解析、存储
- * 
- * 支持两种模式：
- * 1. 完整上传：file + name + category（小文件，<5MB）
- * 2. 元数据模式：name + category + fileSize + fileName + mode='metadata'（大文件）
+ * 仅保存元数据，不保存完整文件（避免请求体过大）
  */
 
 const cloud = require('@lafjs/cloud')
 const db = cloud.database()
 
-// 模板集合
 const TEMPLATES_COLLECTION = 'templates'
 const USERS_COLLECTION = 'users'
 
 /**
- * 上传模板
+ * 上传模板元数据
  * POST /template-upload
  */
 export default async function (ctx: any) {
-  const { file, name, category, tags, userId, mode, fileSize, fileName } = ctx.body
+  const { name, category, tags, userId, config, fileSize, fileName } = ctx.body
   
   if (!name || !category) {
     return {
       success: false,
-      message: '缺少必要参数'
+      message: '缺少必要参数：模板名称和分类'
     }
   }
 
   try {
-    // 生成模板ID
     const templateId = `tpl_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`
     
-    let templateData
-    
-    if (mode === 'metadata') {
-      // 元数据模式：大文件，只保存信息，不保存文件
-      templateData = {
-        _id: templateId,
-        name,
-        category,
-        tags: tags || [],
-        author_id: userId,
-        file_url: '', // 待后续上传
-        preview_url: '',
-        config: {
-          fileSize: fileSize,
-          fileName: fileName,
-          mode: 'metadata'
-        },
-        use_count: 0,
-        status: 'pending_upload', // 等待文件上传
-        created_at: new Date(),
-        updated_at: new Date()
-      }
-    } else {
-      // 完整上传模式
-      if (!file) {
-        return {
-          success: false,
-          message: '缺少文件'
-        }
-      }
-      
-      // 解析模板配色和布局
-      const config = await parseTemplateConfig(file)
-      
-      templateData = {
-        _id: templateId,
-        name,
-        category,
-        tags: tags || [],
-        author_id: userId,
-        file_url: `templates/${templateId}.pptx`,
-        preview_url: `https://via.placeholder.com/400x300?text=${encodeURIComponent(name)}`,
-        config,
-        use_count: 0,
-        status: 'approved',
-        created_at: new Date(),
-        updated_at: new Date()
-      }
+    const templateData = {
+      _id: templateId,
+      name,
+      category,
+      tags: tags || [],
+      author_id: userId || 'anonymous',
+      file_url: '',
+      preview_url: '',
+      config: {
+        ...config,
+        fileSize: fileSize,
+        fileName: fileName,
+        mode: 'metadata'
+      },
+      use_count: 0,
+      status: 'approved',
+      created_at: new Date(),
+      updated_at: new Date()
     }
     
     await db.collection(TEMPLATES_COLLECTION).add(templateData)
     
     // 更新用户贡献数
-    if (userId) {
+    if (userId && userId !== 'anonymous') {
       try {
         await db.collection(USERS_COLLECTION)
           .where({ _id: userId })
@@ -101,10 +65,10 @@ export default async function (ctx: any) {
       success: true,
       data: {
         id: templateId,
-        preview_url: templateData.preview_url,
-        mode: mode || 'full'
+        name,
+        category
       },
-      message: mode === 'metadata' ? '模板信息已提交，等待文件上传' : '模板上传成功'
+      message: '模板投喂成功'
     }
     
   } catch (error) {
@@ -113,20 +77,5 @@ export default async function (ctx: any) {
       success: false,
       message: '上传失败: ' + error.message
     }
-  }
-}
-
-/**
- * 解析模板配置
- */
-async function parseTemplateConfig(fileBase64: string): Promise<any> {
-  return {
-    colors: {
-      primary: '#2C5282',
-      secondary: '#4A90D9',
-      accent: '#00d4ff'
-    },
-    slide_count: 10,
-    layouts: ['cover', 'content', 'content', 'content']
   }
 }
