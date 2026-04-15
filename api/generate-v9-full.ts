@@ -12,7 +12,8 @@
  * 品牌：FDeck（英文）/ 秒演（中文）
  */
 
-const cloud = require('@lafjs/cloud')
+import cloud from '@lafjs/cloud'
+const db = cloud.database()
 
 // ============ 火山方舟API配置 ============
 const ARK_IMAGE_API = 'https://ark.cn-beijing.volces.com/api/v3/images/generations'
@@ -1467,7 +1468,6 @@ export default async function (ctx) {
   console.log('请求参数:', JSON.stringify(ctx.body))
   
   // 初始化图片库
-  const db = cloud.database()
   await initImageLibrary(db)
   
   const taskId = ctx.body?.taskId || `task_${Date.now()}`

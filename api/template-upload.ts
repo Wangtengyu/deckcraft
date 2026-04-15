@@ -3,7 +3,7 @@
  * 仅保存元数据，不保存完整文件（避免请求体过大）
  */
 
-const cloud = require('@lafjs/cloud')
+import cloud from '@lafjs/cloud'
 const db = cloud.database()
 
 const TEMPLATES_COLLECTION = 'templates'
