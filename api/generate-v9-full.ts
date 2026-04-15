@@ -554,15 +554,16 @@ async function generateImageWithArk(prompt, platform, retryCount = 3) {
 }
 
 /**
- * 火山方舟内容生成API（V9.1增加参考素材支持）
+ * 火山方舟内容生成API（V9.2 优化版 - 内容深度展开）
  * @param {string} topic - PPT主题
  * @param {string} section - 当前章节
  * @param {number} count - 要点数量
  * @param {string} scene - 场景
  * @param {object} style - 风格配置
- * @param {string|null} refContent - 参考素材内容（文档/链接内容）
+ * @param {string|null} refContent - 参考素材内容
+ * @param {string} audience - 受众类型（children/students/adults/professionals）
  */
-async function generateContentWithArk(topic, section, count, scene, style, refContent = null) {
+async function generateContentWithArk(topic, section, count, scene, style, refContent = null, audience = 'adult') {
   const sceneContext = {
     report: '工作汇报场景',
     proposal: '项目方案场景',
@@ -571,37 +572,89 @@ async function generateContentWithArk(topic, section, count, scene, style, refCo
     other: '通用内容场景'
   }[scene] || '通用内容场景'
   
-  let prompt = `你是一位专业的PPT内容策划专家。请为"${topic}"主题的"${section}"章节生成${count}个高质量要点。
+  // 受众适配
+  const audienceContext = {
+    children: '面向6-12岁儿童，语言要生动有趣、简单易懂，多用比喻和故事',
+    students: '面向12-22岁学生，语言要清晰准确、富有启发性，适当引用案例',
+    adults: '面向25-50岁成人，语言要务实专业、逻辑严谨',
+    professionals: '面向专业人士，语言要精准深入、数据支撑强'
+  }[audience] || '面向成人，语言要务实专业、逻辑严谨'
+  
+  // 场景适配的内容深度
+  const depthContext = {
+    report: '工作汇报场景需要：数据支撑、量化成果、问题反思、改进措施',
+    proposal: '项目方案场景需要：机会分析、方案优势、实施路径、风险预案',
+    training: '培训课件场景需要：概念讲解、技能分解、案例演示、实操要点',
+    science: '知识科普场景需要：原理说明、现象解释、生活应用、趣味知识',
+    other: '通用场景需要：观点明确、论述充分、逻辑清晰'
+  }[scene] || '观点明确、论述充分、逻辑清晰'
+  
+  let prompt = `你是一位资深的PPT内容策划专家。请为"${topic}"主题的"${section}"章节生成${count}个有深度、有价值的高质量要点。
 
-场景：${sceneContext}
-风格：${style?.name || '商务'}
+## 基础信息
+- 场景：${sceneContext}
+- 风格：${style?.name || '商务'}
+- 受众：${audienceContext}
+- 内容要求：${depthContext}
 
-要求：
-1. 每个要点必须具体、有洞察力，避免空泛表述
-2. 要点之间逻辑清晰，层次分明
-3. 语言简洁有力，适合PPT展示
-4. 直接输出要点，每行一个，不要序号、不要任何前缀符号`
+## 核心要求（必须全部满足）
 
-  // 如果有参考素材，融入生成（V9.1新增）
+### 1. 内容深度要求（重点！）
+每个要点必须是**200-300字的完整段落**，包含以下要素：
+- **核心观点**：一句话点明主题
+- **详细说明**：展开论述为什么、怎么做、有什么价值
+- **数据/案例支撑**：用具体数字、案例、故事来佐证（虚构但合理）
+- **可操作性**：让听众知道如何落地执行
+
+### 2. 内容质量要求
+- 避免空洞口号，每个观点都要有具体支撑
+- 加入真实场景感，让听众能代入
+- 数据要具体（如"提升30%"而不是"大幅提升"）
+- 案例要生动（如"某互联网公司"而不是"某公司"）
+
+### 3. 格式要求（严格遵守！）
+- 每个要点格式：【核心观点】详细说明...
+- 要点之间用"---SEPARATOR---"分隔
+- 不要序号、不要列表符号、不要bullet points
+- 保持段落式叙述，像写文章一样流畅
+
+### 4. 风格适配
+- 汇报场景：正式严谨，数据为王
+- 培训场景：通俗易懂，多用比喻
+- 科普场景：趣味性强，联系生活
+- 方案场景：逻辑清晰，优势突出`
+
+  // 如果有参考素材，融入生成
   if (refContent) {
-    // 限制参考素材长度，避免token超限
     const truncatedRef = refContent.length > 1500 ? refContent.substring(0, 1500) + '...' : refContent
     prompt += `
 
+### 5. 参考素材融合
 **参考素材：**
 ${truncatedRef}
 
-请基于参考素材提炼核心要点，用自己的语言表达，但保持内容的准确性。参考素材中的关键数据和案例可以适当引用。`
+请基于参考素材提炼核心观点，用自己的语言表达，但保持内容的准确性。参考素材中的关键数据、案例、术语必须适当引用或改写。`
   }
 
   prompt += `
 
-示例格式（仅供参考风格，实际内容要贴合主题）：
-通过数据驱动决策，提升运营效率30%以上
-建立用户画像体系，实现精准营销触达
-优化用户体验流程，降低流失率至5%以下
+## 输出示例（仅供参考结构，实际内容要贴合主题）
 
-请生成${count}个具体要点：`
+示例1（培训场景）：
+【建立成长型思维模式】成长型思维认为能力可以通过努力和学习不断提升，而非固定不变。与固定型思维相比，拥有成长型思维的学员在学习新技能时更愿意接受挑战，从失败中吸取教训。研究表明，具备成长型思维的员工绩效提升速度比同龄人快25%。建议在培训中多设置"还没掌握"的场景，帮助学员建立"暂时未达成"的信心。
+
+---SEPARATOR---
+
+【刻意练习提升专业度】刻意练习不是简单的重复，而是有目的、有反馈、不断改进的练习方式。优秀的培训师会为每个技能点设计"学习-练习-反馈-改进"的闭环。以销售技能为例，不是让学员背话术，而是让学员模拟客户拒绝场景，每次通话后立即复盘改进。数据显示，采用刻意练习的团队，3个月后成交率提升40%。
+
+示例2（汇报场景）：
+【用户增长实现量质齐升】通过"拉新-激活-留存-转化"四轮驱动策略，本季度新增付费用户3280人，同比增长45%；用户月活率从62%提升至78%；付费转化率从8.5%提升至12.3%。核心动作包括：优化新用户引导流程（7日留存提升15%）、上线会员积分体系（提升复购频率）、精准推送个性化内容（打开率提升60%）。
+
+---SEPARATOR---
+
+【成本优化释放利润空间】通过供应链整合和流程自动化，实现单位成本下降12%。具体措施包括：与3家核心供应商签订年度框架协议（采购成本降低8%）、上线智能客服系统（人工成本降低35%）、优化仓储布局（物流成本降低18%）。预计全年可节省成本约280万元。
+
+## 请生成${count}个高质量要点：`
 
   try {
     const response = await fetch(ARK_CHAT_API, {
@@ -616,21 +669,30 @@ ${truncatedRef}
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
-        max_tokens: 800
+        max_tokens: 3000  // 增加到3000，支持长内容输出
       })
     })
     
     const result = await response.json()
     
     if (result.choices?.[0]?.message?.content) {
-      const lines = result.choices[0].message.content
-        .split('\n')
-        .map(l => l.trim())
-        .filter(l => l.length > 0 && !l.match(/^[0-9\.\-\*\d]+/))
+      const content = result.choices[0].message.content
+      // 按分隔符分割，提取完整段落
+      const sections = content.split('---SEPARATOR---')
+        .map(s => s.trim())
+        .filter(s => s.length > 50) // 过滤掉太短的内容
+        .map(s => {
+          // 清理格式，只保留【】内的核心观点+内容
+          const match = s.match(/【(.+?)】(.+)/s)
+          if (match) {
+            return `${match[1]}：${match[2]}`
+          }
+          return s
+        })
         .slice(0, count)
       
-      console.log(`[内容生成] 成功生成${lines.length}个要点${refContent ? '（含参考素材）' : ''}`)
-      return lines
+      console.log(`[内容生成] 成功生成${sections.length}个深度要点`)
+      return sections.length > 0 ? sections : null
     }
     
     console.log('[内容生成] API返回格式异常')
@@ -730,30 +792,158 @@ async function updateProgress(taskId, updates) {
 // ============ PPTX生成 ============
 
 /**
- * 布局设计生成器
+ * 布局设计生成器（V9.2 差异化设计版）
+ * @param {object} slide - PPTX slide对象
+ * @param {object} page - 页面配置
+ * @param {object} palette - 配色方案
+ * @param {number} pageIndex - 页码
+ * @param {string} title - 标题
+ * @param {string} subtitle - 副标题
+ * @param {string} styleKey - 风格标识（用于差异化设计）
  */
-function generateLayoutDesign(slide, page, palette, pageIndex, title, subtitle) {
+function generateLayoutDesign(slide, page, palette, pageIndex, title, subtitle, styleKey = 'business') {
   const { type, section, points = [], layout = 'left_title' } = page
   
   // 文本阴影效果
   const textShadow = { type: 'outer', blur: 6, offset: 2, angle: 45, color: '000000', opacity: 0.35 }
   
+  // ========== 风格差异化配置 ==========
+  const styleConfigs = {
+    // 党政红金 - 庄重对称
+    party_red: {
+      fontFamily: 'Microsoft YaHei',
+      titleSize: 52,
+      decorType: 'gold_line',  // 金色线条装饰
+      accentShape: 'rect',
+      contentPadding: 20,
+      showDecors: true
+    },
+    // 科技蓝 - 现代简洁
+    tech_blue: {
+      fontFamily: 'Microsoft YaHei',
+      titleSize: 48,
+      decorType: 'glow',  // 光晕效果
+      accentShape: 'ellipse',
+      contentPadding: 18,
+      showDecors: true
+    },
+    // 商务蓝白 - 专业稳重
+    business: {
+      fontFamily: 'Microsoft YaHei',
+      titleSize: 50,
+      decorType: 'line',  // 简洁线条
+      accentShape: 'rect',
+      contentPadding: 20,
+      showDecors: false
+    },
+    // 温暖米色 - 亲切柔和
+    warm: {
+      fontFamily: 'Microsoft YaHei',
+      titleSize: 46,
+      decorType: 'circle',  // 圆形装饰
+      accentShape: 'ellipse',
+      contentPadding: 22,
+      showDecors: true
+    },
+    // 清新绿色 - 自然清新
+    nature: {
+      fontFamily: 'Microsoft YaHei',
+      titleSize: 48,
+      decorType: 'leaf',  // 叶子元素暗示
+      accentShape: 'ellipse',
+      contentPadding: 18,
+      showDecors: true
+    },
+    // 简约黑白 - 高端极简
+    minimal: {
+      fontFamily: 'Arial',
+      titleSize: 54,
+      decorType: 'none',  // 无装饰
+      accentShape: 'rect',
+      contentPadding: 15,
+      showDecors: false
+    },
+    // 插画童趣 - 活泼可爱
+    illustration: {
+      fontFamily: 'Microsoft YaHei',
+      titleSize: 44,
+      decorType: 'dots',  // 圆点装饰
+      accentShape: 'ellipse',
+      contentPadding: 24,
+      showDecors: true
+    },
+    // 古典文化 - 典雅古朴
+    classical: {
+      fontFamily: 'KaiTi',
+      titleSize: 50,
+      decorType: 'seal',  // 印章暗示
+      accentShape: 'rect',
+      contentPadding: 20,
+      showDecors: true
+    }
+  }
+  
+  // 获取当前风格配置
+  const styleConfig = styleConfigs[styleKey] || styleConfigs.business
+  
+  // ========== 风格差异化封面布局 ==========
   if (type === 'cover') {
-    // ========== 封面布局 - 居中大标题 ==========
+    // ========== 封面布局 - 根据风格差异化设计 ==========
     
-    // 顶部装饰线
-    slide.addShape('rect', {
-      x: 4.5, y: 2.0, w: 4.33, h: 0.02,
-      fill: { color: palette.secondary }
-    })
+    // 根据风格调整装饰
+    if (styleConfig.decorType === 'gold_line' || styleConfig.decorType === 'line') {
+      // 党政/商务风格 - 双线条装饰
+      slide.addShape('rect', {
+        x: 3.5, y: 1.8, w: 6.33, h: 0.03,
+        fill: { color: palette.secondary }
+      })
+      slide.addShape('rect', {
+        x: 3.5, y: 2.0, w: 6.33, h: 0.01,
+        fill: { color: palette.primary }
+      })
+    } else if (styleConfig.decorType === 'glow') {
+      // 科技风格 - 光晕圆点
+      slide.addShape('ellipse', {
+        x: 6.16, y: 1.5, w: 1, h: 1,
+        fill: { color: palette.secondary, transparency: 70 }
+      })
+      slide.addShape('rect', {
+        x: 3.5, y: 2.5, w: 6.33, h: 0.02,
+        fill: { color: palette.secondary }
+      })
+    } else if (styleConfig.decorType === 'dots') {
+      // 插画风格 - 多个小圆点
+      [4.5, 6.16, 7.83].forEach(x => {
+        slide.addShape('ellipse', {
+          x: x - 0.15, y: 1.8, w: 0.3, h: 0.3,
+          fill: { color: palette.secondary, transparency: 50 }
+        })
+      })
+    } else if (styleConfig.decorType === 'seal') {
+      // 古典风格 - 印章式装饰
+      slide.addShape('rect', {
+        x: 5.66, y: 1.6, w: 2, h: 0.04,
+        fill: { color: palette.secondary }
+      })
+      slide.addShape('rect', {
+        x: 5.66, y: 2.4, w: 2, h: 0.04,
+        fill: { color: palette.secondary }
+      })
+    } else {
+      // 默认风格 - 居中线条
+      slide.addShape('rect', {
+        x: 4.5, y: 2.0, w: 4.33, h: 0.02,
+        fill: { color: palette.secondary }
+      })
+    }
     
-    // 主标题
+    // 主标题 - 使用风格配置的字号和字体
     slide.addText(title, {
       x: 0.5, y: 2.2, w: 12.33, h: 2,
       align: 'center', valign: 'middle',
-      fontSize: 54, bold: true,
+      fontSize: styleConfig.titleSize, bold: true,
       color: palette.text,
-      fontFace: 'Microsoft YaHei',
+      fontFace: styleConfig.fontFamily,
       shadow: textShadow
     })
     
@@ -764,16 +954,32 @@ function generateLayoutDesign(slide, page, palette, pageIndex, title, subtitle) 
         align: 'center', valign: 'middle',
         fontSize: 20,
         color: palette.secondary,
-        fontFace: 'Microsoft YaHei',
+        fontFace: styleConfig.fontFamily,
         transparency: 20
       })
     }
     
-    // 底部装饰线
-    slide.addShape('rect', {
-      x: 4.5, y: 5.2, w: 4.33, h: 0.02,
-      fill: { color: palette.secondary }
-    })
+    // 底部装饰 - 风格差异化
+    if (styleConfig.decorType === 'gold_line' || styleConfig.decorType === 'line') {
+      slide.addShape('rect', {
+        x: 3.5, y: 5.0, w: 6.33, h: 0.01,
+        fill: { color: palette.primary }
+      })
+      slide.addShape('rect', {
+        x: 3.5, y: 5.18, w: 6.33, h: 0.03,
+        fill: { color: palette.secondary }
+      })
+    } else if (styleConfig.decorType === 'glow') {
+      slide.addShape('ellipse', {
+        x: 6.16, y: 5.0, w: 1, h: 1,
+        fill: { color: palette.secondary, transparency: 70 }
+      })
+    } else {
+      slide.addShape('rect', {
+        x: 4.5, y: 5.2, w: 4.33, h: 0.02,
+        fill: { color: palette.secondary }
+      })
+    }
     
     // 品牌标识
     slide.addText(`${BRAND_CN} · ${BRAND_EN}`, {
@@ -781,7 +987,7 @@ function generateLayoutDesign(slide, page, palette, pageIndex, title, subtitle) 
       align: 'center', valign: 'middle',
       fontSize: 12,
       color: palette.text,
-      fontFace: 'Microsoft YaHei',
+      fontFace: styleConfig.fontFamily,
       transparency: 50
     })
     
@@ -875,31 +1081,66 @@ function generateLayoutDesign(slide, page, palette, pageIndex, title, subtitle) 
     })
     
   } else {
-    // ========== 内容页布局 ==========
+    // ========== 内容页布局 - 风格差异化设计 ==========
     
     const startY = 1.4
     const usableHeight = 5.5
     
-    // 左侧装饰条
-    slide.addShape('rect', {
-      x: 0, y: 0, w: 0.06, h: 7.5,
-      fill: { color: palette.primary }
-    })
+    // 左侧装饰条 - 根据风格变化
+    if (styleConfig.accentShape === 'ellipse') {
+      // 科技/温暖风格 - 渐变装饰
+      slide.addShape('rect', {
+        x: 0, y: 0, w: 0.08, h: 7.5,
+        fill: { color: palette.primary }
+      })
+      slide.addShape('ellipse', {
+        x: -0.3, y: 2.5, w: 1, h: 2.5,
+        fill: { color: palette.secondary, transparency: 70 }
+      })
+    } else {
+      // 商务/党政风格 - 简洁直线
+      slide.addShape('rect', {
+        x: 0, y: 0, w: 0.06, h: 7.5,
+        fill: { color: palette.primary }
+      })
+    }
     
-    // 标题
+    // 标题 - 使用风格配置的字体
+    const titleSize = styleConfig.decorType === 'minimal' ? 28 : 26
     slide.addText(section, {
       x: 0.5, y: 0.3, w: 12.33, h: 0.8,
       align: 'left', valign: 'middle',
-      fontSize: 26, bold: true,
+      fontSize: titleSize, bold: true,
       color: palette.text,
-      fontFace: 'Microsoft YaHei'
+      fontFace: styleConfig.fontFamily
     })
     
-    // 标题下装饰线
-    slide.addShape('rect', {
-      x: 0.5, y: 1.05, w: 1.5, h: 0.02,
-      fill: { color: palette.secondary }
-    })
+    // 标题下装饰 - 根据风格变化
+    if (styleConfig.decorType === 'dots') {
+      // 插画风格 - 多个小圆点
+      [0.5, 1.2, 1.9].forEach(x => {
+        slide.addShape('ellipse', {
+          x: x, y: 1.1, w: 0.2, h: 0.2,
+          fill: { color: palette.secondary, transparency: 40 }
+        })
+      })
+    } else if (styleConfig.decorType === 'glow') {
+      // 科技风格 - 光晕
+      slide.addShape('ellipse', {
+        x: 0.3, y: 0.8, w: 1.5, h: 0.8,
+        fill: { color: palette.secondary, transparency: 80 }
+      })
+      slide.addShape('rect', {
+        x: 0.5, y: 1.15, w: 2, h: 0.02,
+        fill: { color: palette.secondary }
+      })
+    } else {
+      // 默认 - 简洁线条
+      slide.addShape('rect', {
+        x: 0.5, y: 1.05, w: styleConfig.decorType === 'gold_line' ? 2 : 1.5, h: 0.02,
+        fill: { color: palette.secondary }
+      })
+    }
     
     // 根据布局类型绘制内容
     if (layout === 'center' || layout === 'big_points') {
@@ -909,29 +1150,51 @@ function generateLayoutDesign(slide, page, palette, pageIndex, title, subtitle) 
       points.forEach((point, idx) => {
         const y = startY + idx * itemHeight
         
-        // 要点背景
-        slide.addShape('rect', {
-          x: 0.5, y: y + 0.1, w: 12.33, h: itemHeight - 0.3,
-          fill: { color: palette.primary, transparency: 85 },
-          line: { width: 0 }
-        })
+        // 要点背景 - 风格差异化
+        if (styleConfig.decorType === 'dots') {
+          // 插画风格 - 圆角卡片
+          slide.addShape('roundRect', {
+            x: 0.5, y: y + 0.1, w: 12.33, h: itemHeight - 0.3,
+            fill: { color: palette.primary, transparency: 85 },
+            rectRadius: 0.1
+          })
+        } else {
+          slide.addShape('rect', {
+            x: 0.5, y: y + 0.1, w: 12.33, h: itemHeight - 0.3,
+            fill: { color: palette.primary, transparency: 85 },
+            line: { width: 0 }
+          })
+        }
         
-        // 序号
+        // 序号 - 根据风格变化
+        if (styleConfig.accentShape === 'ellipse') {
+          slide.addShape('ellipse', {
+            x: 0.65, y: y + 0.25, w: 0.7, h: 0.7,
+            fill: { color: palette.secondary }
+          })
+        } else {
+          slide.addShape('rect', {
+            x: 0.7, y: y + 0.3, w: 0.6, h: 0.6,
+            fill: { color: palette.secondary }
+          })
+        }
+        
         slide.addText(`${idx + 1}`, {
           x: 0.7, y: y + 0.3, w: 0.6, h: 0.6,
           align: 'center', valign: 'middle',
-          fontSize: 24, bold: true,
-          color: palette.secondary,
+          fontSize: 22, bold: true,
+          color: palette.text === '#FFFFFF' ? '#1A1A1A' : palette.text,
           fontFace: 'Arial'
         })
         
-        // 内容
+        // 内容 - 根据风格调整字号
+        const contentFontSize = styleConfig.decorType === 'minimal' ? 16 : 15
         slide.addText(point, {
-          x: 1.5, y: y + 0.2, w: 11, h: itemHeight - 0.5,
+          x: 1.5, y: y + 0.15, w: 11, h: itemHeight - 0.4,
           align: 'left', valign: 'middle',
-          fontSize: 18,
+          fontSize: contentFontSize,
           color: palette.text,
-          fontFace: 'Microsoft YaHei'
+          fontFace: styleConfig.fontFamily
         })
       })
       
@@ -1103,10 +1366,10 @@ function generateLayoutDesign(slide, page, palette, pageIndex, title, subtitle) 
 }
 
 /**
- * 生成PPTX文件
+ * 生成PPTX文件（V9.2 支持风格差异化）
  */
-async function generatePPTX(pages, images, title, subtitle, styleConfig) {
-  console.log('[PPTX] 开始生成...')
+async function generatePPTX(pages, images, title, subtitle, styleConfig, styleKey = 'business') {
+  console.log('[PPTX] 开始生成...', { styleKey })
   
   let PptxGenJS, pptx
   try {
@@ -1154,13 +1417,13 @@ async function generatePPTX(pages, images, title, subtitle, styleConfig) {
         slide.background = { color: styleConfig?.palette?.primary?.replace('#', '') || '1E3A5F' }
       }
       
-      // 绘制布局
+      // 绘制布局 - 传递styleKey实现差异化
       generateLayoutDesign(slide, page, styleConfig?.palette || {
         primary: '1E3A5F',
         secondary: '4A90D9',
         text: 'FFFFFF',
         light: 'E8F4FC'
-      }, i, title, subtitle)
+      }, i, title, subtitle, styleKey)
     }
     
     const pptxData = await pptx.write({ outputType: 'base64' })
@@ -1590,7 +1853,7 @@ export default async function (ctx) {
       // AI生成内容要点（传入参考素材）
       const contentPages = pages.filter(p => p.type === 'content')
       for (const page of contentPages) {
-        const aiPoints = await generateContentWithArk(topic, page.section, pointsPerSection, scene, styleConfig, mergedRefContent)
+        const aiPoints = await generateContentWithArk(topic, page.section, pointsPerSection, scene, styleConfig, mergedRefContent, audience)
         if (aiPoints && aiPoints.length > 0) {
           page.points = aiPoints
         } else {
@@ -1710,7 +1973,7 @@ export default async function (ctx) {
       message: '正在生成PPTX文件...'
     })
     
-    const pptxResult = await generatePPTX(pages, images, pptTitle, subtitle, styleConfig)
+    const pptxResult = await generatePPTX(pages, images, pptTitle, subtitle, styleConfig, styleKey)
     
     // ========== 完成 ==========
     const finalProgress = await updateProgress(taskId, {
