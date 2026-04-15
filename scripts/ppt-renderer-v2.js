@@ -20,13 +20,46 @@ const DesignSystem = {
     paragraphGap: 0.2,    // 段落间距
   },
   
-  // 字体系统
+  // 字体系统（安全字体 + 降级策略）
+  fonts: {
+    // 安全字体列表（Windows/Mac都有）
+    chinese: {
+      primary: 'Microsoft YaHei',    // 微软雅黑
+      fallback: 'SimHei',            // 黑体降级
+      system: 'sans-serif'          // 系统默认
+    },
+    english: {
+      primary: 'Arial',
+      fallback: 'Helvetica',
+      system: 'sans-serif'
+    }
+  },
   typography: {
-    hero: { size: 60, font: '微软雅黑', bold: true },      // 大标题
-    title: { size: 36, font: '微软雅黑', bold: true },     // 标题
-    subtitle: { size: 24, font: '微软雅黑', bold: false }, // 副标题
-    body: { size: 16, font: '微软雅黑', bold: false },     // 正文
-    caption: { size: 12, font: '微软雅黑', bold: false },  // 注释
+    hero: { 
+      size: 60, 
+      font: 'Microsoft YaHei, SimHei, sans-serif',  // 降级链
+      bold: true 
+    },
+    title: { 
+      size: 36, 
+      font: 'Microsoft YaHei, SimHei, sans-serif',
+      bold: true 
+    },
+    subtitle: { 
+      size: 24, 
+      font: 'Microsoft YaHei, SimHei, sans-serif',
+      bold: false 
+    },
+    body: { 
+      size: 16, 
+      font: 'Microsoft YaHei, SimHei, sans-serif',
+      bold: false 
+    },
+    caption: { 
+      size: 12, 
+      font: 'Microsoft YaHei, SimHei, sans-serif',
+      bold: false 
+    },
   },
   
   // 阴影预设
