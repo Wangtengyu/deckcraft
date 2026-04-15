@@ -417,6 +417,8 @@
         
         function selectHomePlatform(platform, btn) {
             currentPlatform = platform
+            // 实时保存到localStorage
+            localStorage.setItem('pptPlatform', platform)
             document.querySelectorAll('.platform-btn').forEach(b => {
                 b.classList.remove('active')
                 b.classList.add('text-gray-400')
@@ -437,11 +439,18 @@
         // 快速生成（无模板）
         function generatePPT() {
             const topic = document.getElementById('topicInput').value.trim()
-            if (topic) {
-                localStorage.setItem('pptTopic', topic)
-                localStorage.setItem('pptPlatform', currentPlatform)
-                localStorage.removeItem('pptTemplateId') // 无模板模式
+            if (!topic) {
+                // 没有输入主题，显示提示
+                const input = document.getElementById('topicInput')
+                input.focus()
+                input.classList.add('border-red-400')
+                setTimeout(() => input.classList.remove('border-red-400'), 2000)
+                return
             }
+            
+            localStorage.setItem('pptTopic', topic)
+            localStorage.setItem('pptPlatform', currentPlatform)
+            localStorage.removeItem('pptTemplateId') // 无模板模式
             location.href = 'create.html'
         }
         

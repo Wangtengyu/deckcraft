@@ -333,30 +333,22 @@
                 </div>
             </div>
 
-            <!-- 内容来源 -->
+            <!-- 内容来源（简化说明） -->
             <div class="mb-8">
                 <label class="block text-sm font-medium mb-3">
-                    内容来源
+                    内容来源 <span class="text-gray-500 text-xs ml-2">可选：上传文档或链接作为参考</span>
                 </label>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <button onclick="selectContentSource('material')" class="option-card rounded-xl p-4 cursor-pointer" data-source="material">
-                        <div class="flex items-center">
-                            <i class="fas fa-file-alt text-xl text-accent mr-3"></i>
-                            <div class="text-left">
-                                <div class="font-medium text-sm">我有详细素材</div>
-                                <div class="text-xs text-gray-500 mt-1">严格基于素材，不随意发挥</div>
-                            </div>
+                <div class="bg-surface/50 border border-border/50 rounded-xl p-4">
+                    <div class="flex items-start gap-3">
+                        <i class="fas fa-lightbulb text-accent mt-0.5"></i>
+                        <div class="text-sm text-gray-400">
+                            <p class="mb-2">AI会根据您的主题智能生成内容。如有以下素材，可上传参考：</p>
+                            <ul class="text-xs space-y-1 text-gray-500">
+                                <li>• <span class="text-gray-400">文档/链接</span>：AI将提取关键信息融入PPT</li>
+                                <li>• <span class="text-gray-400">参考图片</span>：可嵌入或作为风格参考</li>
+                            </ul>
                         </div>
-                    </button>
-                    <button onclick="selectContentSource('topic')" class="option-card selected rounded-xl p-4 cursor-pointer" data-source="topic">
-                        <div class="flex items-center">
-                            <i class="fas fa-magic text-xl text-purple-400 mr-3"></i>
-                            <div class="text-left">
-                                <div class="font-medium text-sm">只有主题，帮我发挥</div>
-                                <div class="text-xs text-gray-500 mt-1">AI自主设计内容结构</div>
-                            </div>
-                        </div>
-                    </button>
+                    </div>
                 </div>
             </div>
 
