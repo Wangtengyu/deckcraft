@@ -13,7 +13,7 @@ const PROGRESS_API_URL = 'https://ig8u65l6vm.sealosbja.site/progress';
 const UPLOAD_API_URL = 'https://ig8u65l6vm.sealosbja.site/upload';
 const PARSE_DOC_API_URL = 'https://ig8u65l6vm.sealosbja.site/parse-document';
 const PARSE_URL_API_URL = 'https://ig8u65l6vm.sealosbja.site/parse-url';
-const SPEECH_SCRIPT_API_URL = 'https://ig8u65l6vm.sealosbja.site/generate-speech-script';
+const SPEECH_SCRIPT_API_URL = 'https://ig8u65l6vm.sealosbja.site/generate-speech-scrip';
 
 // 细分风格配置（与后端 generate-v6.ts 保持一致）
 const SUB_STYLE_CONFIG = {
