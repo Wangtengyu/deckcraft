@@ -66,6 +66,17 @@
         .platform-btn.active {
             background: linear-gradient(135deg, #00d4ff 0%, #ff6b9d 100%);
             color: white;
+            border-color: transparent;
+        }
+        .platform-btn.active .text-blue-400,
+        .platform-btn.active .text-red-400,
+        .platform-btn.active .text-green-400,
+        .platform-btn.active .text-purple-400,
+        .platform-btn.active .text-amber-400 {
+            color: white !important;
+        }
+        .platform-btn:hover:not(.active) {
+            border-color: rgba(0, 212, 255, 0.4);
         }
         
         .feature-card {
@@ -140,6 +151,31 @@
                         立即生成
                     </button>
                 </div>
+            </div>
+            
+            <!-- 平台选择标签 -->
+            <div class="flex flex-wrap justify-center gap-2 mb-8">
+                <span class="text-sm text-gray-500 mr-2 self-center">生成到：</span>
+                <button onclick="selectHomePlatform('ppt', this)" class="platform-btn active px-4 py-2 rounded-lg border border-border text-sm transition flex items-center gap-2">
+                    <i class="fas fa-desktop text-blue-400"></i>
+                    <span>PPT</span>
+                </button>
+                <button onclick="selectHomePlatform('xiaohongshu', this)" class="platform-btn px-4 py-2 rounded-lg border border-border text-sm text-gray-400 transition flex items-center gap-2">
+                    <i class="fab fa-instagram text-red-400"></i>
+                    <span>小红书</span>
+                </button>
+                <button onclick="selectHomePlatform('wechat', this)" class="platform-btn px-4 py-2 rounded-lg border border-border text-sm text-gray-400 transition flex items-center gap-2">
+                    <i class="fab fa-weixin text-green-400"></i>
+                    <span>微信</span>
+                </button>
+                <button onclick="selectHomePlatform('mobile', this)" class="platform-btn px-4 py-2 rounded-lg border border-border text-sm text-gray-400 transition flex items-center gap-2">
+                    <i class="fas fa-mobile-alt text-purple-400"></i>
+                    <span>手机</span>
+                </button>
+                <button onclick="selectHomePlatform('poster', this)" class="platform-btn px-4 py-2 rounded-lg border border-border text-sm text-gray-400 transition flex items-center gap-2">
+                    <i class="fas fa-image text-amber-400"></i>
+                    <span>海报</span>
+                </button>
             </div>
             
             <!-- 特色标签 -->
@@ -379,10 +415,14 @@
         let totalPages = 8
         let currentImages = []
         
-        function selectPlatform(btn, platform) {
-            document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'))
-            btn.classList.add('active')
+        function selectHomePlatform(platform, btn) {
             currentPlatform = platform
+            document.querySelectorAll('.platform-btn').forEach(b => {
+                b.classList.remove('active')
+                b.classList.add('text-gray-400')
+            })
+            btn.classList.add('active')
+            btn.classList.remove('text-gray-400')
         }
         
         function filterCategory(btn, category) {

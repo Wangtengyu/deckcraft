@@ -198,6 +198,9 @@
 
         <!-- 步骤1：基本信息 -->
         <div id="step1" class="card rounded-2xl p-6 md:p-8">
+            <!-- 用户流程提示 -->
+            <div id="flowTip" class="hidden"></div>
+            
             <div class="mb-8">
                 <h2 class="text-2xl font-bold mb-2">基本信息</h2>
                 <p class="text-gray-400 text-sm">告诉我们要生成什么样的内容</p>
@@ -237,6 +240,35 @@
                         </div>
                     </button>
                 </div>
+            </div>
+
+            <!-- 模板复刻模式 - 模板选择器 -->
+            <div id="templateUpload" class="mb-8 hidden">
+                <label class="block text-sm font-medium mb-3">
+                    选择模板 <span class="text-purple-400 text-xs">(模板复刻模式)</span>
+                </label>
+                
+                <!-- 模板卡片列表 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div onclick="selectTemplateCard('tpl_guobao_001')" 
+                         class="option-card rounded-xl overflow-hidden cursor-pointer" data-template-id="tpl_guobao_001">
+                        <div class="aspect-video relative bg-gradient-to-br from-red-900/30 to-yellow-900/30">
+                            <img src="templates-assets/images/tpl_guobao_001/image1.png" alt="国宝文化展示" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                            <div class="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+                                <span class="text-white text-xs font-medium px-2 py-1 bg-red-500/80 rounded">党政红金</span>
+                                <span class="text-white/70 text-xs">10页</span>
+                            </div>
+                        </div>
+                        <div class="p-3">
+                            <div class="font-medium text-sm">国宝文化展示</div>
+                            <div class="text-xs text-gray-500 mt-1">党政汇报、文化展示</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 已选模板信息 -->
+                <div id="selectedTemplateInfo" class="hidden"></div>
             </div>
 
             <!-- 目标平台 -->

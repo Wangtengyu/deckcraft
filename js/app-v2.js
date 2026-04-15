@@ -70,6 +70,7 @@ const REF_IMAGE_MODES = {
 let state = {
   currentStep: 1,
   createMode: 'create',
+  templateId: null,  // 当前选中的模板ID
   platform: 'ppt',
   contentSource: 'topic',
   contentDensity: 'medium',
@@ -108,7 +109,233 @@ document.addEventListener('DOMContentLoaded', function() {
   initRefImageUploader();
   initDocumentUploader();
   initUrlParser();
+  
+  // ============ 从首页传递的数据 ============
+  const savedTopic = localStorage.getItem('pptTopic');
+  const savedTemplateId = localStorage.getItem('pptTemplateId');
+  const savedPlatform = localStorage.getItem('pptPlatform');
+
+  if (savedTopic) {
+    const topicInput = document.getElementById('topic');
+    if (topicInput) {
+      topicInput.value = savedTopic;
+      state.userContent = savedTopic;
+    }
+    localStorage.removeItem('pptTopic');
+  }
+
+  if (savedTemplateId) {
+    state.createMode = 'template';
+    state.templateId = savedTemplateId;
+    // 切换到模板复刻模式
+    selectMode('template');
+    // 显示选中的模板信息
+    setTimeout(() => {
+      showSelectedTemplate(savedTemplateId);
+    }, 100);
+    localStorage.removeItem('pptTemplateId');
+  }
+
+  if (savedPlatform) {
+    selectPlatform(savedPlatform);
+    localStorage.removeItem('pptPlatform');
+  }
+  
+  // 显示用户流程提示
+  showUserFlowTip();
 });
+
+// ============ 用户流程提示 ============
+function showUserFlowTip() {
+  const tipContainer = document.getElementById('flowTip');
+  if (!tipContainer) return;
+  
+  const hasTopic = document.getElementById('topic')?.value;
+  const isTemplateMode = state.createMode === 'template' && state.templateId;
+  
+  if (hasTopic || isTemplateMode) {
+    let tipText = '';
+    if (hasTopic && isTemplateMode) {
+      tipText = '✅ 已从首页带入主题和模板';
+    } else if (hasTopic) {
+      tipText = '✅ 已从首页带入主题';
+    } else if (isTemplateMode) {
+      tipText = '✅ 已从首页带入模板';
+    }
+    
+    tipContainer.innerHTML = `
+      <div class="p-3 bg-green-500/10 border border-green-500/30 rounded-xl mb-4">
+        <div class="flex items-center text-green-400 text-sm">
+          <i class="fas fa-check-circle mr-2"></i>
+          <span>${tipText}</span>
+        </div>
+      </div>
+    `;
+    tipContainer.classList.remove('hidden');
+  } else {
+    tipContainer.innerHTML = `
+      <div class="p-3 bg-accent/10 border border-accent/20 rounded-xl mb-4">
+        <div class="flex items-center text-gray-400 text-sm">
+          <i class="fas fa-info-circle mr-2 text-accent"></i>
+          <span>请填写基本信息，或从首页选择模板</span>
+        </div>
+      </div>
+    `;
+    tipContainer.classList.remove('hidden');
+  }
+}
+
+// ============ 模板信息配置 ============
+const TEMPLATE_INFO = {
+  'tpl_guobao_001': {
+    name: '国宝文化展示',
+    thumb: 'templates-assets/images/tpl_guobao_001/thumbs/image1.jpg',
+    cover: 'templates-assets/images/tpl_guobao_001/image1.png',
+    pages: 10,
+    style: '党政红金',
+    category: 'party'
+  }
+};
+
+// ============ 显示选中的模板 ============
+function showSelectedTemplate(templateId) {
+  const template = TEMPLATE_INFO[templateId];
+  if (!template) return;
+  
+  // 更新状态
+  state.templateId = templateId;
+  
+  // 在模板复刻模式下显示选中的模板
+  const templateInfo = document.getElementById('selectedTemplateInfo');
+  if (templateInfo) {
+    templateInfo.innerHTML = `
+      <div class="p-4 bg-accent/10 border border-accent/30 rounded-xl">
+        <div class="flex items-center gap-4">
+          <img src="${template.thumb}" class="w-20 h-14 object-cover rounded-lg border border-border" alt="${template.name}"
+               onerror="this.src='${template.cover}'">
+          <div>
+            <div class="font-medium text-sm">${template.name}</div>
+            <div class="text-xs text-gray-400 mt-1">${template.style} · ${template.pages}页</div>
+          </div>
+          <button onclick="changeTemplate()" class="ml-auto text-accent text-sm hover:text-accent/80 flex items-center">
+            <i class="fas fa-exchange-alt mr-1"></i>更换模板
+          </button>
+        </div>
+      </div>
+    `;
+    templateInfo.classList.remove('hidden');
+  }
+  
+  // 更新模板卡片选中状态
+  updateTemplateCardSelection(templateId);
+}
+
+// ============ 更换模板 ============
+function changeTemplate() {
+  // 显示模板选择弹窗
+  showTemplateSelector();
+}
+
+// ============ 模板选择弹窗 ============
+function showTemplateSelector() {
+  const modal = document.getElementById('templateSelectorModal');
+  if (!modal) {
+    // 动态创建弹窗
+    createTemplateSelectorModal();
+  } else {
+    modal.classList.remove('hidden');
+  }
+  updateTemplateSelectorCards();
+}
+
+function createTemplateSelectorModal() {
+  const modal = document.createElement('div');
+  modal.id = 'templateSelectorModal';
+  modal.className = 'hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+  modal.innerHTML = `
+    <div class="bg-surface rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden border border-border">
+      <div class="p-4 border-b border-border flex items-center justify-between">
+        <h3 class="font-bold">选择模板</h3>
+        <button onclick="closeTemplateSelector()" class="text-gray-400 hover:text-white">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      <div id="templateSelectorContent" class="p-4 overflow-y-auto max-h-[60vh]">
+        <!-- 模板卡片列表 -->
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  updateTemplateSelectorCards();
+}
+
+function updateTemplateSelectorCards() {
+  const container = document.getElementById('templateSelectorContent');
+  if (!container) return;
+  
+  let html = '<div class="grid grid-cols-2 gap-4">';
+  
+  for (const [id, template] of Object.entries(TEMPLATE_INFO)) {
+    const isSelected = state.templateId === id;
+    html += `
+      <div onclick="selectTemplateFromList('${id}')" 
+           class="cursor-pointer rounded-xl border-2 overflow-hidden transition-all ${isSelected ? 'border-accent ring-2 ring-accent/30' : 'border-border hover:border-accent/50'}">
+        <div class="aspect-video relative bg-gradient-to-br from-gray-800 to-gray-900">
+          <img src="${template.cover}" alt="${template.name}" class="w-full h-full object-cover"
+               onerror="this.parentElement.innerHTML='<div class=\\'flex items-center justify-center h-full\\'><i class=\\'fas fa-image text-3xl text-gray-600\\'></i></div>'">
+          ${isSelected ? '<div class="absolute top-2 right-2"><span class="bg-accent text-black text-xs px-2 py-1 rounded-full font-medium">已选择</span></div>' : ''}
+        </div>
+        <div class="p-3">
+          <div class="font-medium text-sm">${template.name}</div>
+          <div class="text-xs text-gray-500 mt-1">${template.style} · ${template.pages}页</div>
+        </div>
+      </div>
+    `;
+  }
+  
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function selectTemplateFromList(templateId) {
+  state.templateId = templateId;
+  state.createMode = 'template';
+  selectMode('template');
+  showSelectedTemplate(templateId);
+  closeTemplateSelector();
+}
+
+function closeTemplateSelector() {
+  const modal = document.getElementById('templateSelectorModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function updateTemplateCardSelection(templateId) {
+  // 更新create.html中模板选择卡片的选中状态
+  const cards = document.querySelectorAll('[data-template-id]');
+  cards.forEach(card => {
+    if (card.dataset.templateId === templateId) {
+      card.classList.add('selected');
+    } else {
+      card.classList.remove('selected');
+    }
+  });
+}
+
+// ============ 选择模板卡片（从模板选择器） ============
+function selectTemplateCard(templateId) {
+  state.templateId = templateId;
+  state.createMode = 'template';
+  // 更新卡片选中状态
+  updateTemplateCardSelection(templateId);
+  // 显示选中的模板信息
+  showSelectedTemplate(templateId);
+  // 滚动到选中的模板信息区域
+  const templateInfo = document.getElementById('selectedTemplateInfo');
+  if (templateInfo) {
+    templateInfo.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
 
 // ============ 文档解析 ============
 function initDocumentUploader() {
@@ -572,6 +799,18 @@ function selectMode(mode) {
   if (templateUpload) {
     if (mode === 'template') {
       templateUpload.classList.remove('hidden');
+      // 如果还没有选择模板，自动选中第一个
+      if (!state.templateId) {
+        const firstTemplate = Object.keys(TEMPLATE_INFO)[0];
+        if (firstTemplate) {
+          setTimeout(() => {
+            selectTemplateCard(firstTemplate);
+          }, 50);
+        }
+      } else {
+        // 显示已选模板
+        showSelectedTemplate(state.templateId);
+      }
     } else {
       templateUpload.classList.add('hidden');
     }
