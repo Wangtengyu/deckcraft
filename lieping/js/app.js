@@ -846,6 +846,28 @@ function generateShareCard() {
     document.getElementById('share-progress-bar').textContent = plan.progress + '%';
     document.getElementById('share-progress-fill').style.width = plan.progress + '%';
     
+    // 消费警醒 - 随机选择一个对比案例
+    const randomComparison = SAVING_COMPARISONS[Math.floor(Math.random() * SAVING_COMPARISONS.length)];
+    document.getElementById('share-comparison').innerHTML = `
+        <div class="mb-2 font-bold text-red-300">${randomComparison.title}</div>
+        <div class="flex justify-center gap-4 text-xs">
+            <div class="text-red-400">
+                <div>${randomComparison.option1.action}</div>
+                <div class="font-bold">¥${randomComparison.option1.result.toLocaleString()}</div>
+            </div>
+            <div class="text-slate-500">vs</div>
+            <div class="text-green-400">
+                <div>${randomComparison.option2.action}</div>
+                <div class="font-bold">¥${randomComparison.option2.result.toLocaleString()}</div>
+            </div>
+        </div>
+        <div class="mt-2 text-yellow-300">${randomComparison.message}</div>
+    `;
+    
+    // 核心理念金句 - 随机选择
+    const randomQuote = CORE_MESSAGES[Math.floor(Math.random() * CORE_MESSAGES.length)];
+    document.getElementById('share-quote').textContent = randomQuote;
+    
     showPage('share');
 }
 

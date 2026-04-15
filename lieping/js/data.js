@@ -1023,3 +1023,150 @@ const SAVINGS_MILESTONES = [
         nextGoal: '恭喜！你已经财务自由'
     }
 ];
+
+
+// ============================================
+// 消费vs储蓄冲击对比 - 用于分享图和结果展示
+// ============================================
+const SAVING_COMPARISONS = [
+    {
+        title: '买车 vs 储蓄',
+        scenario: '30万存款',
+        option1: {
+            action: '买辆代步车',
+            result: 150000,
+            reason: '车辆贬值+油费+保险+保养'
+        },
+        option2: {
+            action: '坚持储蓄投资',
+            result: 401500,
+            reason: '年化6%复利增长'
+        },
+        difference: 251500,
+        message: '一辆车，让你少存25万'
+    },
+    {
+        title: '外卖 vs 带饭',
+        scenario: '每天午餐',
+        option1: {
+            action: '点外卖50元/天',
+            result: 91250,
+            reason: '5年共花费'
+        },
+        option2: {
+            action: '自己带饭15元/天',
+            result: 27375,
+            reason: '5年共花费'
+        },
+        difference: 63875,
+        message: '懒惰让你5年多花6万'
+    },
+    {
+        title: '奶茶 vs 白水',
+        scenario: '每天一杯',
+        option1: {
+            action: '奶茶25元/杯',
+            result: 45625,
+            reason: '5年共花费'
+        },
+        option2: {
+            action: '喝水/自制饮品',
+            result: 0,
+            reason: '0成本'
+        },
+        difference: 45625,
+        message: '一杯奶茶的快乐，5年花掉4.5万'
+    },
+    {
+        title: '打车 vs 地铁',
+        scenario: '每天通勤',
+        option1: {
+            action: '打车30元/天',
+            result: 54750,
+            reason: '5年共花费'
+        },
+        option2: {
+            action: '地铁5元/天',
+            result: 9125,
+            reason: '5年共花费'
+        },
+        difference: 45625,
+        message: '5年多花4.5万，只为少走几步路'
+    },
+    {
+        title: '换手机 vs 继续用',
+        scenario: '手机还能用',
+        option1: {
+            action: '换新手机8000元',
+            result: 8000,
+            reason: '一次性支出'
+        },
+        option2: {
+            action: '继续用旧手机',
+            result: 10700,
+            reason: '8000元投资5年(年化6%)'
+        },
+        difference: 2700,
+        message: '一部手机，让你少赚2700元'
+    },
+    {
+        title: '健身房 vs 居家锻炼',
+        scenario: '健身习惯',
+        option1: {
+            action: '健身房年卡3000元',
+            result: 15000,
+            reason: '5年花费（平均每年去10次）'
+        },
+        option2: {
+            action: '跑步/居家锻炼',
+            result: 0,
+            reason: '免费运动'
+        },
+        difference: 15000,
+        message: '办的不是卡，是为冲动买单'
+    },
+    {
+        title: '网购冲动 vs 等待3天',
+        scenario: '看到就想买',
+        option1: {
+            action: '冲动下单500元/月',
+            result: 30000,
+            reason: '5年冲动消费'
+        },
+        option2: {
+            action: '等待3天再决定',
+            result: 6000,
+            reason: '5年仅买真正需要的'
+        },
+        difference: 24000,
+        message: '等待3天，让你少花2.4万'
+    },
+    {
+        title: '品牌溢价 vs 平价替代',
+        scenario: '日用品消费',
+        option1: {
+            action: '品牌货200元/月',
+            result: 12000,
+            reason: '5年品牌溢价'
+        },
+        option2: {
+            action: '平价替代50元/月',
+            result: 3000,
+            reason: '5年省钱'
+        },
+        difference: 9000,
+        message: '为logo多花9000元，值得吗？'
+    }
+];
+
+// 核心理念金句
+const CORE_MESSAGES = [
+    '不要为欲望买单，要为自由储蓄',
+    '不要为懒惰买单，要为未来投资',
+    '今天的克制，是明天的自由',
+    '消费的快乐是暂时的，储蓄的安全感是永恒的',
+    '你花的每一分钱，都是未来的选择权',
+    '复利不会背叛你，但消费会',
+    '延迟满足，是富人思维的核心',
+    '省钱不是抠门，是对自己负责'
+];
