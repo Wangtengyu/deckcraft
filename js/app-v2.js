@@ -1423,9 +1423,14 @@ function displayResult(result, card) {
   
   // 图片预览按钮
   html += `
-    <button onclick="previewImages()" class="w-full btn-secondary py-3 rounded-xl font-medium flex items-center justify-center">
+    <button onclick="previewImages()" class="w-full btn-secondary py-3 rounded-xl font-medium flex items-center justify-center mb-3">
       <i class="fas fa-images mr-2"></i>
       预览所有图片
+    </button>
+    
+    <button onclick="generateSpeechScript()" class="w-full btn-secondary py-3 rounded-xl font-medium flex items-center justify-center">
+      <i class="fas fa-microphone mr-2"></i>
+      生成口播稿
     </button>
   `;
   
@@ -1480,6 +1485,97 @@ function previewImages() {
   if (firstImg) {
     window.open(firstImg.url, '_blank');
   }
+}
+
+// 生成口播稿
+async function generateSpeechScript() {
+  if (!state.currentOutline || !state.currentOutline.pages) {
+    showToast('请先生成PPT', 'error');
+    return;
+  }
+  
+  showToast('正在生成口播稿...', 'info');
+  
+  try {
+    const response = await fetch(SPEECH_SCRIPT_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: state.topic || '演示文稿',
+        outline: state.currentOutline,
+        scene: state.scene || 'other',
+        audience: state.audience || 'adult'
+      })
+    });
+    
+    const result = await response.json();
+    
+    if (result.success && result.script) {
+      // 显示口播稿
+      showSpeechScriptModal(result.script, result.title);
+    } else {
+      throw new Error(result.message || '生成失败');
+    }
+  } catch (error) {
+    console.error('口播稿生成失败:', error);
+    showToast('口播稿生成失败: ' + error.message, 'error');
+  }
+}
+
+// 显示口播稿弹窗
+function showSpeechScriptModal(script, title) {
+  const modal = document.createElement('div');
+  modal.className = 'fixed inset-0 bg-black/80 flex items-center justify-center z-50';
+  modal.innerHTML = `
+    <div class="bg-card rounded-2xl p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-bold">${title} - 口播稿</h3>
+        <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-white">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      <div class="prose prose-invert max-w-none">
+        <pre class="whitespace-pre-wrap text-gray-300 leading-relaxed bg-surface p-4 rounded-xl">${script}</pre>
+      </div>
+      <div class="flex gap-3 mt-6">
+        <button onclick="copySpeechScript()" class="flex-1 btn-primary py-3 rounded-xl font-medium">
+          <i class="fas fa-copy mr-2"></i>复制全文
+        </button>
+        <button onclick="downloadSpeechScript('${title}')" class="flex-1 btn-secondary py-3 rounded-xl font-medium">
+          <i class="fas fa-download mr-2"></i>下载文档
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  
+  // 保存到window以便复制
+  window.currentSpeechScript = script;
+}
+
+// 复制口播稿
+function copySpeechScript() {
+  if (window.currentSpeechScript) {
+    navigator.clipboard.writeText(window.currentSpeechScript);
+    showToast('已复制到剪贴板', 'success');
+  }
+}
+
+// 下载口播稿
+function downloadSpeechScript(title) {
+  if (!window.currentSpeechScript) return;
+  
+  const blob = new Blob([window.currentSpeechScript], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${title}_口播稿.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  showToast('口播稿下载成功', 'success');
 }
 
 function closeResultModal() {

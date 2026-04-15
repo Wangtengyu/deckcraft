@@ -3,7 +3,7 @@
  * 基于PPT内容生成口播风格的Word文档
  */
 
-const cloud = require('@lafjs/cloud')
+import cloud from '@lafjs/cloud'
 
 // 火山方舟API配置
 const ARK_CHAT_API = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions'
@@ -196,44 +196,49 @@ async function generateWordDocument(title, content) {
 export default async function (ctx) {
   console.log(`=== ${BRAND_CN} 演讲稿生成开始 ===`)
   
-  const { pptContent, style = 'storytelling' } = ctx.body || {}
+  const body = ctx.body || {}
   
-  // 兼容处理：支持两种参数格式
-  const pptData = pptContent.title ? pptContent : { title: 'PPT', pages: [] }
-  const speechStyle = style || ctx.body?.speechStyle || 'storytelling'
-  const scene = ctx.body?.scene || 'other'
-  const audience = ctx.body?.audience || 'adult'
+  // 兼容多种参数格式
+  const pptData = body.pptContent || body.outline || { title: body.title || 'PPT', pages: [] }
+  const speechStyle = body.style || body.speechStyle || 'storytelling'
+  const scene = body.scene || 'other'
+  const audience = body.audience || 'adult'
+  const title = body.title || pptData.title || '演示文稿'
   
   if (!pptData.pages || pptData.pages.length === 0) {
     return {
       success: false,
-      error: 'PPT内容为空，请先生成PPT'
+      message: 'PPT内容为空，请先生成PPT'
     }
   }
   
   try {
     // 1. 生成演讲稿内容（传递更多上下文）
     console.log('[演讲稿] 正在生成内容...')
-    const result = await generateSpeechContent(pptData, speechStyle, { scene, audience })
+    const result = await generateSpeechContent({ title, ...pptData }, speechStyle, { scene, audience })
     
     if (!result.success) {
-      return result
+      return {
+        success: false,
+        message: result.error || '生成失败'
+      }
     }
     
     const speechContent = result.content
     console.log(`[演讲稿] 生成成功，共 ${speechContent.length} 字`)
     
     // 2. 生成Word文档
-    const wordHtml = await generateWordDocument(pptData.title, speechContent)
+    const wordHtml = await generateWordDocument(title, speechContent)
     
-    // 3. 返回结果
+    // 3. 返回结果（前端期望script字段）
     return {
       success: true,
-      title: `${pptData.title} - 演讲稿`,
+      script: speechContent,
+      title: title,
       content: speechContent,
       wordHtml: wordHtml,
       wordCount: speechContent.length,
-      style: style,
+      style: speechStyle,
       message: `演讲稿生成成功，共${speechContent.length}字`
     }
     
@@ -241,7 +246,7 @@ export default async function (ctx) {
     console.error('[演讲稿] 生成异常:', error)
     return {
       success: false,
-      error: error.message
+      message: error.message || '生成失败'
     }
   }
 }
