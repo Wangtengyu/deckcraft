@@ -917,3 +917,109 @@ const LEVELS = [
     { name: '钻石', min: 75, emoji: '💠' },
     { name: '王者', min: 100, emoji: '👑' }
 ];
+
+// ============================================
+// 存款里程碑科普 - 不同阶段的消费诱惑
+// ============================================
+const SAVINGS_MILESTONES = [
+    {
+        amount: 10000,
+        title: '1万',
+        emoji: '🌱',
+        temptation: '换个新手机',
+        temptationCost: 5000,
+        advice: '手机还能用2年，这5000元投资10年=9000元',
+        reward: '应急基金起步',
+        nextGoal: '3万 - 半年生活费'
+    },
+    {
+        amount: 30000,
+        title: '3万',
+        emoji: '🌿',
+        temptation: '买台游戏机/平板',
+        temptationCost: 4000,
+        advice: '娱乐可以等，复利不会等。4000元10年=7200元',
+        reward: '3个月应急基金完成',
+        nextGoal: '5万 - 投资本金门槛'
+    },
+    {
+        amount: 50000,
+        title: '5万',
+        emoji: '🌳',
+        temptation: '来趟说走就走的旅行',
+        temptationCost: 8000,
+        advice: '旅行回来还是穷，不如先让钱生钱',
+        reward: '可开启稳健投资',
+        nextGoal: '10万 - 第一个六位数'
+    },
+    {
+        amount: 100000,
+        title: '10万',
+        emoji: '⭐',
+        temptation: '换最新款手机+电脑',
+        temptationCost: 15000,
+        advice: '这是你的第一个10万！忍住消费，复利加速期来了',
+        reward: '复利收益开始显现',
+        nextGoal: '20万 - 资产配置起点'
+    },
+    {
+        amount: 200000,
+        title: '20万',
+        emoji: '🌟',
+        temptation: '买辆代步车',
+        temptationCost: 100000,
+        advice: '车是消费品，买了就贬值。20万投资年化6%=年赚1.2万',
+        reward: '可开始资产配置',
+        nextGoal: '30万 - 首付门槛'
+    },
+    {
+        amount: 300000,
+        title: '30万',
+        emoji: '💫',
+        temptation: '换辆好车/首付买房',
+        temptationCost: 150000,
+        advice: '房是刚需可以考虑，车能不换先别换',
+        reward: '部分城市购房首付达标',
+        nextGoal: '50万 - 安全感倍增'
+    },
+    {
+        amount: 500000,
+        title: '50万',
+        emoji: '🔥',
+        temptation: '改善住房/换豪车',
+        temptationCost: 200000,
+        advice: '50万投资年收益3万，相当于多一个月工资',
+        reward: '被动收入初具规模',
+        nextGoal: '100万 - 百万富翁'
+    },
+    {
+        amount: 1000000,
+        title: '100万',
+        emoji: '👑',
+        temptation: '换豪宅/环游世界',
+        temptationCost: 500000,
+        advice: '100万是复利的爆发点！年化6%=年赚6万',
+        reward: '实现基础版躺平',
+        nextGoal: '200万 - 舒适躺平'
+    },
+    {
+        amount: 2000000,
+        title: '200万',
+        emoji: '🏆',
+        temptation: '提前退休',
+        temptationCost: 'all',
+        advice: '200万年化6%=12万被动收入，舒适躺平达成！',
+        reward: '舒适躺平',
+        nextGoal: '500万 - 富足躺平'
+    },
+    {
+        amount: 5000000,
+        title: '500万',
+        emoji: '💎',
+        temptation: '随意消费',
+        temptationCost: 'any',
+        advice: '500万年化6%=30万被动收入，你可以选择躺平了',
+        reward: '富足躺平',
+        nextGoal: '恭喜！你已经财务自由'
+    }
+];

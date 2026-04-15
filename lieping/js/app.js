@@ -1117,6 +1117,12 @@ function initPyramidPage() {
     
     // 计算复利威力对比
     calculateCompoundComparison();
+    
+    // 计算用户存款预测
+    calculateUserProjection();
+    
+    // 初始化存款里程碑科普
+    initMilestones();
 }
 
 function showPyramidDetail(index) {
@@ -1155,6 +1161,121 @@ function calculateCompoundTotal(monthly, annualRate, years) {
     }
     
     return total;
+}
+
+// 计算用户存款预测
+function calculateUserProjection() {
+    const monthlySavings = calculateMonthlySavings();
+    const annualRate = appState.ui.returnRate;
+    const currentSavings = appState.user.currentSavings || 0;
+    
+    // 2年、5年、10年预测
+    const projections = {
+        '2年': calculateCompoundTotal(monthlySavings, annualRate, 2) + currentSavings,
+        '5年': calculateCompoundTotal(monthlySavings, annualRate, 5) + currentSavings,
+        '10年': calculateCompoundTotal(monthlySavings, annualRate, 10) + currentSavings
+    };
+    
+    // 更新UI
+    const container = document.getElementById('user-projection');
+    if (container) {
+        container.innerHTML = `
+            <div class="grid grid-cols-3 gap-4">
+                ${Object.entries(projections).map(([year, amount]) => `
+                    <div class="bg-gradient-to-br from-green-900/30 to-emerald-900/30 rounded-xl p-4 text-center">
+                        <div class="text-sm text-slate-400 mb-1">${year}后</div>
+                        <div class="text-2xl font-black text-green-400">¥${Math.round(amount).toLocaleString()}</div>
+                        <div class="text-xs text-slate-500 mt-1">
+                            本金 ${Math.round(currentSavings + monthlySavings * parseInt(year) * 12).toLocaleString()}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="text-center mt-4 text-sm text-slate-400">
+                💡 月存 ¥${monthlySavings.toLocaleString()} + 年化 ${(annualRate * 100).toFixed(1)}%
+            </div>
+        `;
+    }
+}
+
+// 初始化存款里程碑科普
+function initMilestones() {
+    const container = document.getElementById('milestones-container');
+    if (!container) return;
+    
+    const currentSavings = appState.user.currentSavings || 0;
+    
+    // 找到当前阶段和下一个目标
+    let currentMilestone = SAVINGS_MILESTONES[0];
+    let nextMilestone = SAVINGS_MILESTONES[1];
+    
+    for (let i = 0; i < SAVINGS_MILESTONES.length; i++) {
+        if (currentSavings < SAVINGS_MILESTONES[i].amount) {
+            currentMilestone = SAVINGS_MILESTONES[i - 1] || SAVINGS_MILESTONES[0];
+            nextMilestone = SAVINGS_MILESTONES[i];
+            break;
+        }
+    }
+    
+    // 渲染里程碑卡片
+    container.innerHTML = `
+        <!-- 当前阶段高亮 -->
+        <div class="mb-6 p-5 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/50 rounded-xl">
+            <div class="flex items-center gap-3 mb-3">
+                <span class="text-4xl">${currentMilestone.emoji}</span>
+                <div>
+                    <div class="font-bold text-lg">${currentMilestone.title} 存款阶段</div>
+                    <div class="text-sm text-yellow-400">${currentMilestone.reward}</div>
+                </div>
+            </div>
+            ${currentSavings >= currentMilestone.amount ? `
+                <div class="text-green-400 text-sm mb-3">✅ 已达成！</div>
+            ` : `
+                <div class="text-sm text-slate-400 mb-3">
+                    距离达成还需: ¥${(currentMilestone.amount - currentSavings).toLocaleString()}
+                </div>
+            `}
+            <div class="bg-red-500/10 rounded-lg p-3">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-xl">🚫</span>
+                    <span class="font-bold text-red-400">要忍住：${currentMilestone.temptation}</span>
+                </div>
+                <div class="text-sm text-slate-300">${currentMilestone.advice}</div>
+            </div>
+        </div>
+        
+        <!-- 下一个目标 -->
+        <div class="mb-6 p-4 bg-surface/50 rounded-xl">
+            <div class="text-sm text-slate-400 mb-2">下一个目标</div>
+            <div class="flex items-center gap-3">
+                <span class="text-3xl">${nextMilestone.emoji}</span>
+                <div>
+                    <div class="font-bold">${nextMilestone.title} - ${nextMilestone.reward}</div>
+                    <div class="text-xs text-slate-500">距离: ¥${(nextMilestone.amount - currentSavings).toLocaleString()}</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 所有里程碑 -->
+        <div class="space-y-3">
+            <div class="text-sm text-slate-400 mb-2">存款里程碑路线图</div>
+            ${SAVINGS_MILESTONES.map(m => {
+                const achieved = currentSavings >= m.amount;
+                return `
+                    <div class="flex items-center gap-3 p-3 rounded-lg ${achieved ? 'bg-green-500/10' : 'bg-surface/30'}">
+                        <span class="text-2xl ${achieved ? '' : 'opacity-50'}">${achieved ? '✅' : m.emoji}</span>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium ${achieved ? 'text-green-400' : ''}">${m.title}</span>
+                                <span class="text-sm ${achieved ? 'text-green-400' : 'text-slate-500'}">${achieved ? '已达成' : '¥' + m.amount.toLocaleString()}</span>
+                            </div>
+                            <div class="text-xs text-slate-400">要忍住: ${m.temptation}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
 }
 
 // ============================================
