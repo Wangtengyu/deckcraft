@@ -193,13 +193,12 @@
                     class="upload-zone rounded-xl p-12 text-center cursor-pointer"
                     onclick="document.getElementById('fileInput').click()"
                 >
-                    <input type="file" id="fileInput" accept=".pptx" class="hidden" onchange="handleFileSelect(event)">
+                    <input type="file" id="fileInput" accept=".pptx,.pdf" class="hidden" onchange="handleFileSelect(event)">
                     <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-accent/10 flex items-center justify-center">
                         <i class="fas fa-cloud-upload-alt text-3xl text-accent"></i>
                     </div>
                     <p class="text-lg font-medium mb-2">拖拽上传或点击选择</p>
-                    <p class="text-gray-500 text-sm">支持格式：.pptx（最大5MB）</p>
-                    <p class="text-gray-600 text-xs mt-2">PDF格式暂不支持，请先转换为PPTX</p>
+                    <p class="text-gray-500 text-sm">支持格式：.pptx、.pdf（最大5MB）</p>
                 </div>
             </div>
             
@@ -465,8 +464,9 @@
                     return
                 }
                 // 检查文件格式
-                if (!file.name.toLowerCase().endsWith('.pptx')) {
-                    showToast('目前仅支持PPTX格式，PDF暂不支持', 'error')
+                const fileName = file.name.toLowerCase()
+                if (!fileName.endsWith('.pptx') && !fileName.endsWith('.pdf')) {
+                    showToast('仅支持PPTX和PDF格式', 'error')
                     document.getElementById('fileInput').value = ''
                     return
                 }
@@ -514,7 +514,7 @@
                 </div>
                 <div class="text-center py-12">
                     <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-accent border-t-transparent mb-3"></div>
-                    <p class="text-gray-400">正在解析PPT模板...</p>
+                    <p class="text-gray-400">正在解析文件...</p>
                     <p class="text-gray-500 text-sm mt-1">提取图片、配色、布局信息</p>
                 </div>
             `
@@ -570,7 +570,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
                         <label class="block text-sm font-medium mb-2">模板名称 <span class="text-red-400">*</span></label>
-                        <input type="text" id="templateName" class="w-full rounded-xl px-4 py-3" value="${file.name.replace('.pptx', '')}" placeholder="例如：党政红金模板">
+                        <input type="text" id="templateName" class="w-full rounded-xl px-4 py-3" value="${file.name.replace(/\.(pptx|pdf)$/i, '')}" placeholder="例如：党政红金模板">
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">分类</label>
@@ -652,7 +652,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
                         <label class="block text-sm font-medium mb-2">模板名称 <span class="text-red-400">*</span></label>
-                        <input type="text" id="templateName" class="w-full rounded-xl px-4 py-3" value="${file.name.replace('.pptx', '')}" placeholder="例如：党政红金模板">
+                        <input type="text" id="templateName" class="w-full rounded-xl px-4 py-3" value="${file.name.replace(/\.(pptx|pdf)$/i, '')}" placeholder="例如：党政红金模板">
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2">分类</label>

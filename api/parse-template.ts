@@ -1,18 +1,12 @@
 /**
- * 模板解析API - Laf云函数（简化版）
- * 解析上传的PPTX文件，提取基本信息
+ * 模板解析API - Laf云函数
+ * 支持PPTX和PDF文件解析
+ * 
+ * 依赖安装：在Laf云函数的package.json中添加 "pdf-parse": "^1.1.1"
  */
 
 const cloud = require('@lafjs/cloud')
 
-/**
- * 解析PPT模板
- * POST /parse-template
- * 
- * Body:
- * - file: PPTX文件（base64）
- * - fileName: 文件名
- */
 export default async function (ctx: any) {
   const { file, fileName } = ctx.body
   
@@ -24,43 +18,39 @@ export default async function (ctx: any) {
   }
 
   try {
-    // 解析base64获取文件大小
+    // 解析base64获取文件buffer
     const base64Data = file.includes(',') ? file.split(',')[1] : file
     const buffer = Buffer.from(base64Data, 'base64')
     
-    // 简单检测文件格式（PPTX文件以PK开头）
-    const isPPTX = buffer.slice(0, 2).toString() === 'PK'
-    if (!isPPTX) {
+    // 检测文件格式
+    const fileHeader = buffer.slice(0, 4).toString()
+    let fileType = ''
+    
+    if (buffer.slice(0, 2).toString() === 'PK') {
+      fileType = 'PPTX'
+    } else if (fileHeader.startsWith('%PDF')) {
+      fileType = 'PDF'
+    } else {
       return {
         success: false,
-        message: '文件格式不正确，需要PPTX文件'
+        message: '不支持的文件格式，仅支持PPTX和PDF'
       }
     }
     
-    // 根据文件名检测风格
-    const styleType = detectStyle(fileName)
+    // 根据文件类型解析
+    let result
     
-    // 估算图片数量（基于文件大小粗略估算）
-    const estimatedImageCount = Math.floor(buffer.length / 50000) // 约每50KB一张图
-    
-    // 估算页数（基于XML标签数量）
-    const xmlContent = buffer.toString('utf8', 0, Math.min(buffer.length, 100000))
-    const pageCount = (xmlContent.match(/<p:sldId\b/g) || []).length || 8
-    
-    // 提取简单配色
-    const colors = extractSimpleColors(xmlContent, styleType)
-    
-    // 分析布局
-    const layouts = analyzeSimpleLayouts(pageCount)
+    if (fileType === 'PPTX') {
+      result = await parsePPTX(buffer, fileName)
+    } else if (fileType === 'PDF') {
+      result = await parsePDF(buffer, fileName)
+    }
     
     return {
       success: true,
       data: {
-        styleType,
-        imageCount: Math.min(estimatedImageCount, 30),
-        pageCount,
-        colors,
-        layouts,
+        ...result,
+        fileType,
         fileSize: buffer.length,
         fileName
       }
@@ -76,13 +66,103 @@ export default async function (ctx: any) {
 }
 
 /**
+ * 解析PPTX文件
+ */
+async function parsePPTX(buffer: Buffer, fileName: string) {
+  // 根据文件名检测风格
+  const styleType = detectStyle(fileName)
+  
+  // 估算图片数量（基于文件大小粗略估算）
+  const estimatedImageCount = Math.floor(buffer.length / 50000)
+  
+  // 估算页数（基于XML标签数量）
+  const xmlContent = buffer.toString('utf8', 0, Math.min(buffer.length, 100000))
+  const pageCount = (xmlContent.match(/<p:sldId\b/g) || []).length || 8
+  
+  // 提取简单配色
+  const colors = extractSimpleColors(xmlContent, styleType)
+  
+  // 分析布局
+  const layouts = analyzeSimpleLayouts(pageCount)
+  
+  return {
+    styleType,
+    imageCount: Math.min(estimatedImageCount, 30),
+    pageCount,
+    colors,
+    layouts
+  }
+}
+
+/**
+ * 解析PDF文件
+ */
+async function parsePDF(buffer: Buffer, fileName: string) {
+  let pdfData = null
+  let textContent = ''
+  let pageCount = 1
+  
+  try {
+    // 动态导入pdf-parse（需要在Laf中安装依赖）
+    const pdfParse = require('pdf-parse')
+    pdfData = await pdfParse(buffer)
+    
+    textContent = pdfData.text || ''
+    pageCount = pdfData.numpages || 1
+    
+    console.log('PDF解析成功:', {
+      pages: pageCount,
+      textLength: textContent.length
+    })
+  } catch (error) {
+    console.error('PDF解析库错误:', error.message)
+    // 如果pdf-parse未安装，使用基础估算
+    pageCount = estimatePDFPages(buffer)
+  }
+  
+  // 根据文件名和内容检测风格
+  const styleType = detectStyleFromContent(fileName, textContent)
+  
+  // PDF通常图片较少
+  const estimatedImageCount = Math.min(Math.floor(buffer.length / 100000), 10)
+  
+  // 基于文本内容提取关键词作为配色参考
+  const colors = extractColorsFromContent(textContent, styleType)
+  
+  // 分析布局
+  const layouts = analyzeSimpleLayouts(pageCount)
+  
+  // 提取文本摘要（前500字符）
+  const textSummary = textContent.substring(0, 500).replace(/\s+/g, ' ').trim()
+  
+  return {
+    styleType,
+    imageCount: estimatedImageCount,
+    pageCount,
+    colors,
+    layouts,
+    textSummary: textSummary || null
+  }
+}
+
+/**
+ * 基础估算PDF页数（当pdf-parse不可用时）
+ */
+function estimatePDFPages(buffer: Buffer): number {
+  const content = buffer.toString('utf8', 0, Math.min(buffer.length, 50000))
+  // 计算页面结束标记
+  const pageMatches = content.match(/\/Type\s*\/Page\b/gi)
+  return pageMatches ? Math.max(pageMatches.length, 1) : Math.ceil(buffer.length / 50000)
+}
+
+/**
  * 根据文件名检测风格
  */
 function detectStyle(fileName: string): string {
   const lower = (fileName || '').toLowerCase()
   
   if (lower.includes('党') || lower.includes('红') || lower.includes('政') || 
-      lower.includes('红色') || lower.includes('党建') || lower.includes('红色')) {
+      lower.includes('红色') || lower.includes('党建')) {
     return '党政红金'
   }
   
@@ -123,10 +203,41 @@ function detectStyle(fileName: string): string {
 }
 
 /**
- * 提取简单配色
+ * 根据文件名和内容检测风格
+ */
+function detectStyleFromContent(fileName: string, content: string): string {
+  // 先检查文件名
+  const nameStyle = detectStyle(fileName)
+  if (nameStyle !== '通用风格') {
+    return nameStyle
+  }
+  
+  // 再检查内容关键词
+  const text = (content || '').toLowerCase()
+  
+  if (text.includes('党建') || text.includes('党委') || text.includes('党组织')) {
+    return '党政红金'
+  }
+  
+  if (text.includes('技术') || text.includes('人工智能') || text.includes('数字化')) {
+    return '科技未来'
+  }
+  
+  if (text.includes('公司') || text.includes('业务') || text.includes('市场')) {
+    return '商务简约'
+  }
+  
+  if (text.includes('教学') || text.includes('学习') || text.includes('课程')) {
+    return '教育培训'
+  }
+  
+  return '通用风格'
+}
+
+/**
+ * 提取简单配色（PPTX用）
  */
 function extractSimpleColors(xmlContent: string, styleType: string): string[] {
-  // 基于风格类型的预设配色
   const styleColors: Record<string, string[]> = {
     '党政红金': ['#C41E3A', '#FFD700', '#DC143C', '#8B0000', '#FFF8DC', '#FFFFFF'],
     '科技未来': ['#00D4FF', '#0066FF', '#00CED1', '#1E90FF', '#E0FFFF', '#FFFFFF'],
@@ -143,6 +254,14 @@ function extractSimpleColors(xmlContent: string, styleType: string): string[] {
 }
 
 /**
+ * 根据内容提取配色（PDF用）
+ */
+function extractColorsFromContent(content: string, styleType: string): string[] {
+  // 复用PPTX的配色方案
+  return extractSimpleColors('', styleType)
+}
+
+/**
  * 分析简单布局
  */
 function analyzeSimpleLayouts(pageCount: number): string[] {
@@ -154,7 +273,6 @@ function analyzeSimpleLayouts(pageCount: number): string[] {
     } else if (i === pageCount - 1) {
       layouts.push('结尾')
     } else {
-      // 根据位置分配不同布局
       const layoutTypes = ['标题+内容', '图片+文字', '两栏布局', '纯内容', '图表']
       layouts.push(layoutTypes[i % layoutTypes.length])
     }
