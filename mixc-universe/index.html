@@ -122,6 +122,25 @@
             margin-bottom: 50px;
         }
 
+        .ai-agent-btn {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, rgba(191, 0, 255, 0.3), rgba(255, 0, 100, 0.3));
+            border: 1px solid rgba(191, 0, 255, 0.5);
+            border-radius: 50px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .ai-agent-btn:hover {
+            background: linear-gradient(135deg, rgba(191, 0, 255, 0.5), rgba(255, 0, 100, 0.5));
+            box-shadow: 0 0 30px rgba(191, 0, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
         .search-box {
             position: relative;
             width: 100%;
@@ -1583,6 +1602,7 @@
 
         <!-- 搜索和筛选 -->
         <div class="search-filter-bar">
+            <button class="ai-agent-btn" id="aiAgentBtn">🤖 互动智能体</button>
             <div class="search-box">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="11" cy="11" r="8"/>
@@ -2303,6 +2323,17 @@
                     addBotMessage('你好！我是Mixc，你的数字搭子 👋\n\n有什么我可以帮你的吗？关于PPT、小说、项目创意，都可以聊聊~');
                 }
             });
+
+            // 互动智能体按钮
+            const aiAgentBtn = document.getElementById('aiAgentBtn');
+            if (aiAgentBtn) {
+                aiAgentBtn.addEventListener('click', () => {
+                    container.classList.add('active');
+                    if (messages.children.length === 0) {
+                        addBotMessage('你好！我是Mixc，你的数字搭子 👋\n\n有什么我可以帮你的吗？关于PPT、小说、项目创意，都可以聊聊~');
+                    }
+                });
+            }
 
             // 关闭聊天窗口
             close.addEventListener('click', () => {
