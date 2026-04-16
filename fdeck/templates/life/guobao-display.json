@@ -1,0 +1,42 @@
+{
+  "id": "tpl_guobao_001",
+  "name": "国宝次第展示高端动画",
+  "original_name": "国宝次第展示高端动画效果",
+  "category": "life",
+  "tags": ["文化", "展示", "文物", "博物馆", "高端", "动画"],
+  "slide_count": 7,
+  "image_count": 10,
+  "colors": {
+    "primary": "#4472C4",
+    "secondary": "#5B9BD5",
+    "accent": "#FFC000",
+    "dark": "#44546A",
+    "light": "#E7E6E6",
+    "text": "#000000",
+    "background": "#FFFFFF"
+  },
+  "layouts": [
+    { "index": 0, "type": "cover", "title": "后母戊鼎" },
+    { "index": 1, "type": "content", "title": "后母戊鼎详情" },
+    { "index": 2, "type": "content", "title": "四羊方尊" },
+    { "index": 3, "type": "content", "title": "曾侯乙编钟" },
+    { "index": 4, "type": "content", "title": "越王勾践剑" },
+    { "index": 5, "type": "content", "title": "马踏飞燕" },
+    { "index": 6, "type": "guide", "title": "修改指南" }
+  ],
+  "style_features": {
+    "animation": true,
+    "high_quality_images": true,
+    "golden_accent": true,
+    "cultural_theme": true
+  },
+  "content_keywords": ["后母戊鼎", "四羊方尊", "曾侯乙编钟", "越王勾践剑", "马踏飞燕", "国家文物", "展示"],
+  "suitable_for": ["博物馆展示", "文化宣传", "文物介绍", "展览汇报", "历史文化教育"],
+  "preview_url": "guobao-display-preview.jpeg",
+  "file_url": "guobao-display.pptx",
+  "use_count": 0,
+  "author_id": "admin",
+  "status": "approved",
+  "created_at": "2026-04-14T18:05:00.000Z",
+  "updated_at": "2026-04-14T18:05:00.000Z"
+}

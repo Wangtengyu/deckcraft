@@ -1,0 +1,145 @@
+{
+  "id": "tpl_guobao_001",
+  "name": "国宝次第展示高端动画",
+  "category": "life",
+  "tags": ["文化", "展示", "文物", "博物馆", "高端", "动画"],
+  
+  "style": {
+    "colors": {
+      "primary": "#4472C4",
+      "secondary": "#5B9BD5", 
+      "accent": "#FFC000",
+      "dark": "#44546A",
+      "light": "#E7E6E6",
+      "text": "#000000",
+      "textLight": "#FFFFFF",
+      "background": "#FFFFFF"
+    },
+    "fonts": {
+      "title": { "name": "微软雅黑", "size": 44, "bold": true },
+      "subtitle": { "name": "微软雅黑", "size": 24, "bold": false },
+      "body": { "name": "微软雅黑", "size": 18, "bold": false },
+      "caption": { "name": "微软雅黑", "size": 14, "bold": false }
+    },
+    "slideSize": { "width": 10, "height": 5.625, "unit": "inches" }
+  },
+  
+  "slides": [
+    {
+      "index": 0,
+      "type": "cover",
+      "layout": "full_image_overlay",
+      "elements": [
+        {
+          "type": "image",
+          "source": "image1.png",
+          "position": { "x": 0, "y": 0, "w": "100%", "h": "100%" },
+          "sizing": "cover"
+        },
+        {
+          "type": "overlay",
+          "position": { "x": 0, "y": 0, "w": "100%", "h": "100%" },
+          "color": "rgba(0,0,0,0.3)"
+        },
+        {
+          "type": "text",
+          "content": "{title}",
+          "position": { "x": "10%", "y": "40%", "w": "80%", "h": "auto" },
+          "style": "title",
+          "color": "#FFFFFF",
+          "align": "center"
+        },
+        {
+          "type": "text", 
+          "content": "{subtitle}",
+          "position": { "x": "10%", "y": "55%", "w": "80%", "h": "auto" },
+          "style": "subtitle",
+          "color": "#FFFFFF",
+          "align": "center"
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "type": "content",
+      "layout": "left_image_right_text",
+      "elements": [
+        {
+          "type": "image",
+          "source": "image2.png",
+          "position": { "x": 0, "y": 0, "w": "50%", "h": "100%" },
+          "sizing": "cover"
+        },
+        {
+          "type": "text",
+          "content": "{item_title}",
+          "position": { "x": "55%", "y": "20%", "w": "40%", "h": "auto" },
+          "style": "title",
+          "color": "{colors.dark}"
+        },
+        {
+          "type": "text",
+          "content": "{item_description}",
+          "position": { "x": "55%", "y": "35%", "w": "40%", "h": "auto" },
+          "style": "body",
+          "color": "{colors.text}"
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "type": "content", 
+      "layout": "left_image_right_text",
+      "elements": [
+        {
+          "type": "image",
+          "source": "image3.png",
+          "position": { "x": 0, "y": 0, "w": "50%", "h": "100%" },
+          "sizing": "cover"
+        },
+        {
+          "type": "text",
+          "content": "{item_title}",
+          "position": { "x": "55%", "y": "20%", "w": "40%", "h": "auto" },
+          "style": "title",
+          "color": "{colors.dark}"
+        },
+        {
+          "type": "text",
+          "content": "{item_description}",
+          "position": { "x": "55%", "y": "35%", "w": "40%", "h": "auto" },
+          "style": "body",
+          "color": "{colors.text}"
+        }
+      ]
+    }
+  ],
+  
+  "images": {
+    "image1.png": "templates-assets/images/tpl_guobao_001/image1.png",
+    "image2.png": "templates-assets/images/tpl_guobao_001/image2.png",
+    "image3.png": "templates-assets/images/tpl_guobao_001/image3.png",
+    "image4.png": "templates-assets/images/tpl_guobao_001/image4.png",
+    "image5.png": "templates-assets/images/tpl_guobao_001/image5.png",
+    "image6.png": "templates-assets/images/tpl_guobao_001/image6.png",
+    "image7.png": "templates-assets/images/tpl_guobao_001/image7.png",
+    "image8.png": "templates-assets/images/tpl_guobao_001/image8.png",
+    "image9.png": "templates-assets/images/tpl_guobao_001/image9.png",
+    "image10.png": "templates-assets/images/tpl_guobao_001/image10.png"
+  },
+  
+  "placeholders": {
+    "title": "国家文物展示",
+    "subtitle": "中华文明的瑰宝",
+    "item_title": "文物名称",
+    "item_description": "文物详细描述信息..."
+  },
+  
+  "suitable_for": ["博物馆展示", "文化宣传", "文物介绍", "展览汇报"],
+  
+  "file_size": {
+    "original_pptx": "10MB",
+    "config_json": "3KB",
+    "images": "10MB"
+  }
+}
