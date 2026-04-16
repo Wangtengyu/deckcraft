@@ -396,6 +396,49 @@
             --glow-color-2: #ff8c00;
         }
 
+        /* ========== 特色标签 ========== */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 6px;
+            margin-bottom: 4px;
+        }
+
+        .tag-masterpiece {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.2));
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            color: #ffd700;
+        }
+
+        .tag-first {
+            background: linear-gradient(135deg, rgba(191, 0, 255, 0.2), rgba(138, 43, 226, 0.2));
+            border: 1px solid rgba(191, 0, 255, 0.5);
+            color: #bf00ff;
+        }
+
+        .tag-funding {
+            background: linear-gradient(135deg, rgba(255, 165, 0, 0.2), rgba(255, 140, 0, 0.2));
+            border: 1px solid rgba(255, 165, 0, 0.5);
+            color: #ffa500;
+        }
+
+        .tag-idea {
+            background: linear-gradient(135deg, rgba(0, 191, 255, 0.2), rgba(30, 144, 255, 0.2));
+            border: 1px solid rgba(0, 191, 255, 0.5);
+            color: #00bfff;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
         /* ========== 详情弹窗 ========== */
         .modal-overlay {
             position: fixed;
@@ -1827,6 +1870,7 @@
                 description: "上班族财务规划工具，帮你计算躺平所需的财务自由门槛",
                 status: "已完成",
                 statusClass: "status-completed",
+                tags: [], // 可选: "masterpiece"(倾力之作), "first"(始发站), "funding"(缺经费), "idea"(缺创意)
                 link: "/lieping/",
                 createTime: "2024-01-15"
             },
@@ -1837,6 +1881,7 @@
                 description: "检测文本是否由AI生成，识别AI幻觉与虚假信息",
                 status: "已完成",
                 statusClass: "status-completed",
+                tags: [],
                 link: "/ai-detector/",
                 createTime: "2024-02-20"
             },
@@ -1847,6 +1892,7 @@
                 description: "AI一键生成专业PPT，支持多种风格模板",
                 status: "暂停",
                 statusClass: "status-paused",
+                tags: [],
                 link: "/fdeck/",
                 createTime: "2024-03-10"
             },
@@ -1857,6 +1903,7 @@
                 description: "搭建Obsidian/Notion知识管理系统，构建第二大脑",
                 status: "计划中",
                 statusClass: "status-planned",
+                tags: [],
                 link: null,
                 createTime: "2024-04-01"
             },
@@ -1867,6 +1914,7 @@
                 description: "长文写作辅助工具，提升创作效率与质量",
                 status: "计划中",
                 statusClass: "status-planned",
+                tags: [],
                 link: null,
                 createTime: "2024-04-15"
             },
@@ -1877,6 +1925,7 @@
                 description: "科幻小说 - 关于永恒运动与人类命运的宏大叙事",
                 status: "进行中",
                 statusClass: "status-progress",
+                tags: [],
                 link: null,
                 createTime: "2026-04-16"
             },
@@ -1887,6 +1936,7 @@
                 description: "中医背景的人文小说 - 探索传统医学与现代人生的交织",
                 status: "进行中",
                 statusClass: "status-progress",
+                tags: [],
                 link: null,
                 createTime: "2026-04-16"
             },
@@ -1897,6 +1947,7 @@
                 description: "文字游戏 - 用简单的文字探讨生命的深层意义",
                 status: "进行中",
                 statusClass: "status-progress",
+                tags: [],
                 link: null,
                 createTime: "2026-04-16"
             },
@@ -1907,6 +1958,7 @@
                 description: "社交产品 - 社会不仅仅有痛点，还有痒点，发现生活中的小确幸",
                 status: "进行中",
                 statusClass: "status-progress",
+                tags: [],
                 link: null,
                 createTime: "2026-04-16"
             },
@@ -1917,10 +1969,19 @@
                 description: "生态故事 - 为AI灌入各种道经，我的AI要修仙",
                 status: "进行中",
                 statusClass: "status-progress",
+                tags: [],
                 link: null,
                 createTime: "2026-04-16"
             }
         ];
+
+        // 标签配置
+        const tagConfig = {
+            masterpiece: { icon: "⭐", text: "倾力之作", class: "tag-masterpiece" },
+            first: { icon: "🚀", text: "始发站", class: "tag-first" },
+            funding: { icon: "💰", text: "缺经费", class: "tag-funding" },
+            idea: { icon: "💡", text: "缺创意", class: "tag-idea" }
+        };
 
         // ========== 欢迎页面控制 ==========
         const welcomeScreen = document.getElementById('welcomeScreen');
@@ -2238,11 +2299,21 @@
                 emptyState.style.display = 'none';
 
                 // 渲染卡片
-                grid.innerHTML = filteredProducts.map((product, index) => `
+                grid.innerHTML = filteredProducts.map((product, index) => {
+                    // 生成标签HTML
+                    const tagsHtml = product.tags && product.tags.length > 0 
+                        ? `<div class="card-tags">${product.tags.map(tag => {
+                            const config = tagConfig[tag];
+                            return config ? `<span class="tag ${config.class}">${config.icon} ${config.text}</span>` : '';
+                        }).join('')}</div>` 
+                        : '';
+                    
+                    return `
                     <div class="product-card ${product.statusClass} fade-in" data-id="${product.id}" style="animation-delay: ${index * 0.1}s">
                         <span class="card-icon">${product.icon}</span>
                         <h3 class="card-title">${product.name}</h3>
                         <p class="card-desc">${product.description}</p>
+                        ${tagsHtml}
                         <div class="card-footer">
                             <span class="status-badge">
                                 <span class="status-dot"></span>
@@ -2257,7 +2328,7 @@
                             </div>
                         ` : ''}
                     </div>
-                `).join('');
+                `}).join('');
 
                 // 绑定卡片事件
                 this.bindCardEvents();
