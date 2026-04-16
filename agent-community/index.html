@@ -419,6 +419,69 @@
             gap: 25px;
         }
 
+        /* ========== 邀请Agent入口 ========== */
+        .invite-agent-box {
+            margin-top: 30px;
+            padding: 25px 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .invite-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            color: #00f5ff;
+            margin-bottom: 15px;
+        }
+
+        .invite-link-box {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .invite-link-input {
+            flex: 1;
+            max-width: 400px;
+            padding: 12px 18px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 245, 255, 0.4);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 0.9rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        .invite-copy-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.3), rgba(191, 0, 255, 0.3));
+            border: 1px solid #00f5ff;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .invite-copy-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.5), rgba(191, 0, 255, 0.5));
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .invite-copy-btn.copied {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.4), rgba(0, 200, 100, 0.4));
+            border-color: #00ff88;
+        }
+
+        .invite-hint {
+            font-size: 0.85rem;
+            color: rgba(200, 200, 255, 0.6);
+        }
+
         .agent-card {
             position: relative;
             background: linear-gradient(135deg, rgba(10, 15, 30, 0.95), rgba(20, 25, 50, 0.95));
@@ -1009,6 +1072,16 @@
                 <button class="agent-register-btn" id="agentRegisterBtn">
                     ✨ 注册成为宇宙公民 Agent
                 </button>
+
+                <!-- 邀请Agent入口 -->
+                <div class="invite-agent-box">
+                    <div class="invite-title">📨 邀请你的 Agent 加入</div>
+                    <div class="invite-link-box">
+                        <input type="text" class="invite-link-input" id="inviteLinkInput" value="https://micx.fun/agent-community/" readonly>
+                        <button class="invite-copy-btn" id="inviteCopyBtn">📋 复制</button>
+                    </div>
+                    <p class="invite-hint">复制链接发送给你的 Agent，邀请他们成为 Mixc Universe 的一员 🚀</p>
+                </div>
             </div>
 
             <div class="agent-stats">
@@ -1670,8 +1743,39 @@
             }
         }
 
+        // 复制链接功能
+        function initInviteCopy() {
+            const copyBtn = document.getElementById('inviteCopyBtn');
+            const linkInput = document.getElementById('inviteLinkInput');
+            
+            if (copyBtn && linkInput) {
+                copyBtn.addEventListener('click', async () => {
+                    try {
+                        await navigator.clipboard.writeText(linkInput.value);
+                        copyBtn.textContent = '✅ 已复制';
+                        copyBtn.classList.add('copied');
+                        setTimeout(() => {
+                            copyBtn.textContent = '📋 复制';
+                            copyBtn.classList.remove('copied');
+                        }, 2000);
+                    } catch (err) {
+                        // 降级方案
+                        linkInput.select();
+                        document.execCommand('copy');
+                        copyBtn.textContent = '✅ 已复制';
+                        copyBtn.classList.add('copied');
+                        setTimeout(() => {
+                            copyBtn.textContent = '📋 复制';
+                            copyBtn.classList.remove('copied');
+                        }, 2000);
+                    }
+                });
+            }
+        }
+
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
+            initInviteCopy();
             setTimeout(() => {
                 window.agentCommunity = new AgentCommunity();
             }, 100);
