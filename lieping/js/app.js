@@ -545,6 +545,9 @@ function updateCaringMessage() {
 function calculateResults() {
     const { income, expense, city, children } = appState.profile;
     
+    // 清除AI建议缓存，重新测算后需要生成新建议
+    clearAIAdviceCache();
+    
     // 计算月收入
     const monthlyIncome = (
         (income.self || 0) + (income.partner || 0) +
@@ -1127,6 +1130,9 @@ function saveMonthRecord() {
 // ============================================
 // 分享卡片
 // ============================================
+// 缓存AI建议，避免重复生成
+let cachedAIAdvice = null;
+
 async function generateShareCard() {
     const plan = appState.profile.plan;
     const city = appState.profile.city;
@@ -1148,8 +1154,16 @@ async function generateShareCard() {
     document.getElementById('share-progress-bar').textContent = plan.progress + '%';
     document.getElementById('share-progress-fill').style.width = plan.progress + '%';
     
-    // 生成AI建议
-    await generateAIAdvice(plan);
+    // 使用缓存建议或生成新建议
+    const adviceEl = document.getElementById('share-advice');
+    if (adviceEl) {
+        if (cachedAIAdvice) {
+            adviceEl.textContent = cachedAIAdvice;
+        } else {
+            adviceEl.textContent = '正在生成专属建议...';
+            await generateAIAdvice(plan);
+        }
+    }
     
     showPage('share');
 }
@@ -1158,6 +1172,12 @@ async function generateShareCard() {
 async function generateAIAdvice(plan) {
     const adviceEl = document.getElementById('share-advice');
     if (!adviceEl) return;
+    
+    // 如果已有缓存，直接使用
+    if (cachedAIAdvice) {
+        adviceEl.textContent = cachedAIAdvice;
+        return;
+    }
     
     const years = document.getElementById('years-to-goal').textContent;
     const monthlySavings = Math.round(plan.monthlySavings);
@@ -1187,14 +1207,22 @@ async function generateAIAdvice(plan) {
         
         const data = await response.json();
         if (data.choices && data.choices[0] && data.choices[0].message) {
-            adviceEl.textContent = data.choices[0].message.content.trim();
+            cachedAIAdvice = data.choices[0].message.content.trim();
+            adviceEl.textContent = cachedAIAdvice;
         } else {
             adviceEl.textContent = defaultAdvice;
+            cachedAIAdvice = defaultAdvice;
         }
     } catch (error) {
         console.error('AI建议生成失败:', error);
         adviceEl.textContent = defaultAdvice;
+        cachedAIAdvice = defaultAdvice;
     }
+}
+
+// 清除AI建议缓存（当用户重新测算时调用）
+function clearAIAdviceCache() {
+    cachedAIAdvice = null;
 }
 
 function updateShareCard() {
