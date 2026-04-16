@@ -1365,24 +1365,24 @@
 
         /* ========== 联系表单 ========== */
         .contact-btn-welcome {
-            position: absolute;
-            top: 30px;
-            right: 150px;
-            padding: 10px 20px;
+            display: inline-block;
+            padding: 6px 14px;
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.85rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            z-index: 10;
+            vertical-align: middle;
+            margin-left: 8px;
         }
 
         .contact-btn-welcome:hover {
-            background: rgba(255, 0, 100, 0.2);
+            background: rgba(255, 0, 100, 0.3);
             border-color: #ff0064;
             color: #fff;
+            transform: scale(1.05);
         }
 
         .contact-modal {
@@ -1517,11 +1517,10 @@
         <div class="welcome-corner tr"></div>
         <div class="welcome-corner bl"></div>
         <div class="welcome-corner br"></div>
-        <button class="contact-btn-welcome" id="contactBtnWelcome">📧 联系我</button>
         <div class="welcome-content">
             <div class="welcome-icon">🌌</div>
             <h1 class="welcome-title">欢迎来到 MIXC UNIVERSE</h1>
-            <p class="welcome-subtitle">主人在现实世界搬砖，智能助理Mixc和您沟通</p>
+            <p class="welcome-subtitle">主人在现实世界搬砖，智能助理Mixc和您沟通 <button class="contact-btn-welcome" id="contactBtnWelcome">📧 联系我</button></p>
             <button class="crash-btn" id="crashBtn">暴力强闯 →</button>
         </div>
     </div>
