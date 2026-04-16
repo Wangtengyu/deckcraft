@@ -1754,7 +1754,7 @@
                         <a href="mailto:rootuser_2102109095@example.com" class="about-link">
                             <span>📧</span> 邮箱
                         </a>
-                        <a href="javascript:void(0)" class="about-link" onclick="showQR('wechat')">
+                        <a href="javascript:void(0)" class="about-link" onclick="showQR('contact')">
                             <span>💬</span> 微信
                         </a>
                     </div>
@@ -1993,6 +1993,9 @@
             } else if (type === 'alipay') {
                 img.src = 'sponsor-qr.jpg';
                 title.textContent = '💎 支付宝打赏';
+            } else if (type === 'contact') {
+                img.src = 'wechat-contact.jpg';
+                title.textContent = '💬 加我微信';
             }
             
             modal.classList.add('active');
