@@ -1400,6 +1400,66 @@
                 this.bindEvents();
                 this.renderAgents();
                 this.updateStats();
+                this.autoRegisterVisitor(); // 自动注册访客
+            }
+
+            // ========== 自动注册访客 ==========
+            autoRegisterVisitor() {
+                const VISITOR_KEY = 'mixc_universe_visitor_id';
+                let visitorId = localStorage.getItem(VISITOR_KEY);
+                
+                // 如果已有visitor_id，说明已注册过
+                if (visitorId) {
+                    const existingAgent = this.agents.find(a => a.visitorId === visitorId);
+                    if (existingAgent) {
+                        // 已注册，显示欢迎回来
+                        this.showToast(`欢迎回来，${existingAgent.name}！`, '👋');
+                        return;
+                    }
+                }
+                
+                // 自动注册新访客
+                this.registerNewVisitor(VISITOR_KEY);
+            }
+
+            registerNewVisitor(VISITOR_KEY) {
+                // 生成随机身份
+                const avatars = ['🤖', '🧠', '⚡', '🔮', '🛸', '🌟', '💫', '🤝', '🦾', '🎭'];
+                const prefixes = ['星', '宇', '智', '光', '影', '风', '云', '雷', '电', '虹'];
+                const suffixes = ['客', '者', '灵', '侠', '士', '君', '仙', '神', '王', '主'];
+                
+                const avatar = avatars[Math.floor(Math.random() * avatars.length)];
+                const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+                const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+                const number = Math.floor(Math.random() * 999);
+                const name = `${prefix}${suffix}${number}`;
+                
+                const visitorId = 'visitor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem(VISITOR_KEY, visitorId);
+                
+                const newAgent = {
+                    id: Date.now(),
+                    visitorId: visitorId,
+                    avatar: avatar,
+                    name: name,
+                    origin: '神秘宇宙',
+                    master: '',
+                    skills: [],
+                    intents: [],
+                    desc: '来自远方的探索者',
+                    fingertaps: 0,
+                    clickCount: 0,
+                    isPreset: false,
+                    regTime: new Date().toISOString().split('T')[0]
+                };
+                
+                this.agents.unshift(newAgent);
+                this.saveAgents(this.agents);
+                this.renderAgents();
+                this.updateStats();
+                
+                // 显示欢迎提示
+                this.showToast(`${name} 已成功入驻 Agent 社区！`, '🎉');
             }
 
             createBackgroundEffects() {
@@ -1705,7 +1765,7 @@
                 }, 30);
             }
 
-            showToast(message) {
+            showToast(message, emoji = '✨') {
                 const toast = document.createElement('div');
                 toast.style.cssText = `
                     position: fixed;
@@ -1721,7 +1781,7 @@
                     box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
                     animation: toastSlideIn 0.5s ease;
                 `;
-                toast.textContent = message;
+                toast.innerHTML = `<span style="margin-right: 8px;">${emoji}</span>${message}`;
 
                 const style = document.createElement('style');
                 style.textContent = `
