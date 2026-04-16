@@ -134,11 +134,21 @@
             cursor: pointer;
             transition: all 0.3s ease;
             white-space: nowrap;
+            animation: breathe 3s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(191, 0, 255, 0.3), 0 0 40px rgba(255, 0, 100, 0.2);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(191, 0, 255, 0.5), 0 0 60px rgba(255, 0, 100, 0.4);
+            }
         }
 
         .ai-agent-btn:hover {
             background: linear-gradient(135deg, rgba(191, 0, 255, 0.5), rgba(255, 0, 100, 0.5));
-            box-shadow: 0 0 30px rgba(191, 0, 255, 0.4);
+            box-shadow: 0 0 30px rgba(191, 0, 255, 0.5), 0 0 60px rgba(255, 0, 100, 0.4);
             transform: translateY(-2px);
         }
 
@@ -1716,7 +1726,7 @@
 
         <!-- 搜索和筛选 -->
         <div class="search-filter-bar">
-            <button class="ai-agent-btn" id="aiAgentBtn">🤖 互动智能体</button>
+            <button class="ai-agent-btn" id="aiAgentBtn">🤖 智能体Mixc</button>
             <div class="search-box">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="11" cy="11" r="8"/>
