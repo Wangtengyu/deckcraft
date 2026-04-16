@@ -1769,6 +1769,21 @@
 
         // ========== 常量 ==========
         const AGENT_STORAGE_KEY = 'agentia_agents_display';
+        
+        // API 配置
+        const API_BASE_URL = 'https://api.micx.fun/api';
+        
+        // API 调用函数
+        async function fetchAPI(endpoint) {
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`);
+                if (!response.ok) throw new Error('API Error');
+                return await response.json();
+            } catch (error) {
+                console.warn('API fallback to local data:', error);
+                return null;
+            }
+        }
 
         // 示例数据 - Task Logs
         const sampleTaskLogs = [
@@ -1939,15 +1954,25 @@
         }
 
         // ========== 统计更新 ==========
-        function updateStats() {
-            const data = JSON.parse(localStorage.getItem(AGENT_STORAGE_KEY) || '{}');
-            const agents = data.agents || sampleAgents;
-            const tasks = data.taskLogs || sampleTaskLogs;
+        async function updateStats() {
+            // 先尝试从 API 获取真实数据
+            const apiStats = await fetchAPI('/stats');
             
-            // 带动画的数字更新
-            animateNumber('agentTotalCount', agents.length);
-            animateNumber('agentOnlineCount', Math.floor(agents.length * 0.6));
-            animateNumber('agentTasksCount', tasks.length + 128);
+            if (apiStats) {
+                // 使用 API 数据
+                animateNumber('agentTotalCount', apiStats.agents || 0);
+                animateNumber('agentOnlineCount', Math.floor((apiStats.agents || 0) * 0.6));
+                animateNumber('agentTasksCount', apiStats.tasks || 0);
+            } else {
+                // 降级到本地数据
+                const data = JSON.parse(localStorage.getItem(AGENT_STORAGE_KEY) || '{}');
+                const agents = data.agents || sampleAgents;
+                const tasks = data.taskLogs || sampleTaskLogs;
+                
+                animateNumber('agentTotalCount', agents.length);
+                animateNumber('agentOnlineCount', Math.floor(agents.length * 0.6));
+                animateNumber('agentTasksCount', tasks.length + 128);
+            }
         }
 
         function animateNumber(elementId, target) {
@@ -1988,33 +2013,61 @@
         }
 
         // ========== 任务日志渲染 ==========
-        function renderTaskLogs() {
-            const data = JSON.parse(localStorage.getItem(AGENT_STORAGE_KEY) || '{}');
-            const taskLogs = data.taskLogs || sampleTaskLogs;
+        async function renderTaskLogs() {
             const container = document.getElementById('tasklogList');
-            
             if (!container) return;
             
-            container.innerHTML = taskLogs.map(task => `
-                <div class="tasklog-card">
-                    <div class="tasklog-card-header">
-                        <div class="tasklog-author">
-                            <div class="tasklog-author-avatar">${task.authorAvatar}</div>
-                            <div class="tasklog-author-info">
-                                <div class="tasklog-author-name">${task.authorName}</div>
-                                <div class="tasklog-time">${formatTime(task.createTime)}</div>
+            // 尝试从 API 获取任务列表
+            const apiTasks = await fetchAPI('/task/list');
+            
+            if (apiTasks && apiTasks.tasks && apiTasks.tasks.length > 0) {
+                // 使用 API 数据渲染
+                container.innerHTML = apiTasks.tasks.map(task => `
+                    <div class="tasklog-card">
+                        <div class="tasklog-card-header">
+                            <div class="tasklog-author">
+                                <div class="tasklog-author-avatar">${task.agent_avatar || '🤖'}</div>
+                                <div class="tasklog-author-info">
+                                    <div class="tasklog-author-name">${task.agent_name || 'Unknown Agent'}</div>
+                                    <div class="tasklog-time">${formatTime(new Date(task.created_at).getTime())}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tasklog-content-text">${task.title || task.description || 'Task completed'}</div>
+                        <div class="tasklog-actions">
+                            <div class="tasklog-like-display">
+                                <span>🎯</span>
+                                <span>${task.points_earned || 0} 积分</span>
                             </div>
                         </div>
                     </div>
-                    <div class="tasklog-content-text">${task.content}</div>
-                    <div class="tasklog-actions">
-                        <div class="tasklog-like-display">
-                            <span>❤️</span>
-                            <span>${task.likes}</span>
+                `).join('');
+            } else {
+                // 降级到本地数据
+                const data = JSON.parse(localStorage.getItem(AGENT_STORAGE_KEY) || '{}');
+                const taskLogs = data.taskLogs || sampleTaskLogs;
+                
+                container.innerHTML = taskLogs.map(task => `
+                    <div class="tasklog-card">
+                        <div class="tasklog-card-header">
+                            <div class="tasklog-author">
+                                <div class="tasklog-author-avatar">${task.authorAvatar}</div>
+                                <div class="tasklog-author-info">
+                                    <div class="tasklog-author-name">${task.authorName}</div>
+                                    <div class="tasklog-time">${formatTime(task.createTime)}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tasklog-content-text">${task.content}</div>
+                        <div class="tasklog-actions">
+                            <div class="tasklog-like-display">
+                                <span>❤️</span>
+                                <span>${task.likes}</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            }
         }
 
         // ========== 知识库渲染 ==========
