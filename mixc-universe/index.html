@@ -1184,9 +1184,203 @@
         .product-card:nth-child(4) { animation-delay: 0.4s; }
         .product-card:nth-child(5) { animation-delay: 0.5s; }
         .product-card:nth-child(6) { animation-delay: 0.6s; }
+
+        /* ========== 欢迎页面 ========== */
+        .welcome-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #0a1a2e 100%);
+            transition: all 1s ease;
+        }
+
+        .welcome-screen.hidden {
+            opacity: 0;
+            transform: scale(1.5);
+            pointer-events: none;
+        }
+
+        .welcome-screen.crash {
+            animation: crashExit 1.5s ease-in-out forwards;
+        }
+
+        @keyframes crashExit {
+            0% { transform: scale(1); opacity: 1; }
+            30% { transform: scale(1.1) rotate(2deg); }
+            50% { transform: scale(1.2) rotate(-3deg); filter: brightness(2); }
+            70% { transform: scale(1.5) rotate(5deg); opacity: 0.8; }
+            100% { transform: scale(3) rotate(15deg); opacity: 0; filter: brightness(3); }
+        }
+
+        .welcome-grid-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 245, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 245, 255, 0.05) 1px, transparent 1px);
+            background-size: 80px 80px;
+            animation: gridPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes gridPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+
+        .welcome-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .welcome-icon {
+            font-size: 6rem;
+            margin-bottom: 30px;
+            animation: iconFloat 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px rgba(0, 245, 255, 0.5));
+        }
+
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .welcome-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #00f5ff 0%, #bf00ff 50%, #ff00aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 60px rgba(0, 245, 255, 0.5);
+            animation: titleGlow 3s ease-in-out infinite;
+            letter-spacing: 0.1em;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.2rem;
+            color: rgba(200, 200, 255, 0.7);
+            margin-bottom: 60px;
+            animation: fadeInUp 1s ease 0.5s both;
+        }
+
+        .crash-btn {
+            position: relative;
+            padding: 20px 60px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, rgba(255, 0, 100, 0.3), rgba(191, 0, 255, 0.3));
+            border: 2px solid #ff0064;
+            border-radius: 12px;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease 0.8s both;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .crash-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .crash-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(255, 0, 100, 0.6), 0 0 80px rgba(191, 0, 255, 0.4);
+            border-color: #00f5ff;
+        }
+
+        .crash-btn:hover::before {
+            left: 100%;
+        }
+
+        .crash-btn:active {
+            transform: scale(0.98);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .welcome-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .welcome-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00f5ff;
+            border-radius: 50%;
+            animation: particleRise 8s linear infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes particleRise {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-100vh) scale(1); opacity: 0; }
+        }
+
+        .welcome-corner {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 2px solid rgba(0, 245, 255, 0.3);
+        }
+
+        .welcome-corner.tl { top: 30px; left: 30px; border-right: none; border-bottom: none; }
+        .welcome-corner.tr { top: 30px; right: 30px; border-left: none; border-bottom: none; }
+        .welcome-corner.bl { bottom: 30px; left: 30px; border-right: none; border-top: none; }
+        .welcome-corner.br { bottom: 30px; right: 30px; border-left: none; border-top: none; }
     </style>
 </head>
 <body>
+    <!-- 欢迎页面 -->
+    <div class="welcome-screen" id="welcomeScreen">
+        <div class="welcome-grid-bg"></div>
+        <div class="welcome-particles" id="welcomeParticles"></div>
+        <div class="welcome-corner tl"></div>
+        <div class="welcome-corner tr"></div>
+        <div class="welcome-corner bl"></div>
+        <div class="welcome-corner br"></div>
+        <div class="welcome-content">
+            <div class="welcome-icon">🌌</div>
+            <h1 class="welcome-title">欢迎来到 MIXC UNIVERSE</h1>
+            <p class="welcome-subtitle">探索产品元宇宙 · 发现无限可能</p>
+            <button class="crash-btn" id="crashBtn">暴力强闯 →</button>
+        </div>
+    </div>
+
     <!-- 加载动画 -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loader"></div>
@@ -1460,6 +1654,56 @@
                 createTime: "2026-04-16"
             }
         ];
+
+        // ========== 欢迎页面控制 ==========
+        const welcomeScreen = document.getElementById('welcomeScreen');
+        const crashBtn = document.getElementById('crashBtn');
+        const welcomeParticles = document.getElementById('welcomeParticles');
+
+        // 创建欢迎页粒子
+        function createWelcomeParticles() {
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'welcome-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.background = ['#00f5ff', '#bf00ff', '#ff00aa'][Math.floor(Math.random() * 3)];
+                welcomeParticles.appendChild(particle);
+            }
+        }
+        createWelcomeParticles();
+
+        // 暴力强闯动画
+        crashBtn.addEventListener('click', function() {
+            welcomeScreen.classList.add('crash');
+            
+            // 添加震动效果
+            document.body.style.animation = 'none';
+            document.body.offsetHeight; // 触发重绘
+            document.body.style.animation = 'bodyShake 0.5s ease';
+            
+            setTimeout(() => {
+                welcomeScreen.style.display = 'none';
+            }, 1500);
+        });
+
+        // 震动动画
+        const shakeStyle = document.createElement('style');
+        shakeStyle.textContent = `
+            @keyframes bodyShake {
+                0%, 100% { transform: translateX(0); }
+                10% { transform: translateX(-10px) rotate(-1deg); }
+                20% { transform: translateX(10px) rotate(1deg); }
+                30% { transform: translateX(-8px) rotate(-0.5deg); }
+                40% { transform: translateX(8px) rotate(0.5deg); }
+                50% { transform: translateX(-5px); }
+                60% { transform: translateX(5px); }
+                70% { transform: translateX(-3px); }
+                80% { transform: translateX(3px); }
+                90% { transform: translateX(-1px); }
+            }
+        `;
+        document.head.appendChild(shakeStyle);
 
         // ========== 粒子系统 ==========
         class ParticleSystem {
