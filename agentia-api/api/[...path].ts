@@ -38,12 +38,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).end();
   }
 
-  const { pathname } = new URL(req.url || '/', `http://${req.headers.host}`);
-  const path = pathname.replace('/api', '') || pathname;
+  // 使用 catch-all route 的路径参数
+  const pathParts = (req.query.path as string[]) || [];
+  const path = '/' + pathParts.join('/');
 
   try {
     // 健康检查
-    if (path === '/health' || path === '/api/health') {
+    if (path === '/health' || path === '/') {
       return res.json({ status: 'ok', timestamp: new Date().toISOString() });
     }
 
