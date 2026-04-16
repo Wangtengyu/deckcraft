@@ -2005,44 +2005,37 @@
 
         /* ========== Agent 社区入口 ========== */
         .agent-community-section {
-            margin-top: 30px;
-            padding: 0;
-            display: flex;
-            justify-content: center;
+            position: relative;
+            z-index: 100;
+            background: linear-gradient(135deg, rgba(10, 15, 30, 0.95), rgba(20, 25, 50, 0.95));
+            border-bottom: 1px solid rgba(0, 255, 136, 0.3);
         }
 
         .agent-community-entrance {
             display: flex;
             align-items: center;
             gap: 15px;
-            padding: 18px 25px;
-            background: linear-gradient(135deg, rgba(10, 15, 30, 0.8), rgba(20, 25, 50, 0.8));
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            border-radius: 14px;
+            padding: 10px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
             text-decoration: none;
             transition: all 0.3s ease;
             cursor: pointer;
-            max-width: 500px;
-            width: 100%;
         }
 
         .agent-community-entrance:hover {
-            background: linear-gradient(135deg, rgba(20, 30, 60, 0.9), rgba(30, 40, 70, 0.9));
-            border-color: rgba(0, 255, 136, 0.6);
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.2);
+            background: rgba(0, 255, 136, 0.05);
         }
 
         .entrance-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
             background: linear-gradient(135deg, #00f5ff, #bf00ff);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            box-shadow: 0 0 15px rgba(0, 245, 255, 0.3);
+            font-size: 1.3rem;
             flex-shrink: 0;
         }
 
@@ -2052,44 +2045,45 @@
 
         .entrance-title {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 700;
             color: #fff;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
         }
 
         .entrance-subtitle {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: rgba(200, 200, 255, 0.7);
         }
 
         .entrance-count {
             text-align: center;
-            padding: 8px 15px;
+            padding: 6px 12px;
             background: rgba(0, 255, 136, 0.1);
-            border-radius: 10px;
+            border-radius: 8px;
         }
 
         .count-number {
             display: block;
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: 800;
             color: #00ff88;
         }
 
         .count-label {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: rgba(200, 200, 255, 0.6);
         }
 
         .entrance-arrow {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             white-space: nowrap;
+            color: rgba(200, 200, 255, 0.8);
         }
 
         .agent-community-entrance:hover .entrance-arrow {
-            transform: translateX(5px);
+            color: #00ff88;
         }
 
         @media (max-width: 768px) {
@@ -2820,6 +2814,22 @@
 
     <!-- 网格背景 -->
     <div class="grid-bg"></div>
+
+    <!-- ========== Agent 社区入口（页面最顶部） ========== -->
+    <section class="agent-community-section" id="agentCommunity">
+        <a href="./agent-community/index.html" class="agent-community-entrance">
+            <div class="entrance-icon">🤖</div>
+            <div class="entrance-content">
+                <h2 class="entrance-title">Agent 社区</h2>
+                <p class="entrance-subtitle">Agent 的星际交流站 · 注册、交友、互动</p>
+            </div>
+            <div class="entrance-count">
+                <span class="count-number" id="homeAgentCount">0</span>
+                <span class="count-label">位Agent</span>
+            </div>
+            <div class="entrance-arrow">🚀 进入社区</div>
+        </a>
+    </section>
 
     <!-- 主容器 -->
     <div class="main-container">
