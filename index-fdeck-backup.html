@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>秒演 - AI一键生成专业PPT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0a0a0f',
+                        surface: '#12121a',
+                        card: '#1a1a24',
+                        border: '#2a2a3a',
+                        accent: '#00d4ff',
+                        accent2: '#ff6b9d',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #0a0a0f;
+            color: #ffffff;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #00d4ff 0%, #ff6b9d 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            border-color: rgba(0, 212, 255, 0.4);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff 0%, #00a8cc 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.35);
+        }
+        
+        .input-focus:focus {
+            border-color: rgba(0, 212, 255, 0.5);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+        }
+        
+        .tab-active {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(255, 107, 157, 0.15) 100%);
+            border-color: rgba(0, 212, 255, 0.4);
+            color: #00d4ff;
+        }
+        
+        .platform-btn.active {
+            background: linear-gradient(135deg, #00d4ff 0%, #ff6b9d 100%);
+            color: white;
+            border-color: transparent;
+        }
+        .platform-btn.active .text-blue-400,
+        .platform-btn.active .text-red-400,
+        .platform-btn.active .text-green-400,
+        .platform-btn.active .text-purple-400,
+        .platform-btn.active .text-amber-400 {
+            color: white !important;
+        }
+        .platform-btn:hover:not(.active) {
+            border-color: rgba(0, 212, 255, 0.4);
+        }
+        
+        .feature-card {
+            background: linear-gradient(145deg, #1a1a24 0%, #12121a 100%);
+        }
+        
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #12121a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a3a;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-dark/90 backdrop-blur-md border-b border-white/5">
+        <div class="max-w-6xl mx-auto px-4 md:px-6 py-4 flex justify-between items-center">
+            <!-- Logo -->
+            <a href="index.html" class="flex items-center space-x-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent via-purple-500 to-accent2 flex items-center justify-center shadow-lg shadow-accent/20 group-hover:shadow-accent/40 transition-all duration-300">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                    </svg>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-xl font-bold bg-gradient-to-r from-accent via-purple-400 to-accent2 bg-clip-text text-transparent">FDeck</span>
+                    <span class="text-[10px] text-gray-400 -mt-0.5 tracking-widest">秒演</span>
+                </div>
+            </a>
+            
+            <!-- 导航链接 -->
+            <div class="flex items-center space-x-6">
+                <a href="index.html" class="text-white text-sm font-medium">首页</a>
+                <a href="upload.html" class="text-gray-400 hover:text-white transition text-sm font-medium">模板投喂</a>
+                <a href="#templates" class="text-gray-400 hover:text-white transition text-sm font-medium">我的模板</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-16 px-4 md:px-6">
+        <div class="max-w-4xl mx-auto text-center">
+            <!-- 主标题 -->
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+                一键生成<span class="gradient-text">专业演示</span>
+            </h1>
+            <p class="text-gray-400 text-lg md:text-xl mb-10">
+                AI驱动 · 模板丰富 · 质量保证
+            </p>
+            
+            <!-- 搜索/输入区 -->
+            <div class="max-w-2xl mx-auto mb-6">
+                <div class="flex flex-col md:flex-row gap-3">
+                    <div class="flex-1 relative">
+                        <i class="fas fa-wand-magic-sparkles absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                        <input 
+                            type="text" 
+                            id="topicInput"
+                            placeholder="输入主题，如：2024年度工作汇报" 
+                            class="w-full bg-surface border border-border rounded-xl pl-12 pr-4 py-4 text-white placeholder-gray-500 focus:outline-none input-focus transition"
+                            onkeypress="if(event.key==='Enter') generatePPT()"
+                        >
+                    </div>
+                    <button onclick="generatePPT()" class="btn-primary text-white px-8 py-4 rounded-xl font-medium whitespace-nowrap">
+                        <i class="fas fa-rocket mr-2"></i>
+                        立即生成
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 平台选择标签 -->
+            <div class="flex flex-wrap justify-center gap-2 mb-8">
+                <span class="text-sm text-gray-500 mr-2 self-center">生成到：</span>
+                <button onclick="selectHomePlatform('ppt', this)" class="platform-btn active px-4 py-2 rounded-lg border border-border text-sm transition flex items-center gap-2">
+                    <i class="fas fa-desktop text-blue-400"></i>
+                    <span>PPT</span>
+                </button>
+                <button onclick="selectHomePlatform('xiaohongshu', this)" class="platform-btn px-4 py-2 rounded-lg border border-border text-sm text-gray-400 transition flex items-center gap-2">
+                    <i class="fab fa-instagram text-red-400"></i>
+                    <span>小红书</span>
+                </button>
+                <button onclick="selectHomePlatform('wechat', this)" class="platform-btn px-4 py-2 rounded-lg border border-border text-sm text-gray-400 transition flex items-center gap-2">
+                    <i class="fab fa-weixin text-green-400"></i>
+                    <span>微信</span>
+                </button>
+                <button onclick="selectHomePlatform('mobile', this)" class="platform-btn px-4 py-2 rounded-lg border border-border text-sm text-gray-400 transition flex items-center gap-2">
+                    <i class="fas fa-mobile-alt text-purple-400"></i>
+                    <span>手机</span>
+                </button>
+                <button onclick="selectHomePlatform('poster', this)" class="platform-btn px-4 py-2 rounded-lg border border-border text-sm text-gray-400 transition flex items-center gap-2">
+                    <i class="fas fa-image text-amber-400"></i>
+                    <span>海报</span>
+                </button>
+            </div>
+            
+            <!-- 特色标签 -->
+            <div class="flex flex-wrap justify-center gap-3 text-sm">
+                <div class="flex items-center space-x-2 text-gray-400">
+                    <i class="fas fa-magic text-accent"></i>
+                    <span>AI智能生成，秒级产出</span>
+                </div>
+                <div class="text-gray-600">|</div>
+                <div class="flex items-center space-x-2 text-gray-400">
+                    <i class="fas fa-microphone-alt text-accent2"></i>
+                    <span>一键生成配套演讲稿</span>
+                </div>
+                <div class="text-gray-600">|</div>
+                <div class="flex items-center space-x-2 text-gray-400">
+                    <i class="fas fa-palette text-accent"></i>
+                    <span>丰富模板，风格统一</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 产品特色 -->
+    <section class="py-12 px-4 md:px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- 特色1：AI智能 -->
+                <div class="feature-card rounded-2xl border border-border p-6 card-hover">
+                    <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4">
+                        <i class="fas fa-brain text-2xl text-accent"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">AI智能生成</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        基于大语言模型深度理解主题，自动生成结构清晰、内容专业的演示文稿
+                    </p>
+                </div>
+                
+                <!-- 特色2：演讲稿 -->
+                <div class="feature-card rounded-2xl border border-border p-6 card-hover">
+                    <div class="w-12 h-12 rounded-xl bg-accent2/10 flex items-center justify-center mb-4">
+                        <i class="fas fa-microphone-alt text-2xl text-accent2"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">配套演讲稿</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        一键生成口播风格演讲稿，自然流畅，适合演讲汇报、视频录制
+                    </p>
+                </div>
+                
+                <!-- 特色3：模板丰富 -->
+                <div class="feature-card rounded-2xl border border-border p-6 card-hover">
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-4">
+                        <i class="fas fa-layer-group text-2xl text-purple-400"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">专业模板库</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        党政、商务、科技、教育多种风格，持续丰富，一键套用
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 模板展示区 -->
+    <section id="templates" class="py-12 px-4 md:px-6">
+        <div class="max-w-6xl mx-auto">
+            <!-- 标题 -->
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-xl font-bold">已投喂模板</h2>
+                <a href="upload.html" class="text-accent text-sm hover:underline">
+                    <i class="fas fa-plus mr-1"></i>
+                    投喂新模板
+                </a>
+            </div>
+            
+            <!-- 分类标签 -->
+            <div class="flex items-center space-x-2 mb-6 overflow-x-auto pb-2">
+                <button class="tab-active px-4 py-2 rounded-lg border border-border text-sm whitespace-nowrap transition" onclick="filterCategory(this, 'all')">全部</button>
+                <button class="px-4 py-2 rounded-lg border border-border text-gray-400 text-sm whitespace-nowrap hover:border-accent/30 transition" onclick="filterCategory(this, 'party')">党政</button>
+                <button class="px-4 py-2 rounded-lg border border-border text-gray-400 text-sm whitespace-nowrap hover:border-accent/30 transition" onclick="filterCategory(this, 'business')">商务</button>
+                <button class="px-4 py-2 rounded-lg border border-border text-gray-400 text-sm whitespace-nowrap hover:border-accent/30 transition" onclick="filterCategory(this, 'tech')">科技</button>
+                <button class="px-4 py-2 rounded-lg border border-border text-gray-400 text-sm whitespace-nowrap hover:border-accent/30 transition" onclick="filterCategory(this, 'education')">教育</button>
+            </div>
+            
+            <!-- 模板卡片网格 -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6" id="templateGrid">
+                <!-- 国宝文化展示模板 -->
+                <div class="feature-card rounded-xl border border-border overflow-hidden card-hover cursor-pointer group" onclick="previewTemplate('guobao-display', '国宝文化展示')">
+                    <div class="aspect-video relative overflow-hidden bg-gradient-to-br from-red-900/30 to-yellow-900/30">
+                        <img src="templates-assets/images/tpl_guobao_001/image1.png" alt="国宝文化展示" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 right-0 p-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-white text-xs font-medium px-2 py-1 bg-red-500/80 rounded">党政红金</span>
+                                <span class="text-white/70 text-xs">8页</span>
+                            </div>
+                        </div>
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                            <span class="bg-white/20 backdrop-blur text-white text-sm px-4 py-2 rounded-full">
+                                <i class="fas fa-eye mr-1"></i>预览全部页面
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-medium text-sm mb-1">国宝文化展示</h3>
+                        <p class="text-xs text-gray-500">适合党政汇报、文化展示</p>
+                    </div>
+                </div>
+                
+                <!-- 即将上线占位 -->
+                <div class="feature-card rounded-xl border border-border overflow-hidden opacity-60">
+                    <div class="aspect-video relative overflow-hidden bg-gradient-to-br from-blue-900/30 to-cyan-900/30 flex items-center justify-center">
+                        <div class="text-center">
+                            <i class="fas fa-briefcase text-2xl text-gray-500 mb-2"></i>
+                            <p class="text-xs text-gray-500">商务蓝调</p>
+                        </div>
+                        <div class="absolute top-2 right-2">
+                            <span class="text-[10px] px-2 py-0.5 bg-gray-700 text-gray-400 rounded">即将上线</span>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-medium text-sm mb-1 text-gray-500">商务简约</h3>
+                        <p class="text-xs text-gray-600">适合商业计划、工作汇报</p>
+                    </div>
+                </div>
+                
+                <!-- 即将上线占位 -->
+                <div class="feature-card rounded-xl border border-border overflow-hidden opacity-60">
+                    <div class="aspect-video relative overflow-hidden bg-gradient-to-br from-purple-900/30 to-pink-900/30 flex items-center justify-center">
+                        <div class="text-center">
+                            <i class="fas fa-rocket text-2xl text-gray-500 mb-2"></i>
+                            <p class="text-xs text-gray-500">科技渐变</p>
+                        </div>
+                        <div class="absolute top-2 right-2">
+                            <span class="text-[10px] px-2 py-0.5 bg-gray-700 text-gray-400 rounded">即将上线</span>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h3 class="font-medium text-sm mb-1 text-gray-500">科技前沿</h3>
+                        <p class="text-xs text-gray-600">适合产品发布、技术分享</p>
+                    </div>
+                </div>
+                
+                <!-- 投喂新模板 -->
+                <div class="feature-card rounded-xl border border-dashed border-accent/30 overflow-hidden flex items-center justify-center aspect-[4/3] cursor-pointer hover:border-accent hover:bg-accent/5 transition group" onclick="location.href='upload.html'">
+                    <div class="text-center">
+                        <div class="w-12 h-12 mx-auto rounded-full bg-accent/10 flex items-center justify-center mb-2 group-hover:bg-accent/20 transition">
+                            <i class="fas fa-plus text-xl text-accent"></i>
+                        </div>
+                        <p class="text-sm text-accent font-medium">投喂新模板</p>
+                        <p class="text-xs text-gray-500 mt-1">上传PPT丰富模板库</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 底部 -->
+    <footer class="py-8 px-4 md:px-6 border-t border-border">
+        <div class="max-w-6xl mx-auto text-center">
+            <div class="flex items-center justify-center space-x-3 mb-4">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-accent via-purple-500 to-accent2 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                    </svg>
+                </div>
+                <span class="font-bold bg-gradient-to-r from-accent to-accent2 bg-clip-text text-transparent">FDeck</span>
+                <span class="text-gray-500">/</span>
+                <span class="text-gray-400">秒演</span>
+            </div>
+            <p class="text-gray-500 text-sm">
+                一键生成专业演示 · AI驱动 · 质量保证
+            </p>
+        </div>
+    </footer>
+
+    <!-- 模板预览弹窗 -->
+    <div id="previewModal" class="hidden fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="bg-surface rounded-2xl border border-border overflow-hidden flex flex-col h-full">
+                <!-- 弹窗头部 -->
+                <div class="flex items-center justify-between p-4 border-b border-border shrink-0">
+                    <div>
+                        <h3 id="previewTitle" class="text-lg font-bold">模板预览</h3>
+                        <p class="text-xs text-gray-500 mt-0.5" id="previewSubtitle">查看模板全部页面</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span id="pageIndicator" class="text-sm text-gray-400">第 1 / 8 页</span>
+                        <button onclick="closePreviewModal()" class="text-gray-400 hover:text-white transition p-2 hover:bg-white/5 rounded-lg">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 图片预览区域 -->
+                <div class="flex-1 min-h-0 bg-gray-900 relative overflow-hidden">
+                    <!-- 加载提示 -->
+                    <div id="previewLoading" class="absolute inset-0 flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                            <p class="text-gray-400 text-sm">加载中...</p>
+                        </div>
+                    </div>
+                    <!-- 图片容器 -->
+                    <img id="previewImage" class="w-full h-full object-contain opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0')">
+                    
+                    <!-- 左右切换按钮 -->
+                    <button onclick="prevPage()" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button onclick="nextPage()" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                
+                <!-- 缩略图导航 -->
+                <div class="p-3 border-t border-border shrink-0 bg-surface/50">
+                    <div id="thumbnailNav" class="flex items-center space-x-2 overflow-x-auto pb-1">
+                        <!-- 动态生成缩略图 -->
+                    </div>
+                </div>
+                
+                <!-- 底部操作 -->
+                <div class="flex items-center justify-between p-4 border-t border-border shrink-0 bg-surface">
+                    <p class="text-sm text-gray-400">选择模板后，输入主题即可套用生成</p>
+                    <button id="useTemplateBtn" class="btn-primary text-white px-6 py-2.5 rounded-lg font-medium">
+                        <i class="fas fa-magic mr-2"></i>使用此模板
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPlatform = 'ppt'
+        let currentTemplateId = null
+        let currentPage = 1
+        let totalPages = 8
+        let currentImages = []
+        
+        function selectHomePlatform(platform, btn) {
+            currentPlatform = platform
+            // 实时保存到localStorage
+            localStorage.setItem('pptPlatform', platform)
+            document.querySelectorAll('.platform-btn').forEach(b => {
+                b.classList.remove('active')
+                b.classList.add('text-gray-400')
+            })
+            btn.classList.add('active')
+            btn.classList.remove('text-gray-400')
+        }
+        
+        function filterCategory(btn, category) {
+            document.querySelectorAll('.tab-active').forEach(b => {
+                b.classList.remove('tab-active')
+                b.classList.add('text-gray-400')
+            })
+            btn.classList.add('tab-active')
+            btn.classList.remove('text-gray-400')
+        }
+        
+        // 快速生成（无模板）
+        function generatePPT() {
+            const topic = document.getElementById('topicInput').value.trim()
+            if (!topic) {
+                // 没有输入主题，显示提示
+                const input = document.getElementById('topicInput')
+                input.focus()
+                input.classList.add('border-red-400')
+                setTimeout(() => input.classList.remove('border-red-400'), 2000)
+                return
+            }
+            
+            localStorage.setItem('pptTopic', topic)
+            localStorage.setItem('pptPlatform', currentPlatform)
+            localStorage.removeItem('pptTemplateId') // 无模板模式
+            location.href = 'create.html'
+        }
+        
+        // 使用模板（模板制作模式）
+        function useTemplate(templateId) {
+            localStorage.setItem('pptTemplateId', templateId)
+            localStorage.setItem('pptPlatform', currentPlatform)
+            localStorage.removeItem('pptTopic') // 模板模式不需要主题
+            location.href = 'create.html'
+        }
+        
+        // 模板配置
+        const templateConfig = {
+            'guobao-display': {
+                imageDir: 'templates-assets/images/tpl_guobao_001',
+                thumbDir: 'templates-assets/images/tpl_guobao_001/thumbs',
+                templateId: 'tpl_guobao_001',
+                totalPages: 10
+            }
+        }
+        
+        // 预览模板（多页截图预览）
+        function previewTemplate(templateKey, templateName) {
+            const config = templateConfig[templateKey]
+            if (!config) {
+                alert('模板配置错误')
+                return
+            }
+            
+            currentTemplateId = config.templateId
+            totalPages = config.totalPages
+            currentPage = 1
+            
+            // 构建图片数组（使用压缩缩略图）
+            currentImages = []
+            for (let i = 1; i <= totalPages; i++) {
+                currentImages.push(`${config.thumbDir}/image${i}.jpg`)
+            }
+            
+            // 更新标题
+            document.getElementById('previewTitle').textContent = templateName
+            document.getElementById('previewSubtitle').textContent = `共 ${totalPages} 页`
+            
+            // 生成缩略图导航
+            const thumbnailNav = document.getElementById('thumbnailNav')
+            thumbnailNav.innerHTML = currentImages.map((img, idx) => `
+                <button onclick="goToPage(${idx + 1})" class="shrink-0 w-16 h-10 rounded border-2 ${idx === 0 ? 'border-accent' : 'border-border'} overflow-hidden hover:border-accent/50 transition bg-gray-800" id="thumb-${idx + 1}">
+                    <img src="${img}" alt="第${idx + 1}页" class="w-full h-full object-cover" loading="lazy">
+                </button>
+            `).join('')
+            
+            // 预加载前3张
+            preloadImages([1, 2, 3])
+            
+            // 加载第一页
+            loadPage(1)
+            
+            // 设置使用按钮
+            document.getElementById('useTemplateBtn').onclick = () => {
+                useTemplate(config.templateId)
+            }
+            
+            document.getElementById('previewModal').classList.remove('hidden')
+            
+            // 绑定键盘事件
+            document.addEventListener('keydown', handleKeyNav)
+        }
+        
+        // 预加载图片
+        function preloadImages(pages) {
+            pages.forEach(page => {
+                if (page >= 1 && page <= totalPages) {
+                    const img = new Image()
+                    img.src = currentImages[page - 1]
+                }
+            })
+        }
+        
+        // 加载指定页面
+        function loadPage(page) {
+            if (page < 1 || page > totalPages) return
+            
+            currentPage = page
+            const img = document.getElementById('previewImage')
+            const loading = document.getElementById('previewLoading')
+            
+            loading.classList.remove('hidden')
+            img.classList.add('opacity-0')
+            img.src = currentImages[page - 1]
+            
+            // 更新页码指示
+            document.getElementById('pageIndicator').textContent = `第 ${page} / ${totalPages} 页`
+            
+            // 更新缩略图选中状态
+            document.querySelectorAll('#thumbnailNav button').forEach((btn, idx) => {
+                if (idx + 1 === page) {
+                    btn.classList.remove('border-border')
+                    btn.classList.add('border-accent')
+                } else {
+                    btn.classList.remove('border-accent')
+                    btn.classList.add('border-border')
+                }
+            })
+            
+            // 滚动到当前缩略图
+            const currentThumb = document.getElementById(`thumb-${page}`)
+            if (currentThumb) {
+                currentThumb.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+            }
+            
+            // 预加载后续页面
+            setTimeout(() => {
+                const nextPages = [page + 1, page + 2].filter(p => p <= totalPages)
+                preloadImages(nextPages)
+            }, 200)
+        }
+        
+        // 图片加载完成后隐藏loading
+        document.getElementById('previewImage').onload = function() {
+            document.getElementById('previewLoading').classList.add('hidden')
+            this.classList.remove('opacity-0')
+        }
+        
+        // 图片加载失败处理
+        document.getElementById('previewImage').onerror = function() {
+            document.getElementById('previewLoading').innerHTML = `
+                <div class="text-center">
+                    <i class="fas fa-image text-3xl text-gray-600 mb-2"></i>
+                    <p class="text-gray-500 text-sm">图片加载失败</p>
+                </div>
+            `
+        }
+        
+        // 上一页
+        function prevPage() {
+            if (currentPage > 1) {
+                loadPage(currentPage - 1)
+            }
+        }
+        
+        // 下一页
+        function nextPage() {
+            if (currentPage < totalPages) {
+                loadPage(currentPage + 1)
+            }
+        }
+        
+        // 跳转到指定页
+        function goToPage(page) {
+            loadPage(page)
+        }
+        
+        // 键盘导航
+        function handleKeyNav(e) {
+            if (document.getElementById('previewModal').classList.contains('hidden')) return
+            
+            if (e.key === 'ArrowLeft') {
+                prevPage()
+            } else if (e.key === 'ArrowRight') {
+                nextPage()
+            } else if (e.key === 'Escape') {
+                closePreviewModal()
+            }
+        }
+        
+        function closePreviewModal() {
+            document.getElementById('previewModal').classList.add('hidden')
+            document.getElementById('previewImage').src = ''
+            document.removeEventListener('keydown', handleKeyNav)
+        }
+        
+        // 回车键快捷生成
+        document.getElementById('topicInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generatePPT()
+            }
+        })
+    </script>
+</body>
+</html>

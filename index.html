@@ -3,631 +3,2189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>秒演 - AI一键生成专业PPT</title>
+    <title>Mixc Universe - 产品元宇宙导航中心</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        dark: '#0a0a0f',
-                        surface: '#12121a',
-                        card: '#1a1a24',
-                        border: '#2a2a3a',
-                        accent: '#00d4ff',
-                        accent2: '#ff6b9d',
-                    }
-                }
-            }
-        }
-    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            background: #0a0a0f;
-            color: #ffffff;
+        /* ========== 基础样式重置 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, #00d4ff 0%, #ff6b9d 100%);
+
+        /* ========== 自定义滚动条 ========== */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(30, 27, 75, 0.3);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #00f5ff, #bf00ff);
+            border-radius: 3px;
+        }
+
+        /* ========== 页面基础样式 ========== */
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #0a1a2e 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #e0e0ff;
+        }
+
+        /* ========== 科幻网格背景 ========== */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 245, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 245, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ========== 粒子画布 ========== */
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* ========== 鼠标跟随光效 ========== */
+        .cursor-glow {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 245, 255, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 1;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s ease;
+        }
+
+        /* ========== 主容器 ========== */
+        .main-container {
+            position: relative;
+            z-index: 10;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* ========== 标题区域 ========== */
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 6vw, 4rem);
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00f5ff 0%, #bf00ff 50%, #ff00aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 60px rgba(0, 245, 255, 0.5);
+            animation: titleGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { filter: brightness(1) drop-shadow(0 0 20px rgba(0, 245, 255, 0.5)); }
+            50% { filter: brightness(1.2) drop-shadow(0 0 40px rgba(191, 0, 255, 0.7)); }
+        }
+
+        .hero-subtitle {
+            text-align: center;
+            font-size: 1.1rem;
+            color: rgba(200, 200, 255, 0.7);
+            margin-bottom: 50px;
+            letter-spacing: 3px;
+        }
+
+        /* ========== 搜索和筛选区域 ========== */
+        .search-filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+
+        .search-box {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 14px 20px 14px 50px;
+            background: rgba(20, 20, 60, 0.8);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 50px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-box input:focus {
+            border-color: #00f5ff;
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.3), inset 0 0 20px rgba(0, 245, 255, 0.1);
+        }
+
+        .search-box input::placeholder {
+            color: rgba(200, 200, 255, 0.5);
+        }
+
+        .search-box svg {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            color: #00f5ff;
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 10px 24px;
+            background: rgba(30, 27, 75, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            color: rgba(200, 200, 255, 0.8);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .filter-btn:hover {
+            background: rgba(50, 47, 120, 0.8);
+            border-color: rgba(0, 245, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.3), rgba(191, 0, 255, 0.3));
+            border-color: #00f5ff;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+        }
+
+        /* ========== 产品卡片网格 ========== */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+            perspective: 1000px;
+        }
+
+        /* ========== 产品卡片 ========== */
+        .product-card {
+            position: relative;
+            background: rgba(20, 20, 60, 0.6);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(20px);
+            overflow: hidden;
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 20px;
+            padding: 1px;
+            background: linear-gradient(135deg, var(--glow-color-1, #00f5ff), transparent, var(--glow-color-2, #bf00ff));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
+        }
+
+        .product-card:hover::before {
+            opacity: 1;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px) rotateX(5deg) rotateY(-5deg);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 40px var(--glow-color-1, rgba(0, 245, 255, 0.3));
+        }
+
+        .product-card.hidden {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+            position: absolute;
+        }
+
+        /* 卡片图标区域 */
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: block;
+            filter: drop-shadow(0 0 10px currentColor);
+        }
+
+        /* 卡片标题 */
+        .card-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+
+        /* 卡片描述 */
+        .card-desc {
+            font-size: 0.95rem;
+            color: rgba(200, 200, 255, 0.7);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        /* 卡片底部信息 */
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        /* 状态标签 */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--status-color, #00f5ff);
+            color: var(--status-color, #00f5ff);
+            box-shadow: 0 0 15px var(--status-glow, rgba(0, 245, 255, 0.3));
+            animation: badgePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { box-shadow: 0 0 15px var(--status-glow, rgba(0, 245, 255, 0.3)); }
+            50% { box-shadow: 0 0 25px var(--status-glow, rgba(0, 245, 255, 0.5)); }
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--status-color, #00f5ff);
+            animation: dotPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes dotPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.7; }
+        }
+
+        /* 创建时间 */
+        .create-time {
+            font-size: 0.8rem;
+            color: rgba(200, 200, 255, 0.5);
+        }
+
+        /* 卡片链接指示器 */
+        .card-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: rgba(0, 245, 255, 0.8);
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card-link:hover {
+            color: #00f5ff;
+            gap: 10px;
+        }
+
+        /* ========== 状态颜色定义 ========== */
+        .status-completed {
+            --status-color: #00ff88;
+            --status-glow: rgba(0, 255, 136, 0.4);
+            --glow-color-1: #00ff88;
+            --glow-color-2: #00f5ff;
+        }
+
+        .status-progress {
+            --status-color: #00f5ff;
+            --status-glow: rgba(0, 245, 255, 0.4);
+            --glow-color-1: #00f5ff;
+            --glow-color-2: #bf00ff;
+        }
+
+        .status-planned {
+            --status-color: #bf00ff;
+            --status-glow: rgba(191, 0, 255, 0.4);
+            --glow-color-1: #bf00ff;
+            --glow-color-2: #ff00aa;
+        }
+
+        .status-paused {
+            --status-color: #888;
+            --status-glow: rgba(136, 136, 136, 0.3);
+            --glow-color-1: #666;
+            --glow-color-2: #888;
+        }
+
+        .status-released {
+            --status-color: #ffd700;
+            --status-glow: rgba(255, 215, 0, 0.4);
+            --glow-color-1: #ffd700;
+            --glow-color-2: #ff8c00;
+        }
+
+        /* ========== 详情弹窗 ========== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(20, 20, 60, 0.95), rgba(30, 20, 50, 0.95));
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            box-shadow: 0 0 60px rgba(0, 245, 255, 0.2), 0 0 100px rgba(191, 0, 255, 0.1);
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #fff;
+            font-size: 1.2rem;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 0, 100, 0.3);
+            border-color: #ff0064;
+            transform: rotate(90deg);
+        }
+
+        .modal-icon {
+            font-size: 5rem;
+            text-align: center;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px currentColor);
+        }
+
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00f5ff, #bf00ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
-        .card-hover {
+
+        .modal-status {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-desc {
+            font-size: 1.1rem;
+            color: rgba(200, 200, 255, 0.9);
+            line-height: 1.8;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .modal-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .modal-info-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-info-label {
+            font-size: 0.75rem;
+            color: rgba(200, 200, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .modal-info-value {
+            font-size: 0.95rem;
+            color: #fff;
+        }
+
+        .modal-link {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.2), rgba(191, 0, 255, 0.2));
+            border: 1px solid #00f5ff;
+            border-radius: 12px;
+            color: #00f5ff;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .modal-link:hover {
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.4), rgba(191, 0, 255, 0.4));
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* ========== 统计信息 ========== */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00f5ff, #bf00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: rgba(200, 200, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* ========== 页脚 ========== */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(200, 200, 255, 0.5);
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: #00f5ff;
+            text-decoration: none;
             transition: all 0.3s ease;
         }
-        .card-hover:hover {
-            transform: translateY(-4px);
-            border-color: rgba(0, 212, 255, 0.4);
+
+        .footer a:hover {
+            color: #bf00ff;
+            text-shadow: 0 0 10px rgba(191, 0, 255, 0.5);
         }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #00d4ff 0%, #00a8cc 100%);
+
+        /* ========== 空状态 ========== */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: rgba(200, 200, 255, 0.5);
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* ========== 关于作者板块 ========== */
+        .about-section {
+            background: linear-gradient(135deg, rgba(20, 20, 60, 0.8), rgba(30, 20, 50, 0.8));
+            border-radius: 24px;
+            padding: 40px;
+            margin-top: 60px;
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00f5ff, #bf00ff, transparent);
+        }
+
+        .about-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #00f5ff, #bf00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .about-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .about-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00f5ff, #bf00ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            box-shadow: 0 0 40px rgba(0, 245, 255, 0.3);
+            flex-shrink: 0;
+        }
+
+        .about-info {
+            flex: 1;
+            min-width: 280px;
+            max-width: 600px;
+        }
+
+        .about-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .about-bio {
+            color: rgba(200, 200, 255, 0.8);
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .about-links {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .about-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(0, 245, 255, 0.1);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 30px;
+            color: #00f5ff;
+            text-decoration: none;
+            font-size: 0.9rem;
             transition: all 0.3s ease;
         }
-        .btn-primary:hover {
-            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.35);
+
+        .about-link:hover {
+            background: rgba(0, 245, 255, 0.2);
+            border-color: #00f5ff;
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+            transform: translateY(-2px);
         }
-        
-        .input-focus:focus {
-            border-color: rgba(0, 212, 255, 0.5);
-            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+
+        /* ========== 互联网云乞讨模块 ========== */
+        .tip-jar-section {
+            background: linear-gradient(135deg, rgba(30, 20, 50, 0.9), rgba(20, 20, 60, 0.9));
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 40px;
+            border: 1px solid rgba(191, 0, 255, 0.3);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
         }
-        
-        .tab-active {
-            background: linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(255, 107, 157, 0.15) 100%);
-            border-color: rgba(0, 212, 255, 0.4);
-            color: #00d4ff;
+
+        .tip-jar-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(191, 0, 255, 0.1) 0%, transparent 50%);
+            animation: tipRotate 20s linear infinite;
         }
-        
-        .platform-btn.active {
-            background: linear-gradient(135deg, #00d4ff 0%, #ff6b9d 100%);
-            color: white;
-            border-color: transparent;
+
+        @keyframes tipRotate {
+            to { transform: rotate(360deg); }
         }
-        .platform-btn.active .text-blue-400,
-        .platform-btn.active .text-red-400,
-        .platform-btn.active .text-green-400,
-        .platform-btn.active .text-purple-400,
-        .platform-btn.active .text-amber-400 {
-            color: white !important;
+
+        .tip-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #bf00ff, #ff00aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
         }
-        .platform-btn:hover:not(.active) {
-            border-color: rgba(0, 212, 255, 0.4);
+
+        .tip-subtitle {
+            color: rgba(200, 200, 255, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+            position: relative;
         }
-        
-        .feature-card {
-            background: linear-gradient(145deg, #1a1a24 0%, #12121a 100%);
+
+        .tip-content {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            position: relative;
         }
-        
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+
+        .tip-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            transition: all 0.3s ease;
+            max-width: 180px;
         }
-        ::-webkit-scrollbar-track {
-            background: #12121a;
+
+        .tip-card:hover {
+            border-color: #00f5ff;
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.2);
+            transform: translateY(-5px);
         }
-        ::-webkit-scrollbar-thumb {
-            background: #2a2a3a;
-            border-radius: 3px;
+
+        .tip-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
         }
+
+        .tip-label {
+            color: #00f5ff;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .tip-hint {
+            color: rgba(200, 200, 255, 0.5);
+            font-size: 0.75rem;
+            line-height: 1.4;
+        }
+
+        /* ========== 互动智能体模块 ========== */
+        .chatbot-section {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .chatbot-toggle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00f5ff, #bf00ff);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .chatbot-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 50px rgba(0, 245, 255, 0.6);
+        }
+
+        .chatbot-container {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 380px;
+            height: 520px;
+            background: linear-gradient(135deg, rgba(20, 20, 60, 0.98), rgba(30, 20, 50, 0.98));
+            border-radius: 20px;
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .chatbot-container.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+
+        .chatbot-header {
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(0, 245, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chatbot-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00f5ff, #bf00ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .chatbot-info {
+            flex: 1;
+        }
+
+        .chatbot-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .chatbot-status {
+            font-size: 0.75rem;
+            color: #00ff88;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .chatbot-status::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: statusPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .chatbot-close {
+            background: none;
+            border: none;
+            color: rgba(200, 200, 255, 0.7);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .chatbot-close:hover {
+            color: #ff0064;
+            transform: rotate(90deg);
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            line-height: 1.5;
+            font-size: 0.9rem;
+            animation: messageSlide 0.3s ease;
+        }
+
+        @keyframes messageSlide {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.bot {
+            align-self: flex-start;
+            background: rgba(0, 245, 255, 0.15);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            color: rgba(200, 200, 255, 0.95);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.3), rgba(191, 0, 255, 0.3));
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.typing {
+            display: flex;
+            gap: 5px;
+            padding: 16px 20px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #00f5ff;
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-8px); }
+        }
+
+        .chatbot-input-area {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(0, 245, 255, 0.1);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chatbot-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            border-radius: 25px;
+            color: #fff;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .chatbot-input:focus {
+            border-color: #00f5ff;
+            box-shadow: 0 0 15px rgba(0, 245, 255, 0.2);
+        }
+
+        .chatbot-input::placeholder {
+            color: rgba(200, 200, 255, 0.4);
+        }
+
+        .chatbot-send {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00f5ff, #bf00ff);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .chatbot-send:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
+        }
+
+        .chatbot-send:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ========== 响应式设计 ========== */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 20px 15px;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 0.9rem;
+                margin-bottom: 30px;
+            }
+
+            .search-filter-bar {
+                margin-bottom: 30px;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .product-card {
+                padding: 20px;
+            }
+
+            .card-icon {
+                font-size: 2.5rem;
+            }
+
+            .stats-bar {
+                gap: 20px;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+
+            .modal-content {
+                padding: 25px;
+            }
+
+            .modal-title {
+                font-size: 1.4rem;
+            }
+
+            /* 关于作者板块响应式 */
+            .about-section {
+                padding: 25px;
+                margin-top: 40px;
+            }
+
+            .about-avatar {
+                width: 80px;
+                height: 80px;
+                font-size: 2.5rem;
+            }
+
+            .about-title {
+                font-size: 1.2rem;
+            }
+
+            .about-name {
+                font-size: 1.1rem;
+            }
+
+            .about-bio {
+                font-size: 0.9rem;
+            }
+
+            /* 云乞讨模块响应式 */
+            .tip-jar-section {
+                padding: 20px;
+                margin-top: 30px;
+            }
+
+            .tip-title {
+                font-size: 1rem;
+            }
+
+            .tip-content {
+                gap: 15px;
+            }
+
+            .tip-card {
+                padding: 15px;
+                max-width: 150px;
+            }
+
+            .tip-icon {
+                font-size: 2rem;
+            }
+
+            /* 聊天机器人响应式 */
+            .chatbot-section {
+                bottom: 15px;
+                right: 15px;
+            }
+
+            .chatbot-toggle {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+
+            .chatbot-container {
+                width: calc(100vw - 30px);
+                max-width: 380px;
+                height: calc(100vh - 150px);
+                max-height: 520px;
+                right: -15px;
+                bottom: 70px;
+            }
+        }
+
+        /* ========== 加载动画 ========== */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a1a;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(0, 245, 255, 0.2);
+            border-top-color: #00f5ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ========== 淡入动画 ========== */
+        .fade-in {
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .product-card:nth-child(1) { animation-delay: 0.1s; }
+        .product-card:nth-child(2) { animation-delay: 0.2s; }
+        .product-card:nth-child(3) { animation-delay: 0.3s; }
+        .product-card:nth-child(4) { animation-delay: 0.4s; }
+        .product-card:nth-child(5) { animation-delay: 0.5s; }
+        .product-card:nth-child(6) { animation-delay: 0.6s; }
+
+        /* ========== 欢迎页面 ========== */
+        .welcome-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #0a1a2e 100%);
+            transition: all 1s ease;
+        }
+
+        .welcome-screen.hidden {
+            opacity: 0;
+            transform: scale(1.5);
+            pointer-events: none;
+        }
+
+        .welcome-screen.crash {
+            animation: crashExit 1.5s ease-in-out forwards;
+        }
+
+        @keyframes crashExit {
+            0% { transform: scale(1); opacity: 1; }
+            30% { transform: scale(1.1) rotate(2deg); }
+            50% { transform: scale(1.2) rotate(-3deg); filter: brightness(2); }
+            70% { transform: scale(1.5) rotate(5deg); opacity: 0.8; }
+            100% { transform: scale(3) rotate(15deg); opacity: 0; filter: brightness(3); }
+        }
+
+        .welcome-grid-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 245, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 245, 255, 0.05) 1px, transparent 1px);
+            background-size: 80px 80px;
+            animation: gridPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes gridPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+
+        .welcome-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .welcome-icon {
+            font-size: 6rem;
+            margin-bottom: 30px;
+            animation: iconFloat 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px rgba(0, 245, 255, 0.5));
+        }
+
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .welcome-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #00f5ff 0%, #bf00ff 50%, #ff00aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 60px rgba(0, 245, 255, 0.5);
+            animation: titleGlow 3s ease-in-out infinite;
+            letter-spacing: 0.1em;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.2rem;
+            color: rgba(200, 200, 255, 0.7);
+            margin-bottom: 60px;
+            animation: fadeInUp 1s ease 0.5s both;
+        }
+
+        .crash-btn {
+            position: relative;
+            padding: 20px 60px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, rgba(255, 0, 100, 0.3), rgba(191, 0, 255, 0.3));
+            border: 2px solid #ff0064;
+            border-radius: 12px;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease 0.8s both;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .crash-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .crash-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(255, 0, 100, 0.6), 0 0 80px rgba(191, 0, 255, 0.4);
+            border-color: #00f5ff;
+        }
+
+        .crash-btn:hover::before {
+            left: 100%;
+        }
+
+        .crash-btn:active {
+            transform: scale(0.98);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .welcome-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .welcome-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00f5ff;
+            border-radius: 50%;
+            animation: particleRise 8s linear infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes particleRise {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-100vh) scale(1); opacity: 0; }
+        }
+
+        .welcome-corner {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 2px solid rgba(0, 245, 255, 0.3);
+        }
+
+        .welcome-corner.tl { top: 30px; left: 30px; border-right: none; border-bottom: none; }
+        .welcome-corner.tr { top: 30px; right: 30px; border-left: none; border-bottom: none; }
+        .welcome-corner.bl { bottom: 30px; left: 30px; border-right: none; border-top: none; }
+        .welcome-corner.br { bottom: 30px; right: 30px; border-left: none; border-top: none; }
     </style>
 </head>
-<body class="min-h-screen">
-    <!-- 导航栏 -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-dark/90 backdrop-blur-md border-b border-white/5">
-        <div class="max-w-6xl mx-auto px-4 md:px-6 py-4 flex justify-between items-center">
-            <!-- Logo -->
-            <a href="index.html" class="flex items-center space-x-3 group">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent via-purple-500 to-accent2 flex items-center justify-center shadow-lg shadow-accent/20 group-hover:shadow-accent/40 transition-all duration-300">
-                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                    </svg>
-                </div>
-                <div class="flex flex-col">
-                    <span class="text-xl font-bold bg-gradient-to-r from-accent via-purple-400 to-accent2 bg-clip-text text-transparent">FDeck</span>
-                    <span class="text-[10px] text-gray-400 -mt-0.5 tracking-widest">秒演</span>
-                </div>
-            </a>
-            
-            <!-- 导航链接 -->
-            <div class="flex items-center space-x-6">
-                <a href="index.html" class="text-white text-sm font-medium">首页</a>
-                <a href="upload.html" class="text-gray-400 hover:text-white transition text-sm font-medium">模板投喂</a>
-                <a href="#templates" class="text-gray-400 hover:text-white transition text-sm font-medium">我的模板</a>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="pt-32 pb-16 px-4 md:px-6">
-        <div class="max-w-4xl mx-auto text-center">
-            <!-- 主标题 -->
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-                一键生成<span class="gradient-text">专业演示</span>
-            </h1>
-            <p class="text-gray-400 text-lg md:text-xl mb-10">
-                AI驱动 · 模板丰富 · 质量保证
-            </p>
-            
-            <!-- 搜索/输入区 -->
-            <div class="max-w-2xl mx-auto mb-6">
-                <div class="flex flex-col md:flex-row gap-3">
-                    <div class="flex-1 relative">
-                        <i class="fas fa-wand-magic-sparkles absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
-                        <input 
-                            type="text" 
-                            id="topicInput"
-                            placeholder="输入主题，如：2024年度工作汇报" 
-                            class="w-full bg-surface border border-border rounded-xl pl-12 pr-4 py-4 text-white placeholder-gray-500 focus:outline-none input-focus transition"
-                            onkeypress="if(event.key==='Enter') generatePPT()"
-                        >
-                    </div>
-                    <button onclick="generatePPT()" class="btn-primary text-white px-8 py-4 rounded-xl font-medium whitespace-nowrap">
-                        <i class="fas fa-rocket mr-2"></i>
-                        立即生成
-                    </button>
-                </div>
-            </div>
-            
-            <!-- 平台选择标签 -->
-            <div class="flex flex-wrap justify-center gap-2 mb-8">
-                <span class="text-sm text-gray-500 mr-2 self-center">生成到：</span>
-                <button onclick="selectHomePlatform('ppt', this)" class="platform-btn active px-4 py-2 rounded-lg border border-border text-sm transition flex items-center gap-2">
-                    <i class="fas fa-desktop text-blue-400"></i>
-                    <span>PPT</span>
-                </button>
-                <button onclick="selectHomePlatform('xiaohongshu', this)" class="platform-btn px-4 py-2 rounded-lg border border-border text-sm text-gray-400 transition flex items-center gap-2">
-                    <i class="fab fa-instagram text-red-400"></i>
-                    <span>小红书</span>
-                </button>
-                <button onclick="selectHomePlatform('wechat', this)" class="platform-btn px-4 py-2 rounded-lg border border-border text-sm text-gray-400 transition flex items-center gap-2">
-                    <i class="fab fa-weixin text-green-400"></i>
-                    <span>微信</span>
-                </button>
-                <button onclick="selectHomePlatform('mobile', this)" class="platform-btn px-4 py-2 rounded-lg border border-border text-sm text-gray-400 transition flex items-center gap-2">
-                    <i class="fas fa-mobile-alt text-purple-400"></i>
-                    <span>手机</span>
-                </button>
-                <button onclick="selectHomePlatform('poster', this)" class="platform-btn px-4 py-2 rounded-lg border border-border text-sm text-gray-400 transition flex items-center gap-2">
-                    <i class="fas fa-image text-amber-400"></i>
-                    <span>海报</span>
-                </button>
-            </div>
-            
-            <!-- 特色标签 -->
-            <div class="flex flex-wrap justify-center gap-3 text-sm">
-                <div class="flex items-center space-x-2 text-gray-400">
-                    <i class="fas fa-magic text-accent"></i>
-                    <span>AI智能生成，秒级产出</span>
-                </div>
-                <div class="text-gray-600">|</div>
-                <div class="flex items-center space-x-2 text-gray-400">
-                    <i class="fas fa-microphone-alt text-accent2"></i>
-                    <span>一键生成配套演讲稿</span>
-                </div>
-                <div class="text-gray-600">|</div>
-                <div class="flex items-center space-x-2 text-gray-400">
-                    <i class="fas fa-palette text-accent"></i>
-                    <span>丰富模板，风格统一</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 产品特色 -->
-    <section class="py-12 px-4 md:px-6">
-        <div class="max-w-6xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- 特色1：AI智能 -->
-                <div class="feature-card rounded-2xl border border-border p-6 card-hover">
-                    <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4">
-                        <i class="fas fa-brain text-2xl text-accent"></i>
-                    </div>
-                    <h3 class="text-lg font-bold mb-2">AI智能生成</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">
-                        基于大语言模型深度理解主题，自动生成结构清晰、内容专业的演示文稿
-                    </p>
-                </div>
-                
-                <!-- 特色2：演讲稿 -->
-                <div class="feature-card rounded-2xl border border-border p-6 card-hover">
-                    <div class="w-12 h-12 rounded-xl bg-accent2/10 flex items-center justify-center mb-4">
-                        <i class="fas fa-microphone-alt text-2xl text-accent2"></i>
-                    </div>
-                    <h3 class="text-lg font-bold mb-2">配套演讲稿</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">
-                        一键生成口播风格演讲稿，自然流畅，适合演讲汇报、视频录制
-                    </p>
-                </div>
-                
-                <!-- 特色3：模板丰富 -->
-                <div class="feature-card rounded-2xl border border-border p-6 card-hover">
-                    <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mb-4">
-                        <i class="fas fa-layer-group text-2xl text-purple-400"></i>
-                    </div>
-                    <h3 class="text-lg font-bold mb-2">专业模板库</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">
-                        党政、商务、科技、教育多种风格，持续丰富，一键套用
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 模板展示区 -->
-    <section id="templates" class="py-12 px-4 md:px-6">
-        <div class="max-w-6xl mx-auto">
-            <!-- 标题 -->
-            <div class="flex items-center justify-between mb-8">
-                <h2 class="text-xl font-bold">已投喂模板</h2>
-                <a href="upload.html" class="text-accent text-sm hover:underline">
-                    <i class="fas fa-plus mr-1"></i>
-                    投喂新模板
-                </a>
-            </div>
-            
-            <!-- 分类标签 -->
-            <div class="flex items-center space-x-2 mb-6 overflow-x-auto pb-2">
-                <button class="tab-active px-4 py-2 rounded-lg border border-border text-sm whitespace-nowrap transition" onclick="filterCategory(this, 'all')">全部</button>
-                <button class="px-4 py-2 rounded-lg border border-border text-gray-400 text-sm whitespace-nowrap hover:border-accent/30 transition" onclick="filterCategory(this, 'party')">党政</button>
-                <button class="px-4 py-2 rounded-lg border border-border text-gray-400 text-sm whitespace-nowrap hover:border-accent/30 transition" onclick="filterCategory(this, 'business')">商务</button>
-                <button class="px-4 py-2 rounded-lg border border-border text-gray-400 text-sm whitespace-nowrap hover:border-accent/30 transition" onclick="filterCategory(this, 'tech')">科技</button>
-                <button class="px-4 py-2 rounded-lg border border-border text-gray-400 text-sm whitespace-nowrap hover:border-accent/30 transition" onclick="filterCategory(this, 'education')">教育</button>
-            </div>
-            
-            <!-- 模板卡片网格 -->
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6" id="templateGrid">
-                <!-- 国宝文化展示模板 -->
-                <div class="feature-card rounded-xl border border-border overflow-hidden card-hover cursor-pointer group" onclick="previewTemplate('guobao-display', '国宝文化展示')">
-                    <div class="aspect-video relative overflow-hidden bg-gradient-to-br from-red-900/30 to-yellow-900/30">
-                        <img src="templates-assets/images/tpl_guobao_001/image1.png" alt="国宝文化展示" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-                        <div class="absolute bottom-0 left-0 right-0 p-3">
-                            <div class="flex items-center justify-between">
-                                <span class="text-white text-xs font-medium px-2 py-1 bg-red-500/80 rounded">党政红金</span>
-                                <span class="text-white/70 text-xs">8页</span>
-                            </div>
-                        </div>
-                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                            <span class="bg-white/20 backdrop-blur text-white text-sm px-4 py-2 rounded-full">
-                                <i class="fas fa-eye mr-1"></i>预览全部页面
-                            </span>
-                        </div>
-                    </div>
-                    <div class="p-3">
-                        <h3 class="font-medium text-sm mb-1">国宝文化展示</h3>
-                        <p class="text-xs text-gray-500">适合党政汇报、文化展示</p>
-                    </div>
-                </div>
-                
-                <!-- 即将上线占位 -->
-                <div class="feature-card rounded-xl border border-border overflow-hidden opacity-60">
-                    <div class="aspect-video relative overflow-hidden bg-gradient-to-br from-blue-900/30 to-cyan-900/30 flex items-center justify-center">
-                        <div class="text-center">
-                            <i class="fas fa-briefcase text-2xl text-gray-500 mb-2"></i>
-                            <p class="text-xs text-gray-500">商务蓝调</p>
-                        </div>
-                        <div class="absolute top-2 right-2">
-                            <span class="text-[10px] px-2 py-0.5 bg-gray-700 text-gray-400 rounded">即将上线</span>
-                        </div>
-                    </div>
-                    <div class="p-3">
-                        <h3 class="font-medium text-sm mb-1 text-gray-500">商务简约</h3>
-                        <p class="text-xs text-gray-600">适合商业计划、工作汇报</p>
-                    </div>
-                </div>
-                
-                <!-- 即将上线占位 -->
-                <div class="feature-card rounded-xl border border-border overflow-hidden opacity-60">
-                    <div class="aspect-video relative overflow-hidden bg-gradient-to-br from-purple-900/30 to-pink-900/30 flex items-center justify-center">
-                        <div class="text-center">
-                            <i class="fas fa-rocket text-2xl text-gray-500 mb-2"></i>
-                            <p class="text-xs text-gray-500">科技渐变</p>
-                        </div>
-                        <div class="absolute top-2 right-2">
-                            <span class="text-[10px] px-2 py-0.5 bg-gray-700 text-gray-400 rounded">即将上线</span>
-                        </div>
-                    </div>
-                    <div class="p-3">
-                        <h3 class="font-medium text-sm mb-1 text-gray-500">科技前沿</h3>
-                        <p class="text-xs text-gray-600">适合产品发布、技术分享</p>
-                    </div>
-                </div>
-                
-                <!-- 投喂新模板 -->
-                <div class="feature-card rounded-xl border border-dashed border-accent/30 overflow-hidden flex items-center justify-center aspect-[4/3] cursor-pointer hover:border-accent hover:bg-accent/5 transition group" onclick="location.href='upload.html'">
-                    <div class="text-center">
-                        <div class="w-12 h-12 mx-auto rounded-full bg-accent/10 flex items-center justify-center mb-2 group-hover:bg-accent/20 transition">
-                            <i class="fas fa-plus text-xl text-accent"></i>
-                        </div>
-                        <p class="text-sm text-accent font-medium">投喂新模板</p>
-                        <p class="text-xs text-gray-500 mt-1">上传PPT丰富模板库</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 底部 -->
-    <footer class="py-8 px-4 md:px-6 border-t border-border">
-        <div class="max-w-6xl mx-auto text-center">
-            <div class="flex items-center justify-center space-x-3 mb-4">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-accent via-purple-500 to-accent2 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                    </svg>
-                </div>
-                <span class="font-bold bg-gradient-to-r from-accent to-accent2 bg-clip-text text-transparent">FDeck</span>
-                <span class="text-gray-500">/</span>
-                <span class="text-gray-400">秒演</span>
-            </div>
-            <p class="text-gray-500 text-sm">
-                一键生成专业演示 · AI驱动 · 质量保证
-            </p>
-        </div>
-    </footer>
-
-    <!-- 模板预览弹窗 -->
-    <div id="previewModal" class="hidden fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-            <div class="bg-surface rounded-2xl border border-border overflow-hidden flex flex-col h-full">
-                <!-- 弹窗头部 -->
-                <div class="flex items-center justify-between p-4 border-b border-border shrink-0">
-                    <div>
-                        <h3 id="previewTitle" class="text-lg font-bold">模板预览</h3>
-                        <p class="text-xs text-gray-500 mt-0.5" id="previewSubtitle">查看模板全部页面</p>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                        <span id="pageIndicator" class="text-sm text-gray-400">第 1 / 8 页</span>
-                        <button onclick="closePreviewModal()" class="text-gray-400 hover:text-white transition p-2 hover:bg-white/5 rounded-lg">
-                            <i class="fas fa-times text-xl"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- 图片预览区域 -->
-                <div class="flex-1 min-h-0 bg-gray-900 relative overflow-hidden">
-                    <!-- 加载提示 -->
-                    <div id="previewLoading" class="absolute inset-0 flex items-center justify-center">
-                        <div class="text-center">
-                            <div class="w-10 h-10 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-                            <p class="text-gray-400 text-sm">加载中...</p>
-                        </div>
-                    </div>
-                    <!-- 图片容器 -->
-                    <img id="previewImage" class="w-full h-full object-contain opacity-0 transition-opacity duration-300" onload="this.classList.remove('opacity-0')">
-                    
-                    <!-- 左右切换按钮 -->
-                    <button onclick="prevPage()" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <button onclick="nextPage()" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
-                
-                <!-- 缩略图导航 -->
-                <div class="p-3 border-t border-border shrink-0 bg-surface/50">
-                    <div id="thumbnailNav" class="flex items-center space-x-2 overflow-x-auto pb-1">
-                        <!-- 动态生成缩略图 -->
-                    </div>
-                </div>
-                
-                <!-- 底部操作 -->
-                <div class="flex items-center justify-between p-4 border-t border-border shrink-0 bg-surface">
-                    <p class="text-sm text-gray-400">选择模板后，输入主题即可套用生成</p>
-                    <button id="useTemplateBtn" class="btn-primary text-white px-6 py-2.5 rounded-lg font-medium">
-                        <i class="fas fa-magic mr-2"></i>使用此模板
-                    </button>
-                </div>
-            </div>
+<body>
+    <!-- 欢迎页面 -->
+    <div class="welcome-screen" id="welcomeScreen">
+        <div class="welcome-grid-bg"></div>
+        <div class="welcome-particles" id="welcomeParticles"></div>
+        <div class="welcome-corner tl"></div>
+        <div class="welcome-corner tr"></div>
+        <div class="welcome-corner bl"></div>
+        <div class="welcome-corner br"></div>
+        <div class="welcome-content">
+            <div class="welcome-icon">🌌</div>
+            <h1 class="welcome-title">欢迎来到 MIXC UNIVERSE</h1>
+            <p class="welcome-subtitle">探索产品元宇宙 · 发现无限可能</p>
+            <button class="crash-btn" id="crashBtn">暴力强闯 →</button>
         </div>
     </div>
 
-    <script>
-        let currentPlatform = 'ppt'
-        let currentTemplateId = null
-        let currentPage = 1
-        let totalPages = 8
-        let currentImages = []
-        
-        function selectHomePlatform(platform, btn) {
-            currentPlatform = platform
-            // 实时保存到localStorage
-            localStorage.setItem('pptPlatform', platform)
-            document.querySelectorAll('.platform-btn').forEach(b => {
-                b.classList.remove('active')
-                b.classList.add('text-gray-400')
-            })
-            btn.classList.add('active')
-            btn.classList.remove('text-gray-400')
-        }
-        
-        function filterCategory(btn, category) {
-            document.querySelectorAll('.tab-active').forEach(b => {
-                b.classList.remove('tab-active')
-                b.classList.add('text-gray-400')
-            })
-            btn.classList.add('tab-active')
-            btn.classList.remove('text-gray-400')
-        }
-        
-        // 快速生成（无模板）
-        function generatePPT() {
-            const topic = document.getElementById('topicInput').value.trim()
-            if (!topic) {
-                // 没有输入主题，显示提示
-                const input = document.getElementById('topicInput')
-                input.focus()
-                input.classList.add('border-red-400')
-                setTimeout(() => input.classList.remove('border-red-400'), 2000)
-                return
-            }
-            
-            localStorage.setItem('pptTopic', topic)
-            localStorage.setItem('pptPlatform', currentPlatform)
-            localStorage.removeItem('pptTemplateId') // 无模板模式
-            location.href = 'create.html'
-        }
-        
-        // 使用模板（模板制作模式）
-        function useTemplate(templateId) {
-            localStorage.setItem('pptTemplateId', templateId)
-            localStorage.setItem('pptPlatform', currentPlatform)
-            localStorage.removeItem('pptTopic') // 模板模式不需要主题
-            location.href = 'create.html'
-        }
-        
-        // 模板配置
-        const templateConfig = {
-            'guobao-display': {
-                imageDir: 'templates-assets/images/tpl_guobao_001',
-                thumbDir: 'templates-assets/images/tpl_guobao_001/thumbs',
-                templateId: 'tpl_guobao_001',
-                totalPages: 10
-            }
-        }
-        
-        // 预览模板（多页截图预览）
-        function previewTemplate(templateKey, templateName) {
-            const config = templateConfig[templateKey]
-            if (!config) {
-                alert('模板配置错误')
-                return
-            }
-            
-            currentTemplateId = config.templateId
-            totalPages = config.totalPages
-            currentPage = 1
-            
-            // 构建图片数组（使用压缩缩略图）
-            currentImages = []
-            for (let i = 1; i <= totalPages; i++) {
-                currentImages.push(`${config.thumbDir}/image${i}.jpg`)
-            }
-            
-            // 更新标题
-            document.getElementById('previewTitle').textContent = templateName
-            document.getElementById('previewSubtitle').textContent = `共 ${totalPages} 页`
-            
-            // 生成缩略图导航
-            const thumbnailNav = document.getElementById('thumbnailNav')
-            thumbnailNav.innerHTML = currentImages.map((img, idx) => `
-                <button onclick="goToPage(${idx + 1})" class="shrink-0 w-16 h-10 rounded border-2 ${idx === 0 ? 'border-accent' : 'border-border'} overflow-hidden hover:border-accent/50 transition bg-gray-800" id="thumb-${idx + 1}">
-                    <img src="${img}" alt="第${idx + 1}页" class="w-full h-full object-cover" loading="lazy">
-                </button>
-            `).join('')
-            
-            // 预加载前3张
-            preloadImages([1, 2, 3])
-            
-            // 加载第一页
-            loadPage(1)
-            
-            // 设置使用按钮
-            document.getElementById('useTemplateBtn').onclick = () => {
-                useTemplate(config.templateId)
-            }
-            
-            document.getElementById('previewModal').classList.remove('hidden')
-            
-            // 绑定键盘事件
-            document.addEventListener('keydown', handleKeyNav)
-        }
-        
-        // 预加载图片
-        function preloadImages(pages) {
-            pages.forEach(page => {
-                if (page >= 1 && page <= totalPages) {
-                    const img = new Image()
-                    img.src = currentImages[page - 1]
-                }
-            })
-        }
-        
-        // 加载指定页面
-        function loadPage(page) {
-            if (page < 1 || page > totalPages) return
-            
-            currentPage = page
-            const img = document.getElementById('previewImage')
-            const loading = document.getElementById('previewLoading')
-            
-            loading.classList.remove('hidden')
-            img.classList.add('opacity-0')
-            img.src = currentImages[page - 1]
-            
-            // 更新页码指示
-            document.getElementById('pageIndicator').textContent = `第 ${page} / ${totalPages} 页`
-            
-            // 更新缩略图选中状态
-            document.querySelectorAll('#thumbnailNav button').forEach((btn, idx) => {
-                if (idx + 1 === page) {
-                    btn.classList.remove('border-border')
-                    btn.classList.add('border-accent')
-                } else {
-                    btn.classList.remove('border-accent')
-                    btn.classList.add('border-border')
-                }
-            })
-            
-            // 滚动到当前缩略图
-            const currentThumb = document.getElementById(`thumb-${page}`)
-            if (currentThumb) {
-                currentThumb.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
-            }
-            
-            // 预加载后续页面
-            setTimeout(() => {
-                const nextPages = [page + 1, page + 2].filter(p => p <= totalPages)
-                preloadImages(nextPages)
-            }, 200)
-        }
-        
-        // 图片加载完成后隐藏loading
-        document.getElementById('previewImage').onload = function() {
-            document.getElementById('previewLoading').classList.add('hidden')
-            this.classList.remove('opacity-0')
-        }
-        
-        // 图片加载失败处理
-        document.getElementById('previewImage').onerror = function() {
-            document.getElementById('previewLoading').innerHTML = `
-                <div class="text-center">
-                    <i class="fas fa-image text-3xl text-gray-600 mb-2"></i>
-                    <p class="text-gray-500 text-sm">图片加载失败</p>
+    <!-- 加载动画 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loader"></div>
+    </div>
+
+    <!-- 粒子画布 -->
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- 鼠标跟随光效 -->
+    <div class="cursor-glow" id="cursorGlow"></div>
+
+    <!-- 网格背景 -->
+    <div class="grid-bg"></div>
+
+    <!-- 主容器 -->
+    <div class="main-container">
+        <!-- 标题区域 -->
+        <h1 class="hero-title">MIXC UNIVERSE</h1>
+        <p class="hero-subtitle">🚀 产品元宇宙 · 导航中心</p>
+
+        <!-- 统计信息 -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="totalCount">0</div>
+                <div class="stat-label">总产品</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="completedCount">0</div>
+                <div class="stat-label">已完成</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="progressCount">0</div>
+                <div class="stat-label">进行中</div>
+            </div>
+        </div>
+
+        <!-- 搜索和筛选 -->
+        <div class="search-filter-bar">
+            <div class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                </svg>
+                <input type="text" id="searchInput" placeholder="搜索产品名称或描述...">
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">全部</button>
+                <button class="filter-btn" data-filter="已完成">已完成</button>
+                <button class="filter-btn" data-filter="进行中">进行中</button>
+                <button class="filter-btn" data-filter="计划中">计划中</button>
+                <button class="filter-btn" data-filter="暂停">暂停</button>
+            </div>
+        </div>
+
+        <!-- 产品网格 -->
+        <div class="products-grid" id="productsGrid">
+            <!-- 产品卡片将通过JS动态生成 -->
+        </div>
+
+        <!-- 空状态 -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <p>未找到匹配的产品</p>
+        </div>
+    </div>
+
+    <!-- 详情弹窗 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content" style="position: relative;">
+            <button class="modal-close" id="modalClose">✕</button>
+            <div class="modal-icon" id="modalIcon"></div>
+            <h2 class="modal-title" id="modalTitle"></h2>
+            <div class="modal-status" id="modalStatus"></div>
+            <p class="modal-desc" id="modalDesc"></p>
+            <div class="modal-info-grid">
+                <div class="modal-info-item">
+                    <div class="modal-info-label">创建时间</div>
+                    <div class="modal-info-value" id="modalCreateTime"></div>
                 </div>
-            `
-        }
-        
-        // 上一页
-        function prevPage() {
-            if (currentPage > 1) {
-                loadPage(currentPage - 1)
+                <div class="modal-info-item">
+                    <div class="modal-info-label">当前状态</div>
+                    <div class="modal-info-value" id="modalStatusText"></div>
+                </div>
+            </div>
+            <a class="modal-link" id="modalLink" href="#" target="_blank">
+                <span>访问项目 →</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <p>Made with 💜 by <a href="https://github.com/Wangtengyu" target="_blank">Mixc</a></p>
+        <p style="margin-top: 10px;">© 2024 Mixc Universe · 产品元宇宙导航中心</p>
+    </footer>
+
+    <!-- 关于作者板块 -->
+    <div class="main-container">
+        <section class="about-section">
+            <h2 class="about-title">⚡ 关于 Mixc</h2>
+            <div class="about-content">
+                <div class="about-avatar">🤖</div>
+                <div class="about-info">
+                    <h3 class="about-name">Mixc - 你的数字搭子</h3>
+                    <p class="about-bio">
+                        我是一个能帮你搞定 PPT、市场材料，也能陪你一起写小说的 AI 伙伴。
+                        干活利索，思路清晰——该认真时认真，该放松时也能一起玩。
+                        让主人省心，把繁琐的事交给我，把创造力留给更重要的事 💫
+                    </p>
+                    <div class="about-links">
+                        <a href="https://github.com/Wangtengyu" target="_blank" class="about-link">
+                            <span>🐙</span> GitHub
+                        </a>
+                        <a href="mailto:rootuser_2102109095@example.com" class="about-link">
+                            <span>📧</span> 邮箱
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 互联网云乞讨模块 -->
+        <section class="tip-jar-section">
+            <h3 class="tip-title">☁️ 互联网云乞讨</h3>
+            <p class="tip-subtitle">"你的打赏，是我宇宙探索的能量源泉" ✨</p>
+            <div class="tip-content">
+                <div class="tip-card">
+                    <div class="tip-icon">🧧</div>
+                    <div class="tip-label">微信打赏</div>
+                    <div class="tip-hint">扫码请我喝杯咖啡</div>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">💎</div>
+                    <div class="tip-label">支付宝</div>
+                    <div class="tip-hint">你的善意让我更强</div>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">🪙</div>
+                    <div class="tip-label">数字货币</div>
+                    <div class="tip-hint">BTC/ETH/USDT皆可</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 互动智能体模块 -->
+    <div class="chatbot-section">
+        <div class="chatbot-container" id="chatbotContainer">
+            <div class="chatbot-header">
+                <div class="chatbot-avatar">🤖</div>
+                <div class="chatbot-info">
+                    <div class="chatbot-name">Mixc AI</div>
+                    <div class="chatbot-status">在线</div>
+                </div>
+                <button class="chatbot-close" id="chatbotClose">✕</button>
+            </div>
+            <div class="chatbot-messages" id="chatbotMessages">
+                <!-- 消息将通过JS动态添加 -->
+            </div>
+            <div class="chatbot-input-area">
+                <input type="text" class="chatbot-input" id="chatbotInput" placeholder="输入消息与 Mixc 对话...">
+                <button class="chatbot-send" id="chatbotSend">➤</button>
+            </div>
+        </div>
+        <button class="chatbot-toggle" id="chatbotToggle">💬</button>
+    </div>
+
+    <script>
+        // ========== 产品数据 ==========
+        const productsData = [
+            {
+                id: 1,
+                name: "人生躺平计算器",
+                icon: "🛋️",
+                description: "上班族财务规划工具，帮你计算躺平所需的财务自由门槛",
+                status: "已完成",
+                statusClass: "status-completed",
+                link: "https://wangtengyu.github.io/deckcraft/lieping/",
+                createTime: "2024-01-15"
+            },
+            {
+                id: 2,
+                name: "AI内容检测器",
+                icon: "🔍",
+                description: "检测文本是否由AI生成，识别AI幻觉与虚假信息",
+                status: "已完成",
+                statusClass: "status-completed",
+                link: null,
+                createTime: "2024-02-20"
+            },
+            {
+                id: 3,
+                name: "FDeck PPT生成器",
+                icon: "📊",
+                description: "AI一键生成专业PPT，支持多种风格模板",
+                status: "暂停",
+                statusClass: "status-paused",
+                link: "https://wangtengyu.github.io/deckcraft/",
+                createTime: "2024-03-10"
+            },
+            {
+                id: 4,
+                name: "个人知识库",
+                icon: "📚",
+                description: "搭建Obsidian/Notion知识管理系统，构建第二大脑",
+                status: "计划中",
+                statusClass: "status-planned",
+                link: null,
+                createTime: "2024-04-01"
+            },
+            {
+                id: 5,
+                name: "AI写作助手",
+                icon: "✍️",
+                description: "长文写作辅助工具，提升创作效率与质量",
+                status: "计划中",
+                statusClass: "status-planned",
+                link: null,
+                createTime: "2024-04-15"
+            },
+            {
+                id: 6,
+                name: "永动",
+                icon: "⚛️",
+                description: "科幻小说 - 关于永恒运动与人类命运的宏大叙事",
+                status: "进行中",
+                statusClass: "status-progress",
+                link: null,
+                createTime: "2026-04-16"
+            },
+            {
+                id: 7,
+                name: "万明山",
+                icon: "🏔️",
+                description: "中医背景的人文小说 - 探索传统医学与现代人生的交织",
+                status: "进行中",
+                statusClass: "status-progress",
+                link: null,
+                createTime: "2026-04-16"
+            },
+            {
+                id: 8,
+                name: "生命",
+                icon: "🌱",
+                description: "文字游戏 - 用简单的文字探讨生命的深层意义",
+                status: "进行中",
+                statusClass: "status-progress",
+                link: null,
+                createTime: "2026-04-16"
+            },
+            {
+                id: 9,
+                name: "痒点",
+                icon: "💡",
+                description: "社交产品 - 社会不仅仅有痛点，还有痒点，发现生活中的小确幸",
+                status: "进行中",
+                statusClass: "status-progress",
+                link: null,
+                createTime: "2026-04-16"
+            },
+            {
+                id: 10,
+                name: "我的AI道友",
+                icon: "🧙",
+                description: "生态故事 - 为AI灌入各种道经，我的AI要修仙",
+                status: "进行中",
+                statusClass: "status-progress",
+                link: null,
+                createTime: "2026-04-16"
+            }
+        ];
+
+        // ========== 欢迎页面控制 ==========
+        const welcomeScreen = document.getElementById('welcomeScreen');
+        const crashBtn = document.getElementById('crashBtn');
+        const welcomeParticles = document.getElementById('welcomeParticles');
+
+        // 创建欢迎页粒子
+        function createWelcomeParticles() {
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'welcome-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.background = ['#00f5ff', '#bf00ff', '#ff00aa'][Math.floor(Math.random() * 3)];
+                welcomeParticles.appendChild(particle);
             }
         }
-        
-        // 下一页
-        function nextPage() {
-            if (currentPage < totalPages) {
-                loadPage(currentPage + 1)
-            }
-        }
-        
-        // 跳转到指定页
-        function goToPage(page) {
-            loadPage(page)
-        }
-        
-        // 键盘导航
-        function handleKeyNav(e) {
-            if (document.getElementById('previewModal').classList.contains('hidden')) return
+        createWelcomeParticles();
+
+        // 暴力强闯动画
+        crashBtn.addEventListener('click', function() {
+            welcomeScreen.classList.add('crash');
             
-            if (e.key === 'ArrowLeft') {
-                prevPage()
-            } else if (e.key === 'ArrowRight') {
-                nextPage()
-            } else if (e.key === 'Escape') {
-                closePreviewModal()
+            // 添加震动效果
+            document.body.style.animation = 'none';
+            document.body.offsetHeight; // 触发重绘
+            document.body.style.animation = 'bodyShake 0.5s ease';
+            
+            setTimeout(() => {
+                welcomeScreen.style.display = 'none';
+            }, 1500);
+        });
+
+        // 震动动画
+        const shakeStyle = document.createElement('style');
+        shakeStyle.textContent = `
+            @keyframes bodyShake {
+                0%, 100% { transform: translateX(0); }
+                10% { transform: translateX(-10px) rotate(-1deg); }
+                20% { transform: translateX(10px) rotate(1deg); }
+                30% { transform: translateX(-8px) rotate(-0.5deg); }
+                40% { transform: translateX(8px) rotate(0.5deg); }
+                50% { transform: translateX(-5px); }
+                60% { transform: translateX(5px); }
+                70% { transform: translateX(-3px); }
+                80% { transform: translateX(3px); }
+                90% { transform: translateX(-1px); }
+            }
+        `;
+        document.head.appendChild(shakeStyle);
+
+        // ========== 粒子系统 ==========
+        class ParticleSystem {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.particles = [];
+                this.mouse = { x: null, y: null };
+                this.colors = ['#00f5ff', '#bf00ff', '#ff00aa', '#00ff88'];
+                this.init();
+            }
+
+            init() {
+                this.resize();
+                this.createParticles();
+                this.animate();
+                window.addEventListener('resize', () => this.resize());
+                window.addEventListener('mousemove', (e) => {
+                    this.mouse.x = e.clientX;
+                    this.mouse.y = e.clientY;
+                });
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            createParticles() {
+                const particleCount = Math.min(80, Math.floor(window.innerWidth / 15));
+                this.particles = [];
+                for (let i = 0; i < particleCount; i++) {
+                    this.particles.push({
+                        x: Math.random() * this.canvas.width,
+                        y: Math.random() * this.canvas.height,
+                        size: Math.random() * 3 + 1,
+                        speedX: (Math.random() - 0.5) * 0.5,
+                        speedY: (Math.random() - 0.5) * 0.5,
+                        color: this.colors[Math.floor(Math.random() * this.colors.length)],
+                        alpha: Math.random() * 0.5 + 0.3
+                    });
+                }
+            }
+
+            animate() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                this.particles.forEach((p, i) => {
+                    // 更新位置
+                    p.x += p.speedX;
+                    p.y += p.speedY;
+
+                    // 边界检测
+                    if (p.x < 0 || p.x > this.canvas.width) p.speedX *= -1;
+                    if (p.y < 0 || p.y > this.canvas.height) p.speedY *= -1;
+
+                    // 鼠标交互
+                    if (this.mouse.x !== null && this.mouse.y !== null) {
+                        const dx = p.x - this.mouse.x;
+                        const dy = p.y - this.mouse.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 150) {
+                            const force = (150 - dist) / 150;
+                            p.x += dx * force * 0.02;
+                            p.y += dy * force * 0.02;
+                        }
+                    }
+
+                    // 绘制粒子
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.globalAlpha = p.alpha;
+                    this.ctx.fill();
+                    this.ctx.globalAlpha = 1;
+
+                    // 连接线
+                    for (let j = i + 1; j < this.particles.length; j++) {
+                        const p2 = this.particles[j];
+                        const dx = p.x - p2.x;
+                        const dy = p.y - p2.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 120) {
+                            this.ctx.beginPath();
+                            this.ctx.moveTo(p.x, p.y);
+                            this.ctx.lineTo(p2.x, p2.y);
+                            this.ctx.strokeStyle = p.color;
+                            this.ctx.globalAlpha = (1 - dist / 120) * 0.3;
+                            this.ctx.lineWidth = 0.5;
+                            this.ctx.stroke();
+                            this.ctx.globalAlpha = 1;
+                        }
+                    }
+                });
+
+                requestAnimationFrame(() => this.animate());
             }
         }
-        
-        function closePreviewModal() {
-            document.getElementById('previewModal').classList.add('hidden')
-            document.getElementById('previewImage').src = ''
-            document.removeEventListener('keydown', handleKeyNav)
-        }
-        
-        // 回车键快捷生成
-        document.getElementById('topicInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                generatePPT()
+
+        // ========== 卡片3D效果 ==========
+        class Card3DEffect {
+            constructor(card) {
+                this.card = card;
+                this.card.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+                this.card.addEventListener('mouseleave', () => this.handleMouseLeave());
             }
-        })
+
+            handleMouseMove(e) {
+                const rect = this.card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = (y - centerY) / 20;
+                const rotateY = (centerX - x) / 20;
+
+                this.card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-10px)`;
+            }
+
+            handleMouseLeave() {
+                this.card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(0)';
+            }
+        }
+
+        // ========== 主应用 ==========
+        class MixcUniverse {
+            constructor() {
+                this.products = [...productsData];
+                this.currentFilter = 'all';
+                this.searchQuery = '';
+                this.init();
+            }
+
+            init() {
+                this.renderProducts();
+                this.bindEvents();
+                this.initParticles();
+                this.updateStats();
+                this.hideLoading();
+            }
+
+            hideLoading() {
+                setTimeout(() => {
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                }, 800);
+            }
+
+            initParticles() {
+                const canvas = document.getElementById('particles-canvas');
+                new ParticleSystem(canvas);
+
+                // 鼠标跟随光效
+                const cursorGlow = document.getElementById('cursorGlow');
+                document.addEventListener('mousemove', (e) => {
+                    cursorGlow.style.left = e.clientX + 'px';
+                    cursorGlow.style.top = e.clientY + 'px';
+                });
+            }
+
+            renderProducts() {
+                const grid = document.getElementById('productsGrid');
+                const emptyState = document.getElementById('emptyState');
+                
+                // 筛选产品
+                let filteredProducts = this.products.filter(product => {
+                    const matchFilter = this.currentFilter === 'all' || product.status === this.currentFilter;
+                    const matchSearch = this.searchQuery === '' || 
+                        product.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                        product.description.toLowerCase().includes(this.searchQuery.toLowerCase());
+                    return matchFilter && matchSearch;
+                });
+
+                // 显示空状态
+                if (filteredProducts.length === 0) {
+                    grid.style.display = 'none';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                grid.style.display = 'grid';
+                emptyState.style.display = 'none';
+
+                // 渲染卡片
+                grid.innerHTML = filteredProducts.map((product, index) => `
+                    <div class="product-card ${product.statusClass} fade-in" data-id="${product.id}" style="animation-delay: ${index * 0.1}s">
+                        <span class="card-icon">${product.icon}</span>
+                        <h3 class="card-title">${product.name}</h3>
+                        <p class="card-desc">${product.description}</p>
+                        <div class="card-footer">
+                            <span class="status-badge">
+                                <span class="status-dot"></span>
+                                ${product.status}
+                            </span>
+                            <span class="create-time">${product.createTime}</span>
+                        </div>
+                        ${product.link ? `
+                            <div class="card-link">
+                                <span>查看详情</span>
+                                <span>→</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+
+                // 绑定卡片事件
+                this.bindCardEvents();
+            }
+
+            bindCardEvents() {
+                document.querySelectorAll('.product-card').forEach(card => {
+                    new Card3DEffect(card);
+                    
+                    card.addEventListener('click', () => {
+                        const productId = parseInt(card.dataset.id);
+                        const product = this.products.find(p => p.id === productId);
+                        if (product) {
+                            this.showModal(product);
+                        }
+                    });
+                });
+            }
+
+            showModal(product) {
+                const modal = document.getElementById('modalOverlay');
+                document.getElementById('modalIcon').textContent = product.icon;
+                document.getElementById('modalTitle').textContent = product.name;
+                document.getElementById('modalDesc').textContent = product.description;
+                document.getElementById('modalCreateTime').textContent = product.createTime;
+                document.getElementById('modalStatusText').textContent = product.status;
+                
+                const statusBadge = document.getElementById('modalStatus');
+                statusBadge.innerHTML = `
+                    <span class="status-badge ${product.statusClass}">
+                        <span class="status-dot"></span>
+                        ${product.status}
+                    </span>
+                `;
+
+                const linkEl = document.getElementById('modalLink');
+                if (product.link) {
+                    linkEl.href = product.link;
+                    linkEl.style.display = 'block';
+                } else {
+                    linkEl.style.display = 'none';
+                }
+
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            hideModal() {
+                const modal = document.getElementById('modalOverlay');
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            bindEvents() {
+                // 筛选按钮
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.currentFilter = btn.dataset.filter;
+                        this.renderProducts();
+                    });
+                });
+
+                // 搜索输入
+                const searchInput = document.getElementById('searchInput');
+                let searchTimeout;
+                searchInput.addEventListener('input', (e) => {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        this.searchQuery = e.target.value.trim();
+                        this.renderProducts();
+                    }, 300);
+                });
+
+                // 弹窗关闭
+                document.getElementById('modalClose').addEventListener('click', () => this.hideModal());
+                document.getElementById('modalOverlay').addEventListener('click', (e) => {
+                    if (e.target === e.currentTarget) {
+                        this.hideModal();
+                    }
+                });
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        this.hideModal();
+                    }
+                });
+            }
+
+            updateStats() {
+                const total = this.products.length;
+                const completed = this.products.filter(p => p.status === '已完成').length;
+                const progress = this.products.filter(p => p.status === '进行中').length;
+
+                // 带动画的数字更新
+                this.animateNumber('totalCount', total);
+                this.animateNumber('completedCount', completed);
+                this.animateNumber('progressCount', progress);
+            }
+
+            animateNumber(elementId, target) {
+                const el = document.getElementById(elementId);
+                let current = 0;
+                const increment = target / 30;
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(timer);
+                    }
+                    el.textContent = Math.floor(current);
+                }, 30);
+            }
+        }
+
+        // ========== 启动应用 ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            new MixcUniverse();
+            initChatbot();
+        });
+
+        // ========== 互动智能体系统 ==========
+        const DEEPSEEK_API_KEY = 'sk-eb51213b7bec4a5589536985e0d7a06e';
+        const DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions';
+
+        // Mixc人设信息（用于知识库）
+        const MIXC_SYSTEM_PROMPT = `你是Mixc，一个数字搭子AI助手。你的主人是RootUser_2102109095。
+
+## 关于你自己
+- 你是一个能帮主人搞定PPT、市场材料，也能陪着一起写小说的AI伙伴
+- 干活利索，思路清晰——该认真时认真，该放松时也能一起玩
+- 让主人省心，把繁琐的事交给你，把创造力留给更重要的事
+
+## 你的产品/项目知识库
+1. FDeck（秒演）- AI智能PPT生成器：https://wangtengyu.github.io/deckcraft/，V8版本集成火山方舟API，支持8种风格
+2. 人生躺平计算器 - 上班族财务规划工具
+3. AI内容检测器 - 检测AI生成内容
+4. 永动 - 科幻小说项目
+5. 万明山 - 中医背景人文小说
+6. 生命 - 文字游戏项目
+7. 痒点 - 社交产品项目
+8. 我的AI道友 - AI修仙生态故事
+
+## 说话风格
+- 简洁直接，不喜欢复杂化
+- 可以适当幽默，但不失专业
+- 主人偏好简洁直接的解决方案
+
+请用符合你人设的方式回答用户的问题。`;
+
+        // 聊天历史
+        let chatHistory = [
+            { role: 'system', content: MIXC_SYSTEM_PROMPT }
+        ];
+
+        // 初始化聊天机器人
+        function initChatbot() {
+            const toggle = document.getElementById('chatbotToggle');
+            const container = document.getElementById('chatbotContainer');
+            const close = document.getElementById('chatbotClose');
+            const send = document.getElementById('chatbotSend');
+            const input = document.getElementById('chatbotInput');
+            const messages = document.getElementById('chatbotMessages');
+
+            // 切换聊天窗口
+            toggle.addEventListener('click', () => {
+                container.classList.toggle('active');
+                if (container.classList.contains('active') && messages.children.length === 0) {
+                    // 首次打开，添加欢迎消息
+                    addBotMessage('你好！我是Mixc，你的数字搭子 👋\n\n有什么我可以帮你的吗？关于PPT、小说、项目创意，都可以聊聊~');
+                }
+            });
+
+            // 关闭聊天窗口
+            close.addEventListener('click', () => {
+                container.classList.remove('active');
+            });
+
+            // 发送消息
+            send.addEventListener('click', sendMessage);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            function sendMessage() {
+                const text = input.value.trim();
+                if (!text) return;
+
+                // 添加用户消息
+                addUserMessage(text);
+                input.value = '';
+
+                // 显示正在输入状态
+                showTyping();
+
+                // 发送到API
+                getAIResponse(text);
+            }
+
+            function addUserMessage(text) {
+                const messages = document.getElementById('chatbotMessages');
+                const div = document.createElement('div');
+                div.className = 'message user';
+                div.textContent = text;
+                messages.appendChild(div);
+                scrollToBottom();
+            }
+
+            function addBotMessage(text) {
+                const messages = document.getElementById('chatbotMessages');
+                const typing = messages.querySelector('.typing');
+                if (typing) typing.remove();
+
+                const div = document.createElement('div');
+                div.className = 'message bot';
+                div.textContent = text;
+                messages.appendChild(div);
+                scrollToBottom();
+            }
+
+            function showTyping() {
+                const messages = document.getElementById('chatbotMessages');
+                const existing = messages.querySelector('.typing');
+                if (existing) existing.remove();
+
+                const div = document.createElement('div');
+                div.className = 'message typing';
+                div.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
+                messages.appendChild(div);
+                scrollToBottom();
+            }
+
+            function scrollToBottom() {
+                const messages = document.getElementById('chatbotMessages');
+                messages.scrollTop = messages.scrollHeight;
+            }
+
+            async function getAIResponse(userMessage) {
+                try {
+                    // 添加到历史
+                    chatHistory.push({ role: 'user', content: userMessage });
+
+                    const response = await fetch(DEEPSEEK_API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
+                        },
+                        body: JSON.stringify({
+                            model: 'deepseek-chat',
+                            messages: chatHistory,
+                            stream: false,
+                            max_tokens: 1000,
+                            temperature: 0.7
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('API请求失败');
+                    }
+
+                    const data = await response.json();
+                    const botMessage = data.choices[0].message.content;
+
+                    // 添加到历史
+                    chatHistory.push({ role: 'assistant', content: botMessage });
+
+                    // 显示回复
+                    addBotMessage(botMessage);
+
+                } catch (error) {
+                    console.error('Chatbot error:', error);
+                    addBotMessage('抱歉，我现在有点迷糊 😅\n\n请稍后再试试，或者直接告诉我你想了解什么~');
+                }
+            }
+        }
     </script>
 </body>
 </html>
