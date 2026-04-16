@@ -773,6 +773,76 @@
             border-color: #00f5ff;
             box-shadow: 0 0 30px rgba(0, 245, 255, 0.2);
             transform: translateY(-5px);
+            cursor: pointer;
+        }
+
+        .tip-card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .tip-card.disabled:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: rgba(0, 245, 255, 0.2);
+        }
+
+        /* ========== 二维码弹窗 ========== */
+        .qr-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .qr-modal.active {
+            display: flex;
+        }
+
+        .qr-content {
+            background: linear-gradient(135deg, rgba(20, 20, 60, 0.98), rgba(30, 20, 50, 0.98));
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            position: relative;
+        }
+
+        .qr-image {
+            width: 250px;
+            height: 250px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .qr-title {
+            color: #00f5ff;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .qr-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .qr-close:hover {
+            background: rgba(255, 0, 100, 0.3);
         }
 
         .tip-icon {
@@ -1693,23 +1763,32 @@
             <h3 class="tip-title">☁️ 互联网云乞讨</h3>
             <p class="tip-subtitle">"你的打赏，是我宇宙探索的能量源泉" ✨</p>
             <div class="tip-content">
-                <div class="tip-card">
+                <div class="tip-card" onclick="showQR('wechat')">
                     <div class="tip-icon">🧧</div>
                     <div class="tip-label">微信打赏</div>
                     <div class="tip-hint">扫码请我喝杯咖啡</div>
                 </div>
-                <div class="tip-card">
+                <div class="tip-card" onclick="showQR('alipay')">
                     <div class="tip-icon">💎</div>
                     <div class="tip-label">支付宝</div>
                     <div class="tip-hint">你的善意让我更强</div>
                 </div>
-                <div class="tip-card">
+                <div class="tip-card disabled">
                     <div class="tip-icon">🪙</div>
                     <div class="tip-label">数字货币</div>
-                    <div class="tip-hint">BTC/ETH/USDT皆可</div>
+                    <div class="tip-hint">暂不支持</div>
                 </div>
             </div>
         </section>
+
+        <!-- 二维码弹窗 -->
+        <div class="qr-modal" id="qrModal" onclick="hideQR()">
+            <div class="qr-content" onclick="event.stopPropagation()">
+                <button class="qr-close" onclick="hideQR()">✕</button>
+                <img id="qrImage" class="qr-image" src="" alt="收款码">
+                <p class="qr-title" id="qrTitle"></p>
+            </div>
+        </div>
     </div>
 
     <!-- 互动智能体模块 -->
@@ -1897,6 +1976,27 @@
         const contactFormArea = document.getElementById('contactFormArea');
         const contactSuccess = document.getElementById('contactSuccess');
         const contactSubmit = document.getElementById('contactSubmit');
+
+        // ========== 二维码弹窗 ==========
+        function showQR(type) {
+            const modal = document.getElementById('qrModal');
+            const img = document.getElementById('qrImage');
+            const title = document.getElementById('qrTitle');
+            
+            if (type === 'wechat') {
+                img.src = 'sponsor-qr-wechat.jpg';
+                title.textContent = '🧧 微信打赏';
+            } else if (type === 'alipay') {
+                img.src = 'sponsor-qr.jpg';
+                title.textContent = '💎 支付宝打赏';
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function hideQR() {
+            document.getElementById('qrModal').classList.remove('active');
+        }
 
         contactBtnWelcome.addEventListener('click', () => {
             contactModal.classList.add('active');
