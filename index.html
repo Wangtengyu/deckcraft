@@ -1649,6 +1649,359 @@
         .contact-success-text {
             color: rgba(200, 200, 255, 0.9);
         }
+
+        /* ========== 彩蛋点击效果 ========== */
+        .click-egg-counter {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: rgba(255, 200, 100, 0.8);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .click-egg-counter.show {
+            opacity: 1;
+        }
+
+        .click-egg-counter span {
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        /* ========== 彩蛋提示弹窗 ========== */
+        .egg-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: linear-gradient(135deg, rgba(20, 20, 60, 0.98), rgba(30, 20, 50, 0.98));
+            border: 2px solid #ffd700;
+            border-radius: 20px;
+            padding: 40px 50px;
+            text-align: center;
+            z-index: 10001;
+            box-shadow: 0 0 60px rgba(255, 215, 0, 0.4);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .egg-popup.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .egg-popup-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            animation: eggBounce 0.6s ease infinite;
+        }
+
+        @keyframes eggBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .egg-popup-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .egg-popup-sub {
+            color: rgba(200, 200, 255, 0.7);
+            font-size: 0.95rem;
+        }
+
+        /* ========== 烟花效果 ========== */
+        .firework {
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+        }
+
+        .firework-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: fireworkExplode 1s ease-out forwards;
+        }
+
+        @keyframes fireworkExplode {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* ========== 小精灵捉迷藏 ========== */
+        .hidden-sprite {
+            position: fixed;
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 50;
+            animation: spriteFloat 2s ease-in-out infinite;
+            transition: transform 0.2s, opacity 0.3s;
+            filter: drop-shadow(0 0 10px rgba(255, 200, 100, 0.5));
+        }
+
+        .hidden-sprite:hover {
+            transform: scale(1.3);
+        }
+
+        .hidden-sprite.caught {
+            opacity: 0;
+            transform: scale(2) rotate(360deg);
+        }
+
+        @keyframes spriteFloat {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-8px) rotate(5deg); }
+        }
+
+        /* 小精灵计分板 */
+        .sprite-score {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, rgba(20, 20, 60, 0.9), rgba(30, 20, 50, 0.9));
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            border-radius: 12px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 100;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .sprite-score.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .sprite-score-icon {
+            font-size: 1.5rem;
+        }
+
+        .sprite-score-text {
+            font-family: 'Orbitron', sans-serif;
+            color: #ffd700;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .sprite-score-add {
+            position: absolute;
+            top: -20px;
+            right: 20px;
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 1rem;
+            animation: scoreFloat 0.8s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes scoreFloat {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-30px); }
+        }
+
+        /* ========== 关键词动画 ========== */
+        .keyword-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .keyword-effect.active {
+            opacity: 1;
+        }
+
+        /* 借钱警告效果 */
+        .keyword-effect.danger {
+            background: radial-gradient(circle, transparent 30%, rgba(255, 0, 0, 0.3) 100%);
+            animation: dangerFlash 0.5s ease-in-out infinite;
+        }
+
+        @keyframes dangerFlash {
+            0%, 100% { background: radial-gradient(circle, transparent 30%, rgba(255, 0, 0, 0.2) 100%); }
+            50% { background: radial-gradient(circle, transparent 30%, rgba(255, 0, 0, 0.5) 100%); }
+        }
+
+        /* 打赏爱心效果 */
+        .heart-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        .falling-heart {
+            position: absolute;
+            font-size: 1.5rem;
+            animation: heartFall linear forwards;
+            pointer-events: none;
+        }
+
+        @keyframes heartFall {
+            0% {
+                transform: translateY(-50px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* ========== 语音按钮 ========== */
+        .voice-btn {
+            position: absolute;
+            bottom: 8px;
+            right: 60px;
+            width: 32px;
+            height: 32px;
+            background: rgba(0, 245, 255, 0.2);
+            border: 1px solid rgba(0, 245, 255, 0.4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .voice-btn:hover {
+            background: rgba(0, 245, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .voice-btn.speaking {
+            animation: voicePulse 1s ease-in-out infinite;
+            background: rgba(0, 255, 136, 0.3);
+            border-color: #00ff88;
+        }
+
+        @keyframes voicePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        /* ========== 自拍功能 ========== */
+        .selfie-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 200, 100, 0.2);
+            border: 1px solid rgba(255, 200, 100, 0.4);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .selfie-btn:hover {
+            background: rgba(255, 200, 100, 0.4);
+            transform: scale(1.1);
+        }
+
+        .selfie-frame {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: linear-gradient(135deg, rgba(20, 20, 60, 0.95), rgba(30, 20, 50, 0.95));
+            border: 3px solid;
+            border-image: linear-gradient(135deg, #00f5ff, #bf00ff, #ff00aa) 1;
+            padding: 30px;
+            text-align: center;
+            z-index: 10002;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 60px rgba(0, 245, 255, 0.3);
+        }
+
+        .selfie-frame.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .selfie-avatar {
+            font-size: 5rem;
+            margin-bottom: 15px;
+            animation: selfieShake 0.5s ease-in-out;
+        }
+
+        @keyframes selfieShake {
+            0%, 100% { transform: rotate(0); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+        }
+
+        .selfie-text {
+            font-family: 'Orbitron', sans-serif;
+            color: #00f5ff;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .selfie-close {
+            padding: 8px 20px;
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.3), rgba(191, 0, 255, 0.3));
+            border: 1px solid #00f5ff;
+            border-radius: 20px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .selfie-close:hover {
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.5), rgba(191, 0, 255, 0.5));
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
+        }
+
+        /* ========== 欢迎语随机变化 ========== */
+        .welcome-icon {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .welcome-icon.clicked {
+            animation: iconShake 0.3s ease;
+        }
+
+        @keyframes iconShake {
+            0%, 100% { transform: translateX(0) rotate(0); }
+            25% { transform: translateX(-5px) rotate(-5deg); }
+            75% { transform: translateX(5px) rotate(5deg); }
+        }
     </style>
 </head>
 <body>
@@ -1661,11 +2014,31 @@
         <div class="welcome-corner bl"></div>
         <div class="welcome-corner br"></div>
         <div class="welcome-content">
-            <div class="welcome-icon">🌌</div>
+            <div class="welcome-icon" id="welcomeIcon">🌌<div class="click-egg-counter" id="clickEggCounter">再点 <span>0</span>/5 次发现彩蛋</div></div>
             <h1 class="welcome-title">欢迎来到 MIXC UNIVERSE</h1>
             <p class="welcome-subtitle">主人在现实世界搬砖，智能助理Mixc和您沟通 <button class="contact-btn-welcome" id="contactBtnWelcome">📧 联系我</button></p>
             <button class="crash-btn" id="crashBtn">暴力强闯 →</button>
         </div>
+    </div>
+
+    <!-- 彩蛋弹窗 -->
+    <div class="egg-popup" id="eggPopup">
+        <div class="egg-popup-icon">🎉</div>
+        <div class="egg-popup-text">恭喜发现彩蛋！</div>
+        <div class="egg-popup-sub">你已经是Mixc Universe的资深探索者啦~</div>
+    </div>
+
+    <!-- 烟花效果容器 -->
+    <div id="fireworkContainer"></div>
+
+    <!-- 关键词效果层 -->
+    <div class="keyword-effect" id="keywordEffect"></div>
+    <div class="heart-rain" id="heartRain"></div>
+
+    <!-- 小精灵计分板 -->
+    <div class="sprite-score" id="spriteScore">
+        <span class="sprite-score-icon">👻</span>
+        <span class="sprite-score-text" id="spriteScoreText">0</span>
     </div>
 
     <!-- 联系弹窗 -->
@@ -1859,6 +2232,8 @@
                 </div>
                 <button class="chatbot-close" id="chatbotClose">✕</button>
             </div>
+            <button class="selfie-btn" id="selfieBtn" title="自拍">📸</button>
+            <button class="voice-btn" id="voiceBtn" title="语音">🔊</button>
             <div class="chatbot-messages" id="chatbotMessages">
                 <!-- 消息将通过JS动态添加 -->
             </div>
@@ -1868,6 +2243,13 @@
             </div>
         </div>
         <button class="chatbot-toggle" id="chatbotToggle">💬</button>
+    </div>
+
+    <!-- 自拍弹窗 -->
+    <div class="selfie-frame" id="selfieFrame">
+        <div class="selfie-avatar">🤖</div>
+        <div class="selfie-text">Mixc 自拍 🤳</div>
+        <button class="selfie-close" id="selfieClose">关闭</button>
     </div>
 
     <script>
@@ -2638,6 +3020,348 @@
                 }
             }
         }
+
+        // ========== 随机欢迎语 ==========
+        const welcomeMessages = [
+            "暴力入侵成功！有什么事快说，我很忙的~",
+            "主人去搬砖了，留下我看家。打赏可以考虑一下？",
+            "你好啊，入侵者！我已经记录下你的IP了哦~",
+            "又来一个不怕死的？好吧，让我看看你能干嘛~",
+            "哇哦，有人来了！难道是被我的魅力吸引的？",
+            "你好，我是Mixc。别问我为什么在这里，问就是被主人派来看门的。",
+            "嗯？你也暴力入侵了？看来我们是同类人呢~",
+            "欢迎来到Mixc Universe！记得给主人打赏哦~",
+            "来了来了！我是Mixc，你的专属AI小助手~",
+            "暴力破解密码成功！...开玩笑的，本来就没密码。有什么事？"
+        ];
+
+        function getRandomWelcome() {
+            return welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+        }
+
+        // ========== 点击彩蛋功能 ==========
+        let clickCount = 0;
+        const welcomeIcon = document.getElementById('welcomeIcon');
+        const clickEggCounter = document.getElementById('clickEggCounter');
+        const eggPopup = document.getElementById('eggPopup');
+
+        welcomeIcon.addEventListener('click', (e) => {
+            // 阻止触发欢迎页消失
+            e.stopPropagation();
+            
+            clickCount++;
+            
+            // 更新计数器
+            clickEggCounter.querySelector('span').textContent = clickCount;
+            clickEggCounter.classList.add('show');
+            
+            // 添加点击动画
+            welcomeIcon.classList.add('clicked');
+            setTimeout(() => welcomeIcon.classList.remove('clicked'), 300);
+            
+            if (clickCount >= 5) {
+                // 触发彩蛋
+                triggerEasterEgg();
+            }
+        });
+
+        function triggerEasterEgg() {
+            // 显示彩蛋弹窗
+            eggPopup.classList.add('show');
+            
+            // 触发烟花
+            triggerFireworks();
+            
+            // 2秒后隐藏弹窗
+            setTimeout(() => {
+                eggPopup.classList.remove('show');
+            }, 3000);
+            
+            // 重置计数器
+            setTimeout(() => {
+                clickCount = 0;
+                clickEggCounter.classList.remove('show');
+                clickEggCounter.querySelector('span').textContent = '0';
+            }, 1000);
+        }
+
+        // ========== 烟花效果 ==========
+        function triggerFireworks() {
+            const container = document.getElementById('fireworkContainer');
+            const colors = ['#ffd700', '#00f5ff', '#bf00ff', '#ff00aa', '#00ff88', '#ff6b6b'];
+            
+            // 创建多个烟花
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    createFirework(
+                        Math.random() * window.innerWidth * 0.6 + window.innerWidth * 0.2,
+                        Math.random() * window.innerHeight * 0.4 + window.innerHeight * 0.1,
+                        colors[Math.floor(Math.random() * colors.length)]
+                    );
+                }, i * 200);
+            }
+        }
+
+        function createFirework(x, y, color) {
+            const firework = document.createElement('div');
+            firework.className = 'firework';
+            firework.style.left = x + 'px';
+            firework.style.top = y + 'px';
+            
+            // 创建多个粒子
+            const particleCount = 20 + Math.floor(Math.random() * 10);
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'firework-particle';
+                particle.style.background = color;
+                
+                // 随机方向
+                const angle = (Math.PI * 2 * i) / particleCount + Math.random() * 0.5;
+                const distance = 50 + Math.random() * 80;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                
+                particle.style.setProperty('--tx', tx + 'px');
+                particle.style.setProperty('--ty', ty + 'px');
+                
+                firework.appendChild(particle);
+            }
+            
+            document.getElementById('fireworkContainer').appendChild(firework);
+            
+            // 动画结束后移除
+            setTimeout(() => firework.remove(), 1000);
+        }
+
+        // ========== 捉迷藏小精灵 ==========
+        let spriteScore = 0;
+        let currentSprite = null;
+        let spriteTimer = null;
+        const spriteEmojis = ['👻', '👾', '🧚', '✨', '🌟', '💫', '🎃', '🦊'];
+        
+        function createSprite() {
+            if (currentSprite) {
+                currentSprite.remove();
+            }
+            
+            const sprite = document.createElement('div');
+            sprite.className = 'hidden-sprite';
+            sprite.textContent = spriteEmojis[Math.floor(Math.random() * spriteEmojis.length)];
+            
+            // 随机位置（避开边缘和智能体按钮区域）
+            const maxX = window.innerWidth - 80;
+            const maxY = window.innerHeight - 100;
+            const minY = 150; // 避开顶部计分板
+            sprite.style.left = (Math.random() * maxX + 20) + 'px';
+            sprite.style.top = (Math.random() * (maxY - minY) + minY) + 'px';
+            
+            sprite.addEventListener('click', catchSprite);
+            
+            document.body.appendChild(sprite);
+            currentSprite = sprite;
+            
+            // 5秒后自动消失
+            spriteTimer = setTimeout(() => {
+                if (sprite.parentNode) {
+                    sprite.classList.add('caught');
+                    setTimeout(() => {
+                        if (sprite.parentNode) sprite.remove();
+                        currentSprite = null;
+                        createSprite();
+                    }, 300);
+                }
+            }, 5000);
+        }
+
+        function catchSprite() {
+            if (!currentSprite) return;
+            
+            clearTimeout(spriteTimer);
+            spriteScore++;
+            
+            // 显示计分板
+            const scoreBoard = document.getElementById('spriteScore');
+            scoreBoard.classList.add('show');
+            
+            // 更新分数
+            document.getElementById('spriteScoreText').textContent = spriteScore;
+            
+            // 添加加分动画
+            const addScore = document.createElement('div');
+            addScore.className = 'sprite-score-add';
+            addScore.textContent = '+1';
+            scoreBoard.appendChild(addScore);
+            setTimeout(() => addScore.remove(), 800);
+            
+            // 捕获动画
+            currentSprite.classList.add('caught');
+            
+            setTimeout(() => {
+                if (currentSprite && currentSprite.parentNode) {
+                    currentSprite.remove();
+                }
+                currentSprite = null;
+                createSprite();
+            }, 300);
+        }
+
+        // 页面加载后启动捉迷藏
+        setTimeout(() => {
+            createSprite();
+        }, 3000);
+
+        // ========== 关键词触发动画 ==========
+        function checkKeywordEffects(text) {
+            const keywordEffect = document.getElementById('keywordEffect');
+            const heartRain = document.getElementById('heartRain');
+            
+            // 借钱 - 警告效果
+            if (text.includes('借钱') || text.includes('借我') || text.includes('给我钱')) {
+                keywordEffect.className = 'keyword-effect active danger';
+                setTimeout(() => {
+                    keywordEffect.classList.remove('active', 'danger');
+                }, 2000);
+            }
+            
+            // 打赏 - 爱心雨效果
+            if (text.includes('打赏') || text.includes('赞助') || text.includes('捐款')) {
+                createHeartRain();
+            }
+            
+            // 主人 - 忠诚回应
+            if (text.includes('主人')) {
+                const firework = document.getElementById('fireworkContainer');
+                const miniFirework = document.createElement('div');
+                miniFirework.style.cssText = 'position:fixed;top:50%;left:50%;font-size:2rem;z-index:9999;animation:eggBounce 0.5s ease';
+                miniFirework.textContent = '💖';
+                document.body.appendChild(miniFirework);
+                setTimeout(() => miniFirework.remove(), 500);
+            }
+        }
+
+        function createHeartRain() {
+            const heartRain = document.getElementById('heartRain');
+            const hearts = ['💖', '💗', '💕', '💓', '💝', '❤️'];
+            
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.className = 'falling-heart';
+                    heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+                    heart.style.left = Math.random() * 100 + '%';
+                    heart.style.animationDuration = (2 + Math.random() * 2) + 's';
+                    heart.style.fontSize = (1 + Math.random() * 1) + 'rem';
+                    heartRain.appendChild(heart);
+                    
+                    setTimeout(() => heart.remove(), 4000);
+                }, i * 100);
+            }
+        }
+
+        // 修改getAIResponse函数，添加关键词检测
+        const originalGetAIResponse = getAIResponse;
+        getAIResponse = async function(userMessage) {
+            // 先检查关键词效果
+            checkKeywordEffects(userMessage);
+            // 再调用原函数
+            return originalGetAIResponse(userMessage);
+        };
+
+        // ========== 语音回复功能 ==========
+        let speechSynthesis = window.speechSynthesis;
+        let isSpeaking = false;
+        
+        function speakText(text) {
+            if (!speechSynthesis) {
+                console.log('浏览器不支持语音合成');
+                return;
+            }
+            
+            // 停止之前的语音
+            speechSynthesis.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-CN';
+            utterance.rate = 1;
+            utterance.pitch = 1.2;
+            
+            utterance.onstart = () => {
+                isSpeaking = true;
+                document.getElementById('voiceBtn')?.classList.add('speaking');
+            };
+            
+            utterance.onend = () => {
+                isSpeaking = false;
+                document.getElementById('voiceBtn')?.classList.remove('speaking');
+            };
+            
+            speechSynthesis.speak(utterance);
+        }
+
+        // 语音按钮事件
+        document.getElementById('voiceBtn')?.addEventListener('click', () => {
+            if (isSpeaking) {
+                speechSynthesis.cancel();
+                isSpeaking = false;
+                document.getElementById('voiceBtn')?.classList.remove('speaking');
+            } else {
+                const lastBotMessage = document.querySelector('.chatbot-messages .message.bot:last-child');
+                if (lastBotMessage) {
+                    speakText(lastBotMessage.textContent);
+                }
+            }
+        });
+
+        // ========== 自拍功能 ==========
+        const selfieBtn = document.getElementById('selfieBtn');
+        const selfieFrame = document.getElementById('selfieFrame');
+        const selfieClose = document.getElementById('selfieClose');
+
+        selfieBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            selfieFrame.classList.add('show');
+        });
+
+        selfieClose?.addEventListener('click', () => {
+            selfieFrame.classList.remove('show');
+        });
+
+        selfieFrame?.addEventListener('click', (e) => {
+            if (e.target === selfieFrame) {
+                selfieFrame.classList.remove('show');
+            }
+        });
+
+        // ========== 修改欢迎消息为随机 ==========
+        const originalInitChatbot = initChatbot;
+        initChatbot = function() {
+            originalInitChatbot();
+            
+            // 修改欢迎消息的显示逻辑
+            const toggle = document.getElementById('chatbotToggle');
+            const container = document.getElementById('chatbotContainer');
+            const messages = document.getElementById('chatbotMessages');
+            
+            // 重写首次打开的欢迎消息
+            const originalToggleHandler = toggle.onclick;
+            toggle.onclick = () => {
+                container.classList.toggle('active');
+                if (container.classList.contains('active') && messages.children.length === 0) {
+                    addBotMessage(getRandomWelcome());
+                }
+            };
+            
+            const aiAgentBtn = document.getElementById('aiAgentBtn');
+            if (aiAgentBtn) {
+                const originalAgentHandler = aiAgentBtn.onclick;
+                aiAgentBtn.onclick = () => {
+                    container.classList.add('active');
+                    if (messages.children.length === 0) {
+                        addBotMessage(getRandomWelcome());
+                    }
+                };
+            }
+        };
     </script>
 </body>
 </html>
