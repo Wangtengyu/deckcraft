@@ -1362,6 +1362,150 @@
         .welcome-corner.tr { top: 30px; right: 30px; border-left: none; border-bottom: none; }
         .welcome-corner.bl { bottom: 30px; left: 30px; border-right: none; border-top: none; }
         .welcome-corner.br { bottom: 30px; right: 30px; border-left: none; border-top: none; }
+
+        /* ========== 联系表单 ========== */
+        .contact-btn-welcome {
+            position: absolute;
+            top: 30px;
+            right: 150px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .contact-btn-welcome:hover {
+            background: rgba(255, 0, 100, 0.2);
+            border-color: #ff0064;
+            color: #fff;
+        }
+
+        .contact-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .contact-modal.active {
+            display: flex;
+        }
+
+        .contact-content {
+            background: linear-gradient(135deg, rgba(20, 20, 60, 0.98), rgba(30, 20, 50, 0.98));
+            border-radius: 20px;
+            padding: 35px;
+            max-width: 420px;
+            width: 90%;
+            border: 1px solid rgba(255, 0, 100, 0.3);
+            box-shadow: 0 0 60px rgba(255, 0, 100, 0.2);
+            position: relative;
+        }
+
+        .contact-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            text-align: center;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, #ff0064, #bf00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .contact-input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 0, 100, 0.3);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .contact-input:focus {
+            outline: none;
+            border-color: #ff0064;
+        }
+
+        .contact-input::placeholder {
+            color: rgba(200, 200, 255, 0.4);
+        }
+
+        .contact-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .contact-submit {
+            background: linear-gradient(135deg, #ff0064, #bf00ff);
+            border: none;
+            border-radius: 10px;
+            padding: 14px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .contact-submit:hover {
+            box-shadow: 0 4px 20px rgba(255, 0, 100, 0.4);
+        }
+
+        .contact-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .contact-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .contact-close:hover {
+            background: rgba(255, 0, 100, 0.3);
+        }
+
+        .contact-success {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .contact-success-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .contact-success-text {
+            color: rgba(200, 200, 255, 0.9);
+        }
     </style>
 </head>
 <body>
@@ -1373,11 +1517,32 @@
         <div class="welcome-corner tr"></div>
         <div class="welcome-corner bl"></div>
         <div class="welcome-corner br"></div>
+        <button class="contact-btn-welcome" id="contactBtnWelcome">📧 联系我</button>
         <div class="welcome-content">
             <div class="welcome-icon">🌌</div>
             <h1 class="welcome-title">欢迎来到 MIXC UNIVERSE</h1>
-            <p class="welcome-subtitle">探索产品元宇宙 · 发现无限可能</p>
+            <p class="welcome-subtitle">主人在现实世界搬砖，智能助理Mixc和您沟通</p>
             <button class="crash-btn" id="crashBtn">暴力强闯 →</button>
+        </div>
+    </div>
+
+    <!-- 联系弹窗 -->
+    <div class="contact-modal" id="contactModal">
+        <div class="contact-content">
+            <button class="contact-close" id="contactClose">✕</button>
+            <div id="contactFormArea">
+                <h3 class="contact-title">📮 给我留言</h3>
+                <form class="contact-form" id="contactForm">
+                    <input type="text" class="contact-input" id="contactName" placeholder="您的称呼" required>
+                    <input type="text" class="contact-input" id="contactWay" placeholder="联系方式（微信/邮箱，选填）">
+                    <textarea class="contact-input contact-textarea" id="contactMsg" placeholder="想说的话..." required></textarea>
+                    <button type="submit" class="contact-submit" id="contactSubmit">发送到微信</button>
+                </form>
+            </div>
+            <div class="contact-success" id="contactSuccess" style="display: none;">
+                <div class="contact-success-icon">✅</div>
+                <p class="contact-success-text">消息已发送！<br>我会尽快回复您</p>
+            </div>
         </div>
     </div>
 
@@ -1704,6 +1869,66 @@
             }
         `;
         document.head.appendChild(shakeStyle);
+
+        // ========== 联系表单 ==========
+        const contactBtnWelcome = document.getElementById('contactBtnWelcome');
+        const contactModal = document.getElementById('contactModal');
+        const contactClose = document.getElementById('contactClose');
+        const contactForm = document.getElementById('contactForm');
+        const contactFormArea = document.getElementById('contactFormArea');
+        const contactSuccess = document.getElementById('contactSuccess');
+        const contactSubmit = document.getElementById('contactSubmit');
+
+        contactBtnWelcome.addEventListener('click', () => {
+            contactModal.classList.add('active');
+        });
+
+        contactClose.addEventListener('click', () => {
+            contactModal.classList.remove('active');
+        });
+
+        contactModal.addEventListener('click', (e) => {
+            if (e.target === contactModal) {
+                contactModal.classList.remove('active');
+            }
+        });
+
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('contactName').value.trim();
+            const way = document.getElementById('contactWay').value.trim();
+            const msg = document.getElementById('contactMsg').value.trim();
+
+            if (!name || !msg) return;
+
+            contactSubmit.disabled = true;
+            contactSubmit.textContent = '发送中...';
+
+            try {
+                const title = `📬 新留言：${name}`;
+                const content = `**称呼**：${name}\n\n**联系方式**：${way || '未留'}\n\n**留言内容**：\n${msg}`;
+                const url = `https://sct.ftqq.com/SCT338707TFNBTePRwEw9E8PSJNmzERVe3.send?text=${encodeURIComponent(title)}&desp=${encodeURIComponent(content)}`;
+                
+                await fetch(url);
+                
+                contactFormArea.style.display = 'none';
+                contactSuccess.style.display = 'block';
+                
+                setTimeout(() => {
+                    contactModal.classList.remove('active');
+                    contactForm.reset();
+                    contactFormArea.style.display = 'block';
+                    contactSuccess.style.display = 'none';
+                    contactSubmit.disabled = false;
+                    contactSubmit.textContent = '发送到微信';
+                }, 3000);
+            } catch (error) {
+                alert('发送失败，请稍后再试');
+                contactSubmit.disabled = false;
+                contactSubmit.textContent = '发送到微信';
+            }
+        });
 
         // ========== 粒子系统 ==========
         class ParticleSystem {
