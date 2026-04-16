@@ -1,0 +1,11 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  
+  return res.json({
+    status: 'ok',
+    message: 'Agentia API is running!',
+    timestamp: new Date().toISOString()
+  });
+}
