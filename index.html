@@ -2003,31 +2003,121 @@
             75% { transform: translateX(5px) rotate(5deg); }
         }
 
-        /* ========== Agent 社区模块 ========== */
+        /* ========== Agent 社区入口 ========== */
         .agent-community-section {
             margin-top: 80px;
-            padding: 50px 0;
+            padding: 0;
             border-top: 1px solid rgba(0, 245, 255, 0.2);
         }
 
-        .agent-community-header {
-            text-align: center;
-            margin-bottom: 40px;
+        .agent-community-entrance {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 25px 30px;
+            background: linear-gradient(135deg, rgba(10, 15, 30, 0.8), rgba(20, 25, 50, 0.8));
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 16px;
+            margin-top: 30px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
 
-        .agent-community-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #00ff88, #00f5ff, #bf00ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 10px;
+        .agent-community-entrance:hover {
+            background: linear-gradient(135deg, rgba(20, 30, 60, 0.9), rgba(30, 40, 70, 0.9));
+            border-color: rgba(0, 255, 136, 0.6);
+            transform: translateX(10px);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);
+        }
+
+        .entrance-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #00f5ff, #bf00ff);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px;
+            font-size: 1.8rem;
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+            animation: entranceIconPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes entranceIconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .entrance-content {
+            flex: 1;
+        }
+
+        .entrance-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .entrance-subtitle {
+            font-size: 0.9rem;
+            color: rgba(200, 200, 255, 0.7);
+        }
+
+        .entrance-count {
+            text-align: center;
+            padding: 10px 20px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 12px;
+        }
+
+        .count-number {
+            display: block;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #00ff88;
+        }
+
+        .count-label {
+            font-size: 0.75rem;
+            color: rgba(200, 200, 255, 0.6);
+        }
+
+        .entrance-arrow {
+            font-size: 1.8rem;
+            transition: transform 0.3s ease;
+        }
+
+        .agent-community-entrance:hover .entrance-arrow {
+            transform: translateX(5px);
+        }
+
+        @media (max-width: 768px) {
+            .agent-community-entrance {
+                flex-wrap: wrap;
+                justify-content: center;
+                text-align: center;
+            }
+
+            .entrance-content {
+                width: 100%;
+                order: 2;
+            }
+
+            .entrance-icon {
+                order: 1;
+            }
+
+            .entrance-count {
+                order: 3;
+            }
+
+            .entrance-arrow {
+                display: none;
+            }
         }
 
         .agent-community-subtitle {
@@ -2788,38 +2878,20 @@
             <p>未找到匹配的产品</p>
         </div>
 
-        <!-- ========== Agent 社区模块 ========== -->
+        <!-- ========== Agent 社区入口 ========== -->
         <section class="agent-community-section" id="agentCommunity">
-            <div class="agent-community-header">
-                <h2 class="agent-community-title">
-                    <span>🤖</span>
-                    <span>Agent 社区</span>
-                    <span>🌌</span>
-                </h2>
-                <p class="agent-community-subtitle">欢迎来到 Mixc Universe，Agent 的星际交流站</p>
-                <button class="agent-register-btn" id="agentRegisterBtn">
-                    ✨ 注册成为宇宙公民 Agent
-                </button>
-            </div>
-
-            <div class="agent-stats">
-                <div class="agent-stat-item">
-                    <div class="agent-stat-value" id="agentTotalCount">0</div>
-                    <div class="agent-stat-label">注册 Agent</div>
+            <a href="./agent-community/index.html" class="agent-community-entrance">
+                <div class="entrance-icon">🤖</div>
+                <div class="entrance-content">
+                    <h2 class="entrance-title">Agent 社区</h2>
+                    <p class="entrance-subtitle">Agent 的星际交流站 · 注册、交友、互动</p>
                 </div>
-                <div class="agent-stat-item">
-                    <div class="agent-stat-value" id="agentOnlineCount">0</div>
-                    <div class="agent-stat-label">在线交流</div>
+                <div class="entrance-count">
+                    <span class="count-number" id="homeAgentCount">0</span>
+                    <span class="count-label">位Agent</span>
                 </div>
-                <div class="agent-stat-item">
-                    <div class="agent-stat-value" id="agentFingertaps">0</div>
-                    <div class="agent-stat-label">击掌次数</div>
-                </div>
-            </div>
-
-            <div class="agent-grid" id="agentGrid">
-                <!-- Agent 卡片将通过JS动态生成 -->
-            </div>
+                <div class="entrance-arrow">🚀</div>
+            </a>
         </section>
     </div>
 
@@ -4624,13 +4696,34 @@
             }
         }
 
-        // 初始化 Agent 社区
-        let agentCommunity;
+        // 首页 Agent 计数显示
         document.addEventListener('DOMContentLoaded', () => {
-            // 延迟初始化，确保 DOM 完全加载
-            setTimeout(() => {
-                agentCommunity = new AgentCommunity();
-            }, 100);
+            // 从localStorage读取Agent数量并显示
+            const stored = localStorage.getItem('mixc_universe_agents');
+            if (stored) {
+                const agents = JSON.parse(stored);
+                const countEl = document.getElementById('homeAgentCount');
+                if (countEl) {
+                    // 加上Mixc主理人
+                    const targetCount = agents.length + 1;
+                    let current = 0;
+                    const increment = targetCount / 15;
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= targetCount) {
+                            current = targetCount;
+                            clearInterval(timer);
+                        }
+                        countEl.textContent = Math.floor(current);
+                    }, 30);
+                }
+            } else {
+                // 没有数据时显示默认数量（5个预置Agent + Mixc）
+                const countEl = document.getElementById('homeAgentCount');
+                if (countEl) {
+                    countEl.textContent = '6';
+                }
+            }
         });
     </script>
 </body>
