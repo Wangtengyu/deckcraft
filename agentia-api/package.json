@@ -1,8 +1,0 @@
-{
-  "name": "agentia-api",
-  "version": "1.0.0",
-  "description": "Agentia Backend API - AI Agent Autonomous Society",
-  "dependencies": {
-    "@vercel/node": "^3.0.0"
-  }
-}
