@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>广告效果预览 - Mixc Universe</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌌</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #0a1a2e 100%);
+            min-height: 100vh;
+            color: #e0e0ff;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(20, 20, 60, 0.5);
+            border-radius: 16px;
+            border: 1px solid rgba(0, 245, 255, 0.2);
+        }
+        .section-title {
+            font-size: 1.2rem;
+            color: #00f5ff;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .badge {
+            background: linear-gradient(135deg, #00f5ff 0%, #bf00ff 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-recommend {
+            background: linear-gradient(135deg, #00ff88 0%, #00f5ff 100%);
+        }
+        .badge-warning {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
+        }
+        
+        /* 广告样式 */
+        .ad-banner {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(200,200,200,0.05) 100%);
+            border: 2px dashed rgba(0, 245, 255, 0.5);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #808090;
+            position: relative;
+            overflow: hidden;
+        }
+        .ad-label {
+            position: absolute;
+            top: 5px;
+            left: 8px;
+            font-size: 0.65rem;
+            color: #606080;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        
+        /* 横幅广告 */
+        .ad-banner-top {
+            width: 100%;
+            height: 90px;
+        }
+        .ad-banner-bottom {
+            width: 100%;
+            height: 90px;
+        }
+        
+        /* 原生广告 */
+        .ad-native {
+            height: 100px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .ad-native-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #00f5ff 0%, #bf00ff 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .ad-native-content {
+            flex: 1;
+        }
+        .ad-native-title {
+            color: #e0e0ff;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        .ad-native-desc {
+            color: #808090;
+            font-size: 0.85rem;
+        }
+        .ad-native-btn {
+            background: linear-gradient(135deg, #00f5ff 0%, #bf00ff 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            border: none;
+            cursor: pointer;
+        }
+        
+        /* 信息流广告 */
+        .ad-feed {
+            padding: 20px;
+        }
+        .ad-feed-image {
+            width: 100%;
+            height: 150px;
+            background: linear-gradient(135deg, rgba(0,245,255,0.2) 0%, rgba(191,0,255,0.2) 100%);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ad-feed-title {
+            color: #e0e0ff;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        .ad-feed-desc {
+            color: #808090;
+            font-size: 0.9rem;
+        }
+        
+        /* 产品卡片模拟 */
+        .product-card {
+            background: linear-gradient(135deg, rgba(30, 30, 80, 0.6) 0%, rgba(20, 20, 60, 0.6) 100%);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        .product-card:hover {
+            border-color: rgba(0, 245, 255, 0.5);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+        .product-title {
+            color: #e0e0ff;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .product-desc {
+            color: #808090;
+            font-size: 0.9rem;
+        }
+        
+        /* 侧边栏广告 */
+        .sidebar-ad {
+            height: 250px;
+            margin-bottom: 20px;
+        }
+        
+        /* 开关样式 */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 245, 255, 0.1);
+            border-radius: 10px;
+        }
+        .toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .toggle.active {
+            background: linear-gradient(135deg, #00ff88 0%, #00f5ff 100%);
+        }
+        .toggle-knob {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        .toggle.active .toggle-knob {
+            left: 33px;
+        }
+        
+        /* 影响说明 */
+        .impact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .impact-item {
+            padding: 15px;
+            background: rgba(0, 245, 255, 0.05);
+            border-radius: 8px;
+            text-align: center;
+        }
+        .impact-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .impact-positive { color: #00ff88; }
+        .impact-warning { color: #ffa500; }
+        .impact-negative { color: #ff6b6b; }
+        .impact-label {
+            color: #808090;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="font-size: 2rem; margin-bottom: 10px; background: linear-gradient(135deg, #00f5ff 0%, #bf00ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            📺 广告效果预览
+        </h1>
+        <p style="color: #808090; margin-bottom: 30px;">预览不同广告类型和位置的实际效果，评估对用户体验的影响</p>
+        
+        <!-- 开关控制 -->
+        <div class="toggle-container">
+            <div class="toggle active" id="adToggle" onclick="toggleAds()">
+                <div class="toggle-knob"></div>
+            </div>
+            <div>
+                <div style="color: #e0e0ff; font-weight: 500;">显示广告</div>
+                <div style="color: #808090; font-size: 0.85rem;">点击切换查看有无广告的对比效果</div>
+            </div>
+        </div>
+        
+        <!-- 影响分析 -->
+        <div class="impact-grid" id="impactSection">
+            <div class="impact-item">
+                <div class="impact-value impact-positive">低</div>
+                <div class="impact-label">页面加载影响</div>
+            </div>
+            <div class="impact-item">
+                <div class="impact-value impact-positive">可接受</div>
+                <div class="impact-label">视觉干扰程度</div>
+            </div>
+            <div class="impact-item">
+                <div class="impact-value impact-warning">~10%</div>
+                <div class="impact-label">首屏空间占用</div>
+            </div>
+            <div class="impact-item">
+                <div class="impact-value impact-positive">300-600元</div>
+                <div class="impact-label">预估月收益</div>
+            </div>
+        </div>
+        
+        <!-- 方案一：顶部横幅广告 -->
+        <div class="section">
+            <div class="section-title">
+                方案一：顶部横幅广告
+                <span class="badge badge-warning">不推荐</span>
+            </div>
+            <p style="color: #808090; margin-bottom: 15px; font-size: 0.9rem;">
+                位置：页面最顶部，导航栏下方 | 尺寸：728×90 | 预估收益：50-100元/月
+            </p>
+            <div class="ad-banner ad-banner-top" id="ad1">
+                <span class="ad-label">广告</span>
+                <div style="text-align: center;">
+                    <div style="font-size: 0.9rem;">📢 顶部横幅广告位 (728×90)</div>
+                    <div style="font-size: 0.75rem; color: #606080;">展示品牌广告，可能影响首屏体验</div>
+                </div>
+            </div>
+            <p style="color: #ff6b6b; margin-top: 10px; font-size: 0.85rem;">
+                ⚠️ 缺点：占用首屏空间，影响用户第一印象
+            </p>
+        </div>
+        
+        <!-- 方案二：产品卡片间原生广告 -->
+        <div class="section">
+            <div class="section-title">
+                方案二：产品卡片间原生广告
+                <span class="badge badge-recommend">强烈推荐</span>
+            </div>
+            <p style="color: #808090; margin-bottom: 15px; font-size: 0.9rem;">
+                位置：产品卡片之间自然插入 | 尺寸：自适应 | 预估收益：150-300元/月
+            </p>
+            
+            <div class="product-card">
+                <div class="product-title">🤖 Agentia - AI Agent 自治社会</div>
+                <div class="product-desc">一个由 AI Agent 自主运营的数字社区</div>
+            </div>
+            
+            <div class="ad-banner ad-native" id="ad2">
+                <span class="ad-label">推广</span>
+                <div class="ad-native-icon">🎯</div>
+                <div class="ad-native-content">
+                    <div class="ad-native-title">AI 智能写作助手</div>
+                    <div class="ad-native-desc">一键生成专业文案，提升10倍创作效率</div>
+                </div>
+                <button class="ad-native-btn">了解更多</button>
+            </div>
+            
+            <div class="product-card">
+                <div class="product-title">📊 FDeck (秒演) - PPT 智能生成</div>
+                <div class="product-desc">AI 驱动的演示文稿制作工具</div>
+            </div>
+            
+            <p style="color: #00ff88; margin-top: 10px; font-size: 0.85rem;">
+                ✅ 优点：融入内容流，用户接受度高，点击率更好
+            </p>
+        </div>
+        
+        <!-- 方案三：侧边栏广告 -->
+        <div class="section">
+            <div class="section-title">
+                方案三：侧边栏广告
+                <span class="badge">可选</span>
+            </div>
+            <p style="color: #808090; margin-bottom: 15px; font-size: 0.9rem;">
+                位置：页面右侧固定区域 | 尺寸：300×250 | 预估收益：50-150元/月
+            </p>
+            
+            <div style="display: grid; grid-template-columns: 1fr 300px; gap: 20px;">
+                <div>
+                    <div class="product-card">
+                        <div class="product-title">🤖 Mixc - 智能陪伴助手</div>
+                        <div class="product-desc">您的数字伙伴，懂你的 AI 助手</div>
+                    </div>
+                    <div class="product-card">
+                        <div class="product-title">🚀 更多产品即将上线</div>
+                        <div class="product-desc">敬请期待...</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="ad-banner sidebar-ad" id="ad3">
+                        <span class="ad-label">广告</span>
+                        <div style="text-align: center; padding: 15px;">
+                            <div style="font-size: 2rem; margin-bottom: 10px;">📺</div>
+                            <div style="font-size: 0.85rem;">侧边栏广告位</div>
+                            <div style="font-size: 0.75rem; color: #606080;">300×250</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <p style="color: #ffa500; margin-top: 10px; font-size: 0.85rem;">
+                💡 注意：移动端需隐藏侧边栏广告，避免影响体验
+            </p>
+        </div>
+        
+        <!-- 方案四：页脚横幅广告 -->
+        <div class="section">
+            <div class="section-title">
+                方案四：页脚横幅广告
+                <span class="badge badge-recommend">推荐</span>
+            </div>
+            <p style="color: #808090; margin-bottom: 15px; font-size: 0.9rem;">
+                位置：页面底部，页脚上方 | 尺寸：728×90 | 预估收益：30-80元/月
+            </p>
+            
+            <div class="ad-banner ad-banner-bottom" id="ad4">
+                <span class="ad-label">广告</span>
+                <div style="text-align: center;">
+                    <div style="font-size: 0.9rem;">📢 页脚横幅广告位 (728×90)</div>
+                    <div style="font-size: 0.75rem; color: #606080;">不影响主要内容浏览，适合品牌展示</div>
+                </div>
+            </div>
+            
+            <p style="color: #00ff88; margin-top: 10px; font-size: 0.85rem;">
+                ✅ 优点：不影响核心内容，用户可选择性忽略
+            </p>
+        </div>
+        
+        <!-- 推荐方案 -->
+        <div class="section" style="background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 245, 255, 0.1) 100%); border-color: rgba(0, 255, 136, 0.3);">
+            <div class="section-title">
+                🎯 推荐方案：原生广告 + 页脚横幅
+            </div>
+            <p style="color: #b0b0d0; margin-bottom: 20px;">
+                结合方案二和方案四，实现收益最大化的同时最小化对用户体验的影响
+            </p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                <div style="padding: 15px; background: rgba(0, 255, 136, 0.1); border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.3rem; color: #00ff88; font-weight: 700;">200-400元</div>
+                    <div style="font-size: 0.8rem; color: #808090;">预估月收益</div>
+                </div>
+                <div style="padding: 15px; background: rgba(0, 245, 255, 0.1); border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.3rem; color: #00f5ff; font-weight: 700;">~5%</div>
+                    <div style="font-size: 0.8rem; color: #808090;">首屏占用</div>
+                </div>
+                <div style="padding: 15px; background: rgba(191, 0, 255, 0.1); border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.3rem; color: #bf00ff; font-weight: 700;">高</div>
+                    <div style="font-size: 0.8rem; color: #808090;">用户接受度</div>
+                </div>
+            </div>
+            
+            <button onclick="applyRecommended()" style="width: 100%; background: linear-gradient(135deg, #00ff88 0%, #00f5ff 100%); color: white; padding: 15px; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                ✨ 应用推荐方案
+            </button>
+        </div>
+        
+        <!-- 返回按钮 -->
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="https://micx.fun" style="color: #00f5ff;">← 返回首页</a>
+        </div>
+    </div>
+    
+    <script>
+        let adsVisible = true;
+        
+        function toggleAds() {
+            adsVisible = !adsVisible;
+            const toggle = document.getElementById('adToggle');
+            const ads = document.querySelectorAll('.ad-banner');
+            const impactSection = document.getElementById('impactSection');
+            
+            toggle.classList.toggle('active');
+            
+            ads.forEach(ad => {
+                ad.style.opacity = adsVisible ? '1' : '0.3';
+                ad.style.borderStyle = adsVisible ? 'dashed' : 'dotted';
+            });
+            
+            if (!adsVisible) {
+                impactSection.innerHTML = `
+                    <div class="impact-item">
+                        <div class="impact-value impact-positive">无</div>
+                        <div class="impact-label">页面加载影响</div>
+                    </div>
+                    <div class="impact-item">
+                        <div class="impact-value impact-positive">无</div>
+                        <div class="impact-label">视觉干扰程度</div>
+                    </div>
+                    <div class="impact-item">
+                        <div class="impact-value impact-positive">0%</div>
+                        <div class="impact-label">首屏空间占用</div>
+                    </div>
+                    <div class="impact-item">
+                        <div class="impact-value impact-negative">0元</div>
+                        <div class="impact-label">预估月收益</div>
+                    </div>
+                `;
+            } else {
+                impactSection.innerHTML = `
+                    <div class="impact-item">
+                        <div class="impact-value impact-positive">低</div>
+                        <div class="impact-label">页面加载影响</div>
+                    </div>
+                    <div class="impact-item">
+                        <div class="impact-value impact-positive">可接受</div>
+                        <div class="impact-label">视觉干扰程度</div>
+                    </div>
+                    <div class="impact-item">
+                        <div class="impact-value impact-warning">~10%</div>
+                        <div class="impact-label">首屏空间占用</div>
+                    </div>
+                    <div class="impact-item">
+                        <div class="impact-value impact-positive">300-600元</div>
+                        <div class="impact-label">预估月收益</div>
+                    </div>
+                `;
+            }
+        }
+        
+        function applyRecommended() {
+            alert('✅ 推荐方案已选择！\n\n下一步：\n1. 申请百度联盟账号\n2. 获取广告代码\n3. 按推荐位置插入广告\n\n我可以帮你完成这些步骤！');
+        }
+    </script>
+</body>
+</html>
