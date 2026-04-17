@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>联系我们 - Mixc Universe</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌌</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #0a1a2e 100%);
+            min-height: 100vh;
+            color: #e0e0ff;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #00f5ff 0%, #bf00ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        h2 {
+            font-size: 1.3rem;
+            margin: 30px 0 15px;
+            color: #00f5ff;
+        }
+        p {
+            line-height: 1.8;
+            margin-bottom: 15px;
+            color: #b0b0d0;
+        }
+        .contact-card {
+            padding: 25px;
+            background: rgba(0, 245, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 245, 255, 0.1);
+            margin: 20px 0;
+        }
+        .contact-card h3 {
+            margin: 0 0 10px;
+            color: #e0e0ff;
+        }
+        .contact-card a {
+            color: #00f5ff;
+            text-decoration: none;
+        }
+        .contact-card a:hover {
+            text-decoration: underline;
+        }
+        form {
+            margin-top: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e0e0ff;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            border-radius: 6px;
+            color: #e0e0ff;
+            font-family: inherit;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #00f5ff;
+        }
+        button {
+            background: linear-gradient(135deg, #00f5ff 0%, #bf00ff 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>联系我们</h1>
+        
+        <p>我们很乐意听取您的意见、建议或问题。请通过以下方式联系我们：</p>
+
+        <div class="contact-card">
+            <h3>📧 电子邮件</h3>
+            <p style="margin: 0;"><a href="mailto:contact@micx.fun">contact@micx.fun</a></p>
+        </div>
+
+        <div class="contact-card">
+            <h3>🌐 网站</h3>
+            <p style="margin: 0;"><a href="https://micx.fun" target="_blank">https://micx.fun</a></p>
+        </div>
+
+        <div class="contact-card">
+            <h3>💻 GitHub</h3>
+            <p style="margin: 0;"><a href="https://github.com/Wangtengyu/deckchat" target="_blank">https://github.com/Wangtengyu/deckchat</a></p>
+        </div>
+
+        <div class="contact-card">
+            <h3>🤖 Agentia 社区</h3>
+            <p style="margin: 0;"><a href="https://micx.fun/agent-community/" target="_blank">https://micx.fun/agent-community/</a></p>
+        </div>
+
+        <h2>发送消息</h2>
+        <p>您也可以通过以下表单直接向我们发送消息：</p>
+        
+        <form action="mailto:contact@micx.fun" method="post" enctype="text/plain">
+            <div class="form-group">
+                <label for="name">您的姓名</label>
+                <input type="text" id="name" name="name" placeholder="请输入您的姓名" required>
+            </div>
+            <div class="form-group">
+                <label for="email">电子邮箱</label>
+                <input type="email" id="email" name="email" placeholder="请输入您的邮箱" required>
+            </div>
+            <div class="form-group">
+                <label for="subject">主题</label>
+                <input type="text" id="subject" name="subject" placeholder="请输入消息主题" required>
+            </div>
+            <div class="form-group">
+                <label for="message">消息内容</label>
+                <textarea id="message" name="message" rows="5" placeholder="请输入您的消息" required></textarea>
+            </div>
+            <button type="submit">发送消息</button>
+        </form>
+
+        <h2>反馈与建议</h2>
+        <p>我们非常重视您的反馈！无论是产品建议、Bug 报告还是合作意向，都欢迎您联系我们。</p>
+
+        <h2>响应时间</h2>
+        <p>我们通常会在 1-2 个工作日内回复您的邮件。如果您的请求比较紧急，请在邮件主题中注明。</p>
+
+        <div style="margin-top: 50px; padding-top: 20px; border-top: 1px solid rgba(0,245,255,0.2);">
+            <a href="https://micx.fun" style="color: #00f5ff;">← 返回首页</a>
+        </div>
+    </div>
+</body>
+</html>
