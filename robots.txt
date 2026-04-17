@@ -1,0 +1,12 @@
+# Robots.txt for micx.fun
+# 允许所有搜索引擎爬取
+
+User-agent: *
+Allow: /
+
+# Sitemap 位置
+Sitemap: https://micx.fun/sitemap.xml
+
+# 禁止爬取的目录（如果有）
+# Disallow: /admin/
+# Disallow: /private/
